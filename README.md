@@ -1,6 +1,24 @@
 # Neural-Cellular-Automata
 This project involves the creation of a cellular automata model trained using neural networks, which will be hosted online.
 
+## To Do List
+
+### Set up
+
+- [ ] Javascript boiler plate @chloe
+- [ ] Make sure all the stuff is in different files @chloe
+
+### High Performance Computing
+
+- [ ] Highlight neighbourhood of cell
+- [ ] move forward one frame on button press
+
+### Deep Learning
+
+- Pending model is sufficiently developed:
+  - [ ]continuity
+  - [ ]convolutions
+
 ## Resources
 This project is currently using the Notion platform to document project progress and important information. This Notion workspace will be made public at a later point in time.
 
@@ -27,6 +45,17 @@ More resources will be made available in this repo as the project progresses.
 
 ## REPO Maintenance 
 
+### Dev Cycles
+
+Follow this and you should be good. 
+
+1. Branch a new Dev Branch
+2. Create Feature branches from Dev, and add your new features. Benchmarking of individual features may be performed here. 
+3. Features back to Dev
+4. Bug testing and bug fixing to occur here. Bugs are likely a result of multiple new features not working well with each other, so the main thing to test for is that all the new things are playing nicely with each other
+5. After bug testing (and more benchmarking maybe) is complete, Then Dev should be merged back to main
+6. Dev is archived, and the Dev cycle is complete
+
 ### Main Branch
 
 This branch should **always** be operational. 
@@ -43,15 +72,12 @@ fixing bugs. there is only one dev branch. Only merges to the main branch when f
 
 ### Feature Branches
 
-When developing a new feature, create a branch from Dev. 
+When developing a new feature, create a branch from Dev. You can go crazy here.
 
+### File Management Guide
 
-### Dev Cycles
+I guess this isn't necessary, but highly, preferable. The general idea is to keep things as modular as possible. 
 
-1. Branch a new Dev Branch
-2. Create Feature branches from Dev, and add your new features. Benchmarking of individual features may be performed here. 
-3. Features back to Dev
-4. Bug testing and bug fixing to occur here. Bugs are likely a result of multiple new features not working well with each other, so the main thing to test for is that all the new things are playing nicely with each other
-5. After bug testing (and more benchmarking maybe) is complete, Then Dev should be merged back to main
-6. Dev is archived, and the Dev cycle is complete
-
+1. One file should only have one language written in it. So the tutorial file is **bad** because the Javascript module is written directly in the html file. 
+2. One file should only have one method in it.
+3. 
