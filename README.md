@@ -54,41 +54,55 @@ However, some useful resources for this project include:
 
 More resources will be made available in this repo as the project progresses.
 
-## REPO Maintenance
+## REPO Maintenance 
 
 ### Dev Cycles
 
-Follow this and you should be good.
+A development cycle refers to a period of time over which the team develops the project. 
+At the end of each dev cycle, main is updated. 
+So, people will be able to see the updates we've made *after* a dev cycle finishes.
+Here's what a dev cycle will look like:
 
-1. Branch a new Dev Branch
-2. Create Feature branches from Dev, and add your new features. Benchmarking of individual features may be performed here.
-3. Features back to Dev
-4. Bug testing and bug fixing to occur here. Bugs are likely a result of multiple new features not working well with each other, so the main thing to test for is that all the new things are playing nicely with each other
-5. After bug testing (and more benchmarking maybe) is complete, Then Dev should be merged back to main
-6. Dev is archived, and the Dev cycle is complete
+1. A new Dev branch is created from main.
+2. Feature branches are created from Dev. Features are developed and benchmarked. 
+3. Features merge back to Dev when completed. **Don't** merge features that aren't fully operational yet!
+4. Bug testing. Features may not work together, so we have check that here.
+5. More bug testing, and benchmarking. 
+6. when all features are integrated, Dev is merged to main.
+7. Dev is archived, and the Dev cycle is complete.
+
+See below for more details on how each branch type should operate. 
 
 ### Main Branch
 
-This branch should **always** be operational.
-it only branches to the dev branch. Only the dev branch merges to it
+This branch should **always** be operational. 
+it only branches to the dev branch. 
+Only the dev branch merges to it. 
+Its essentially public facing, so it should always look pretty
 
-pushing straight to main should only be done for
-
-- Documentation
-- md files
-- comments i guess
+Pushing straight to main should only be done for documentation, md files, and comments. 
+But even then just put it on dev, why does it need to be on main, it'll get onto main the at the end of the dev cycle anyway. 
 
 ### Dev Branch
 
-fixing bugs. there is only one dev branch. Only merges to the main branch when fully operational and fully tested. When merged, archive the dev branch with the date of archiving.
+There is at most one dev branch at any point in time.
+if the project is on break, then there should be no dev branch.  
+Only merges to the main branch when fully operational and fully tested. 
+After merged, archive the dev branch with the date of archiving. 
 
 ### Feature Branches
 
-When developing a new feature, create a branch from Dev. You can go crazy here.
+These branch from dev. 
+Each feature should have its own branch. 
+Name branches accordingly. 
+
+Make sure features are fully operational before merging. 
+This is so that if there are issues on dev, it's because of feature integration, not because individual features are broken. 
 
 ### File Management Guide
 
-I guess this isn't necessary, but highly, preferable. The general idea is to keep things as modular as possible.
+I guess stuff here isn't necessary, but highly, highly preferable. The general idea is to keep things as modular as possible. 
 
-1. One file should only have one language written in it. So the tutorial file is **bad** because the Javascript module is written directly in the html file.
+1. One file should only have one language written in it. So the tutorial file is **bad** because the Javascript module is written directly in the html file. 
 2. One file should only have one method in it.
+3. Methods that pertain to a similar feature should be put in a folder together. 
