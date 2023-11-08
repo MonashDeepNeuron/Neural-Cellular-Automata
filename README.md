@@ -6,7 +6,7 @@ This project is currently using the Notion platform to document project progress
 
 However, some useful resources for this project include:
 - Understanding Cellular Automata (CA)
-  - Introduction to [Conway's Game of Life](https://playgameoflife.com/)\
+  - Introduction to [Conway's Game of Life](https://playgameoflife.com/)
   - [Explaining CA](https://natureofcode.com/book/chapter-7-cellular-automata/)
   - What are ["Life-Like" CAs](https://en.m.wikipedia.org/wiki/Life-like_cellular_automaton#cite_note-23)
 - Implementing CAs
