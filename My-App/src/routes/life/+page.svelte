@@ -14,9 +14,8 @@
   <canvas width="512" height="512" />
 
   <script type="module">
-    import test from "/Users/nyankyaw/Documents/UNI/YEAR4/MDN/Neural-Cellular-Automata/My-App/src/routes/life/life.js";
+    import test from "../src/routes/life/life.js";
     // ignore my path lmao
     test();
   </script>
 </body>
-
