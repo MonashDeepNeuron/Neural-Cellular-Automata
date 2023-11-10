@@ -593,27 +593,27 @@ header {
 
 
 
-/* Projects Style */
+/* gameOfLife Style */
 
-#projects {
+#gameOfLife {
   padding-left: 60px;
   padding-right: 60px;
   padding-bottom: 50px;
 }
 
-#projects .masonry {
+#gameOfLife .masonry {
   position: relative;
   width: 100%;
 }
 
-#projects .masonry .item img {
+#gameOfLife .masonry .item img {
   transition: all 1s;
   width: 100%;
   overflow: hidden;
   margin-bottom: 30px;
 }
 
-#projects .masonry .item img:hover {
+#gameOfLife .masonry .item img:hover {
   opacity: 0.5;
 }
 
@@ -1040,7 +1040,7 @@ header {
     right: 0;
   }
 
-  #projects {
+  #gameOfLife {
     padding-left: 15px;
     padding-right: 15px;
   }
