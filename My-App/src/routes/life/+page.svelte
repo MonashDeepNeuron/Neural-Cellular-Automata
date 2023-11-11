@@ -14,8 +14,8 @@
   <canvas width="512" height="512" />
 
   <script type="module">
-    import test from "../src/routes/life/life.js";
+    import main from "../src/routes/life/life.js";
     // ignore my path lmao
-    test();
+    main();
   </script>
 </body>

@@ -1,4 +1,4 @@
-export default const guiShaderWGSL = {
+export const guiShaderWGSL = {
     label: "Cell shader",
     code:
         /*wgsl*/`
@@ -36,6 +36,5 @@ export default const guiShaderWGSL = {
         @fragment
         fn fragmentMain(@location(0) cell: vec2f) -> @location(0) vec4f {
             return vec4f(1, 1, 1, 1);
-        }
-        `
+        }`
 };

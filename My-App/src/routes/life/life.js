@@ -1,5 +1,6 @@
 // import shaders
-import { computeShaderWGSL, guiShaderWGSL } from './shader';
+import { guiShaderWGSL } from './guiShader';
+import { computeShaderWGSL } from './computeShader';
 // SET VARIABLES
 const GRID_SIZE = 16;
 const UPDATE_INTERVAL = 200;
