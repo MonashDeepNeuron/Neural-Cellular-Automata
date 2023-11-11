@@ -7,8 +7,10 @@ This project involves the creation of a cellular automata model trained using ne
 ### General
 
 - [x] Project setup
-- [x] modularise shaders
-- [ ] modularise .js code
+- [x] Modularise shaders
+- [ ] Modularise .js code
+- [ ] Interactivity
+- [ ] Bigger frame with more cells
 
 ### Model Development
 
@@ -72,7 +74,12 @@ We do all the necessary test to ensure the stuff we upload is genuinely ready.
 
 ### Feature Branches
 
-When developing a new feature, create a branch from Dev.
+These branches are where actual programming occurs.
+Create a feature branch from main, and name it accordingly.
+Try to keep it down to one feature per brach, so the git history will clearly outline our development process.
+
+There is a lot of freedom in what you are allowed to do in this branch type, since everything will be vetted when you merge to dev, and more vetting will be done before merging to main.
+The principle is just try to keep things reasonable and clear.
 
 ## Dev Cycles
 
@@ -83,6 +90,6 @@ The general progression of a dev cycle is as follows.
 1. Branch a new dev branch from main.
 2. Create feature branches from dev, and add your new features.
 3. Upon completion, feature branches merge back to dev.
-4. Bug testing on dev. They may occur as a result of feature integration
-5. After bug testing (and more benchmarking maybe) is complete, Then Dev should be merged back to main
-6. Dev is archived, and the Dev cycle is complete
+4. Bug testing on dev. These may occur as a result of feature integration.
+5. After bug testing (and more benchmarking maybe) is complete, Then Dev should be merged back to main.
+6. Dev is archived, and the Dev cycle is complete.
