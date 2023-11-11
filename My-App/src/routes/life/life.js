@@ -1,8 +1,9 @@
 // import shaders
-import { WORKGROUP_SIZE, computeShaderWGSL, guiShaderWGSL } from './shader';
+import { computeShaderWGSL, guiShaderWGSL } from './shader';
 // SET VARIABLES
 const GRID_SIZE = 16;
 const UPDATE_INTERVAL = 200;
+const WORKGROUP_SIZE = 8;
 const initialState = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
@@ -86,7 +87,7 @@ export default async function main() {
     });
 
     // VERTEX SETUP for a square
-    const verticies = new Float32Array([
+    const vertices = new Float32Array([
         // X,    Y,
         -0.8, -0.8, // Triangle 1
         -0.8, 0.8,
@@ -98,12 +99,12 @@ export default async function main() {
     ]);
 
     const vertexBuffer = device.createBuffer({
-        label: "Cell verticies", // Error message label
-        size: verticies.byteLength,
+        label: "Cell vertices", // Error message label
+        size: vertices.byteLength,
         usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     });
 
-    device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, verticies);
+    device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, vertices);
 
     const vertexBufferLayout = {
         arrayStride: 8, // 32bit = 4 bytes, 4x2 = 8 bytes to skip to find next vertex
@@ -259,7 +260,7 @@ export default async function main() {
 
         pass.setBindGroup(0, bindGroups[step % 2]);
 
-        pass.draw(verticies.length / 2, GRID_SIZE * GRID_SIZE); // 6 verticies, 12 floats
+        pass.draw(vertices.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
 
         pass.end();
 
@@ -272,5 +273,5 @@ export default async function main() {
 
     setInterval(updateLoop, UPDATE_INTERVAL)
 
-    //setInterval(updateLoop(device, simulationPipeline, bindGroups,step,context,cellPipeline,vertexBuffer,verticies), UPDATE_INTERVAL)
+    //setInterval(updateLoop(device, simulationPipeline, bindGroups,step,context,cellPipeline,vertexBuffer,vertices), UPDATE_INTERVAL)
 }
