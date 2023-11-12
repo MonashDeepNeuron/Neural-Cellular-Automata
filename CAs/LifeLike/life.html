@@ -1,0 +1,21 @@
+<!-- <svelte:head>
+  <script async src="./life.js"></script>
+</svelte:head> -->
+
+<head>
+  <meta charset="utf-8" />
+  <title>WebGPU Life</title>
+</head>
+<div class="text-column">
+  <h1>Game of Life</h1>
+</div>
+
+<body>
+  <canvas width="512" height="512" />
+
+  <script type="module">
+    import main from "http://localhost:5500/life.js";
+    // ignore my path lmao
+    main();
+  </script>
+</body>
