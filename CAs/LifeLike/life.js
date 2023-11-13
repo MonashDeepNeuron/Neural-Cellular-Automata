@@ -12,7 +12,7 @@ const RULESTRING = "/2";
 /**  Number of possible neighbour states: 0-8*/
 const POSSIBLE_NEIGHBOURS = 9;
 
-const initialState = [
+const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -78,8 +78,8 @@ export default async function main() {
 
     // write to buffer A
     for (let i = 0; i < cellStateArray.length; ++i) {
-        //cellStateArray[i] = Math.random() > 0.6 ? 1 : 0;
-        cellStateArray[i] = initialState[i];
+        // cellStateArray[i] = Math.random() > 0.6 ? 1 : 0;
+        cellStateArray[i] = INITIAL_STATE[i];
     }
     device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
 
@@ -293,8 +293,21 @@ export default async function main() {
     // Finish the command buffer and immediately submit it.
     device.queue.submit([encoder.finish()]);
 
+
+    // Called at set interval as callback and on keyPressed
     function updateLoop() {
-        if (!$RUNNING){ return; }
+
+        // Only permitted to run if one frame is wanted or
+        if (!oneFrame) 
+        {
+            if (!running){ return; }
+            // Continue if running = true
+        }
+        else 
+        {
+            oneFrame = false; // Cross-script variable, do not add let,var or const
+        }
+        
 
         const encoder = device.createCommandEncoder();
 
@@ -338,7 +351,9 @@ export default async function main() {
         device.queue.submit([encoder.finish()]);
     }
 
-    setInterval(updateLoop, UPDATE_INTERVAL)
+    setInterval(updateLoop, UPDATE_INTERVAL);
+    forcedUpdate = updateLoop; 
+    // Cross-script variable, enables other scripts to force an update cylce
 }
 
 
@@ -373,7 +388,7 @@ function parseRulestring(rulestring)
             } 
             else 
             {
-                if (!slashFound)
+                if(!slashFound)
                 {
                     RULE[0][x] = 1;
                     // More vigourous validity checks could be used

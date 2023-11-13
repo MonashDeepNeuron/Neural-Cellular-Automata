@@ -10,16 +10,27 @@
   <!-- INIT CODE -->
   <script type="text/javascript">
     // GLOBAL VARIABLE DEFINITION
+      // Define trigger keys
+    const PLAY_PAUSE_KEY = ' ';
+    const NEXT_FRAME_KEY = '.';
+
       // Flags for event coordination
-      var $RUNNING = false;
+    var running = false;
+    var oneFrame = false;
+    var forcedUpdate = () => {return;}; // Value will be addd when defined
 
-    // KEYBOARD EVENT HANDLING FUNCTION
+      // Keyboard event callback
     function keyListener(e) {
-        if (e.key == ' '){ // If space was the trigger key
-            $RUNNING = !$RUNNING;
-        }
-        console.log(e.key+ " was pressed");
-
+        switch (e.key){
+            case PLAY_PAUSE_KEY:
+                running = !running;
+                break;
+            case NEXT_FRAME_KEY:
+                oneFrame = true;
+                forcedUpdate(); // Force immediate update
+                break;
+            default:
+        } 
     }
   </script>
 
