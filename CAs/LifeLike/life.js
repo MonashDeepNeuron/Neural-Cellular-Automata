@@ -1,12 +1,12 @@
 // import shaders
-import { guiShaderWGSL } from "http://localhost:5500/guiShader.js";
-import { computeShaderWGSL } from "http://localhost:5500/computeShader.js";
+import { guiShaderWGSL } from "http://localhost:5500/CAs/LifeLike/guiShader.js";
+import { computeShaderWGSL } from "http://localhost:5500/CAs/LifeLike/computeShader.js";
 // SET VARIABLES
 const GRID_SIZE = 16;
-const UPDATE_INTERVAL = 1000;
+const UPDATE_INTERVAL = 200;
 const WORKGROUP_SIZE = 8;
 
-const RULESTRING = "/2"; // Life lif CA rulestring using Survival/Birth notation
+const RULESTRING = "/2"; // Life like CA rulestring using Survival/Birth notation
 
 const POSSIBLE_NEIGHBOURS = 9;
 
