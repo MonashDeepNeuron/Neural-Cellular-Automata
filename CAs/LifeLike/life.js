@@ -6,8 +6,10 @@ const GRID_SIZE = 16;
 const UPDATE_INTERVAL = 200;
 const WORKGROUP_SIZE = 8;
 
-const RULESTRING = "/2"; // Life like CA rulestring using Survival/Birth notation
+/** Life like CA rulestring using Survival/Birth notation */
+const RULESTRING = "/2"; 
 
+/**  Number of possible neighbour states: 0-8*/
 const POSSIBLE_NEIGHBOURS = 9;
 
 const initialState = [
@@ -88,7 +90,7 @@ export default async function main() {
     device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
 
-    // COPY RULES INTO SHADER BUFFER?
+    // COPY RULES INTO GPU BUFFER
     const ruleArray = new Uint32Array(RULE.length* RULE[0].length);
     const ruleStorage = device.createBuffer({
         label: "Rule Storage",
@@ -148,8 +150,7 @@ export default async function main() {
     // CELL SHADER MODULE
     const cellShaderModule = device.createShaderModule(guiShaderWGSL);
 
-    // LAYOUTS 
-    // COMPUTE SHADER RESOURCE BINDINGS
+    // COMPUTE SHADER RESOURCE BINDING LAYOUT
     const bindGroupLayout = device.createBindGroupLayout({
         label: "Cell Bind Group Layout",
         entries: [
@@ -270,7 +271,30 @@ export default async function main() {
         })
     ];
 
+    // INITIAL CANVAS SETUP
+    const encoder = device.createCommandEncoder();
+    const pass = encoder.beginRenderPass({
+        colorAttachments:
+            [{
+                view: context.getCurrentTexture().createView(),
+                loadOp: "clear",
+                clearValue: { r: 0, g: 0, b: 0, a: 1 }, // New line
+                storeOp: "store",
+            }]
+    });
+
+    // Draw the features
+    pass.setPipeline(cellPipeline);
+    pass.setVertexBuffer(0, vertexBuffer);
+    pass.setBindGroup(0, bindGroups[step % 2]);
+    pass.draw(vertices.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
+    pass.end();
+
+    // Finish the command buffer and immediately submit it.
+    device.queue.submit([encoder.finish()]);
+
     function updateLoop() {
+        if (!$RUNNING){ return; }
 
         const encoder = device.createCommandEncoder();
 
@@ -315,20 +339,19 @@ export default async function main() {
     }
 
     setInterval(updateLoop, UPDATE_INTERVAL)
-
-    //setInterval(updateLoop(device, simulationPipeline, bindGroups,step,context,cellPipeline,vertexBuffer,vertices), UPDATE_INTERVAL)
 }
 
 
 function parseRulestring(rulestring)
 {
-    // Structure:
+    // Output structure:
         // [
         //    SURVIVE[number of neighbours] = 1/0 (true/false),
         //    BIRTH  [number of neighbours] = 1/0 (true/false)
         // ]
-        // Where length of each SURVIVE and BIRTH is 10 (0-9)
+        // Where length of each SURVIVE and BIRTH is 9 (0-8)
     // Default fill all conditions as False then parse rule string
+
     const RULE = [Array(POSSIBLE_NEIGHBOURS).fill(0), Array(POSSIBLE_NEIGHBOURS).fill(0)];
 
     let slashFound = false;
@@ -365,6 +388,6 @@ function parseRulestring(rulestring)
             }
         }
     }
-
+    
     return RULE;
 }

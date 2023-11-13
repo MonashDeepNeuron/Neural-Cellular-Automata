@@ -1,21 +1,46 @@
-<!-- <svelte:head>
-  <script async src="./life.js"></script>
-</svelte:head> -->
+  
+<!DOCTYPE html>
+<html lang="en"> 
 
-<head>
-  <meta charset="utf-8" />
-  <title>WebGPU Life</title>
-</head>
-<div class="text-column">
-  <h1>Game of Life</h1>
-</div>
+  <head>
+    <meta charset="utf-8" />
+    <title>WebGPU Life</title>
+  </head>
 
-<body>
-  <canvas width="512" height="512" />
+  <!-- INIT CODE -->
+  <script type="text/javascript">
+    // GLOBAL VARIABLE DEFINITION
+      // Flags for event coordination
+      var $RUNNING = false;
 
-  <script type="module">
-    import main from "http://localhost:5500/CAs/LifeLike/life.js";
-    // ignore my path lmao
-    main();
+    // KEYBOARD EVENT HANDLING FUNCTION
+    function keyListener(e) {
+        if (e.key == ' '){ // If space was the trigger key
+            $RUNNING = !$RUNNING;
+        }
+        console.log(e.key+ " was pressed");
+
+    }
   </script>
-</body>
+
+  <div class="text-column">
+    <h1>Game of Life</h1>
+  </div>
+
+  <body>
+    <div>
+      <canvas width="512" height="512" />
+    </div>
+
+    <script type="module">
+      import main from "http://localhost:5500/CAs/LifeLike/life.js";
+      main();
+    </script>
+  </body>
+
+  <!-- Final setup script -->
+  <script type="text/javascript">
+    document.getElementsByTagName("body")[0].onkeypress = keyListener;
+  </script>
+
+</html>
