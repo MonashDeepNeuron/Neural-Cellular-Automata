@@ -59,12 +59,25 @@ It is the class of cellular automata which are similar to Life in the following 
 2. rule sets depend only on the number of live neighbours
 3. Moore neighbourhood is used
 
-There are 2<sup>18</sup> different possible life-like cellular automata.
-To better understand the behaviour of a general cellular automata, we introduce rule-strings.
-It is just an ordered list of numbers representing the conditions to survive, then a forward-slash (the "/" symbol), then another ordered list of numbers representing birth conditions.
+There are many different rule sets that classify as life-like, but all the cells in a grid must use the *same rule set* for the cellular automata to be a valid.
+This way, the DNA analogy still holds.
+Each cell uses the same rule set, just now we have the option of trying out different rule sets.
 
-So, if we were to notate life with this rule-string, it would be "3/23", since birth happens with 3 live neighbours and survival happens with 2 or 3 neighbours.
-Another interesting ruleset is "/2", often called seeds.
+To better understand the behaviour of a general cellular automata, we introduce rule-strings.
+It is just an ordered list of numbers representing the conditions to survive, then a forward-slash (the $/$ symbol), then another ordered list of numbers representing birth conditions.
+
+So, if we were to notate life with this rule-string, it would be $23/3$, since survival happens with 2 or 3 live neighbours and birth only happens with exactly 3 neighbours.
+Another interesting rule set is $/2$, often called seeds.
+One can see that survival never happens, and birth happens when 2 live neighbors exist.
+Like real seeds, this rule set has the tendency to explode in size.
+
+There are 2<sup>18</sup> different possible life-like cellular automata, so we won't go through every single one.
+However, we do encourage you to enter various rule sets into the provided implementation.
+Get a feel for how different rule sets generate different cellular automata with different behaviour.
+
+Lastly, there are other ways of notating rule strings.
+Some systems put letters before the lists, some convert things back and forth between binary and decimal.
+They all represent the same concept, and we've opted for a compact rule string system that is quite popular.
 
 ## Larger than Life
 
@@ -78,7 +91,7 @@ whats a convolution
 
 ## Vector based Cellular Automata
 
-the state of each cell coresponds to 4 floating point numbers.
+the state of each cell corresponds to 4 floating point numbers.
 
 ## Invisible State Cellular Automata
 
