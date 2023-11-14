@@ -12,7 +12,7 @@ This project involves the creation of a cellular automata model trained using ne
 - [ ] Bigger frame with more cells
 - [ ] Update template
 - [ ] explanations for each CA
-  - [ ] Life
+  - [x] Life
   - [ ] Life-like
   - [ ] LTL
   - [ ] Convolving CA
@@ -25,12 +25,12 @@ This project involves the creation of a cellular automata model trained using ne
   - [ ] Find some good start state templates (bunnies, stable configurations, gliders, calculator)
   - [ ] Implement interactions
     - [ ] Pause / play (spacebar)
-    - [ ] Change state (click)
     - [ ] Move forward one frame (full-stop button)
     - [ ] allow selectable start state templates
+    - [ ] Change state (click)
   - [ ] Place into template
 - [ ] Life-like CA
-  - [ ] Implement a couple different basic rule sets
+  - [x] Implement a couple different basic rule sets
   - [ ] find good templates for select ruleset
   - [ ] Dynamic shaders, respond to user inputted rule-strings
   - [ ] Place into template
