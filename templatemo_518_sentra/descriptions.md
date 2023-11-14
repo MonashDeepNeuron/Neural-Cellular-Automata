@@ -2,7 +2,7 @@
 
 ## What are Cellular Automata?
 
-"Automata" is the plural or automaton, which is roughly a synonym for computer or machine.
+"Automata" is the plural for automaton, which is roughly a synonym for computer or machine.
 Cells are just small things.
 Cellular automata then, can be thought of as a bunch of little machines, which follow a rule set, and work together.
 Importantly, each cell has *exactly* the same rule set.
@@ -75,13 +75,20 @@ There are 2<sup>18</sup> different possible life-like cellular automata, so we w
 However, we do encourage you to enter various rule sets into the provided implementation.
 Get a feel for how different rule sets generate different cellular automata with different behaviour.
 
-Lastly, there are other ways of notating rule strings.
+Also, there are other ways of notating rule strings.
 Some systems put letters before the lists, some convert things back and forth between binary and decimal.
 They all represent the same concept, and we've opted for a compact rule string system that is quite popular.
 
 ## Larger than Life
 
-wacky neighbourhoods
+The previous cellular automata only dealt with moore neighbourhoods.
+Therefore, cells always had exactly 8 neighbours, the ones it touched.
+Larger than Life cellular automata (LTL CA for short) allow different sized neighbourhoods.
+For example, a neighbourhood of a cell could be a square around it, with side length 7.
+
+We have included an implementation of bugs, a notable cellular automata first studied by Professor Kellie Evans in her PhD
+
+wacky neighbourhoods.
 at this scale we don't really observe individual cells do we, more as blobs and stuff.
 
 ## Convolving Cellular Automata
