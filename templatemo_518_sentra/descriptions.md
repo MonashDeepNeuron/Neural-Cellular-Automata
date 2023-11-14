@@ -44,11 +44,11 @@ we have included cyclic configurations (patterns that loop), bunnies (simple pat
 
 ## Life like
 
-In life, we had a certain requirements for birth and survival.
+In life, we had a certain "requirements" for birth and survival.
+The rule set is then just counting live neighbours and making the appropriate decision.
 
 moore neighbourhood
-rulestrings
-so we can change the initial config and also the
+rulestrings.
 
 ## Larger than Life
 
