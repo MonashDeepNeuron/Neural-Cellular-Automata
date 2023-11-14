@@ -30,6 +30,9 @@ The instructions are also very simple
 - Survival Condition: if a live cell has either 2 or 3 neighbours, it continues to live.
 - In all other conditions, a cell dies.
 
+Neighbours here refer to cells that are directly above, below, left, right, or diagonal to the cell in question.
+This is sometimes referred to as a "moore neighbourhood".
+
 Life is **deterministic**, there is no chance involved.
 Yet, life is also **chaotic** and unpredictable.
 This is not a contradiction.
@@ -44,11 +47,24 @@ we have included cyclic configurations (patterns that loop), bunnies (simple pat
 
 ## Life like
 
-In life, we had a certain "requirements" for birth and survival.
-The rule set is then just counting live neighbours and making the appropriate decision.
+In Life, birth and survival happen when a cell has 2 or 3 live neighbours.
+There is nothing special about these numbers specifically.
+We could change the rule set to let birth happen when 8 neighbours are alive, or survive when 0 neighbours are alive.
+All modifications in this fashion still produce cellular automata that are quiet similar to Life.
 
-moore neighbourhood
-rulestrings.
+This is the idea behind life-like cellular automata.
+It is the class of cellular automata which are similar to Life in the following ways
+
+1. cells are either alive or dead
+2. rule sets depend only on the number of live neighbours
+3. Moore neighbourhood is used
+
+There are 2<sup>18</sup> different possible life-like cellular automata.
+To better understand the behaviour of a general cellular automata, we introduce rule-strings.
+It is just an ordered list of numbers representing the conditions to survive, then a forward-slash (the "/" symbol), then another ordered list of numbers representing birth conditions.
+
+So, if we were to notate life with this rule-string, it would be "3/23", since birth happens with 3 live neighbours and survival happens with 2 or 3 neighbours.
+Another interesting ruleset is "/2", often called seeds.
 
 ## Larger than Life
 
