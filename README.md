@@ -10,6 +10,7 @@ This project involves the creation of a cellular automata model trained using ne
 - [x] Modularise shaders
 - [ ] Modularise .js code
 - [ ] Bigger frame with more cells
+- [ ] Update template
 - [ ] explanations for each CA
   - [ ] Life
   - [ ] Life-like
