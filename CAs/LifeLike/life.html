@@ -1,57 +1,72 @@
-  
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 
-  <head>
-    <meta charset="utf-8" />
-    <title>WebGPU Life</title>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <title>WebGPU Life</title>
+  <link rel="stylesheet" href="style.css"> <!-- Link to the CSS file -->
+</head>
 
-  <!-- INIT CODE -->
-  <script type="text/javascript">
-    // GLOBAL VARIABLE DEFINITION
-      // Define trigger keys
-    const PLAY_PAUSE_KEY = ' ';
-    const NEXT_FRAME_KEY = '.';
+<!-- INIT CODE -->
+<script type="text/javascript">
+  // GLOBAL VARIABLE DEFINITION
+  // Define trigger keys
+  const PLAY_PAUSE_KEY = ' ';
+  const NEXT_FRAME_KEY = '.';
 
-      // Flags for event coordination
-    var running = false;
-    var oneFrame = false;
-    var forcedUpdate = () => {return;}; // Value will be addd when defined
+  // Flags for event coordination
+  var running = false;
+  var oneFrame = false;
+  var forcedUpdate = () => { return; }; // Value will be addd when defined
 
-      // Keyboard event callback
-    function keyListener(e) {
-        switch (e.key){
-            case PLAY_PAUSE_KEY:
-                running = !running;
-                break;
-            case NEXT_FRAME_KEY:
-                oneFrame = true;
-                forcedUpdate(); // Force immediate update
-                break;
-            default:
-        } 
+  // Keyboard event callback
+  function keyListener(e) {
+    switch (e.key) {
+      case PLAY_PAUSE_KEY:
+        running = !running;
+        break;
+      case NEXT_FRAME_KEY:
+        oneFrame = true;
+        forcedUpdate(); // Force immediate update
+        break;
+      default:
     }
-  </script>
+  }
+</script>
 
-  <div class="text-column">
-    <h1>Game of Life</h1>
+<div class="text-column">
+  <h1>Game of Life</h1>
+</div>
+
+<!-- Buttons corresponding to key clicks -->
+<button id="play">Play/Pause</button>
+<button id="next">Next Frame</button>
+
+<body>
+  <div>
+    <canvas width="512" height="512" />
   </div>
 
-  <body>
-    <div>
-      <canvas width="512" height="512" />
-    </div>
+  <script type="module">
+    import main from "http://localhost:5500/CAs/LifeLike/life.js";
+    main();
 
-    <script type="module">
-      import main from "http://localhost:5500/CAs/LifeLike/life.js";
-      main();
-    </script>
-  </body>
+    // Button Event listeners
+    document.getElementById('play').addEventListener('click', function () {
+      running = !running;
+    });
 
-  <!-- Final setup script -->
-  <script type="text/javascript">
-    document.getElementsByTagName("body")[0].onkeypress = keyListener;
+    document.getElementById('next').addEventListener('click', function () {
+      oneFrame = true;
+      forcedUpdate();
+    });
+
   </script>
+</body>
+
+<!-- Final setup script -->
+<script type="text/javascript">
+  document.getElementsByTagName("body")[0].onkeypress = keyListener;
+</script>
 
 </html>
