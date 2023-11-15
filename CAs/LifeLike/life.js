@@ -78,7 +78,7 @@ export default async function main(inputRulestring) {
 
     // write to buffer A
     for (let i = 0; i < cellStateArray.length; ++i) {
-        // cellStateArray[i] = Math.random() > 0.6 ? 1 : 0;
+        // cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
         cellStateArray[i] = INITIAL_STATE[i];
     }
     device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
