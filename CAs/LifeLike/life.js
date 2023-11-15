@@ -1,11 +1,6 @@
 // import shaders
 import { guiShaderWGSL } from "http://localhost:5500/CAs/LifeLike/guiShader.js";
 import { computeShaderWGSL } from "http://localhost:5500/CAs/LifeLike/computeShader.js";
-
-// Global variables
-let pass, device, bindGroups, vertexBuffer, uniformBuffer, ruleStorage, cellStateStorage, cellPipeline, simulationPipeline, canvasContext;
-
-
 // SET VARIABLES
 const GRID_SIZE = 16;
 const UPDATE_INTERVAL = 200;
@@ -36,8 +31,14 @@ const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
-// Device Setup Function
-async function setupDevice() {
+export default async function main() {
+    const RULE = parseRulestring(RULESTRING);
+    console.log(RULE);
+
+    let step = 0
+
+    // DEVICE SETUP - could prob be  a function. yes please make this a function
+    const canvas = document.querySelector("canvas");
     if (!navigator.gpu) {
         throw new Error("WebGPU not supported on this browser");
     }
@@ -47,14 +48,11 @@ async function setupDevice() {
         throw new Error("No appropriate GPUAdapter found.");
     }
 
-    device = await adapter.requestDevice();
-}
+    const device = await adapter.requestDevice();
 
-async function initializeResources(rule) {
-    // Setting up buffers, pipelines
-    const RULE = rule
-    uniformArray = new Float32Array([GRID_SIZE, GRID_SIZE]);
-    uniformBuffer = device.createBuffer({
+    // Uniform grid
+    const uniformArray = new Float32Array([GRID_SIZE, GRID_SIZE]);
+    const uniformBuffer = device.createBuffer({
         label: "Grid Uniforms",
         size: uniformArray.byteLength,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -63,8 +61,8 @@ async function initializeResources(rule) {
     device.queue.writeBuffer(uniformBuffer, 0, uniformArray);
 
     // Cell state arrays
-    cellStateArray = new Uint32Array(GRID_SIZE * GRID_SIZE);
-    cellStateStorage = [
+    const cellStateArray = new Uint32Array(GRID_SIZE * GRID_SIZE);
+    const cellStateStorage = [
         device.createBuffer({
             label: "Cell State A",
             size: cellStateArray.byteLength,
@@ -92,18 +90,26 @@ async function initializeResources(rule) {
     device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
 
-    // COPY RULES INTO GPU BUFFER
-    ruleArray = new Uint32Array(RULE.length * RULE[0].length);
-    ruleStorage = device.createBuffer({
-        label: "Rule Storage",
-        size: ruleArray.byteLength,
-        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-    });
-    for (let i = 0; i < RULE.length; ++i) {
-        for (let j = 0; j < RULE[i].length; j++) {
-            ruleArray[i * POSSIBLE_NEIGHBOURS + j] = RULE[i][j];
+    function rules(rule) {
+        console.log("rules")
+        const ruleArray = new Uint32Array(rule.length * rule[0].length);
+        const ruleStorage = device.createBuffer({
+            label: "Rule Storage",
+            size: ruleArray.byteLength,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
+
+        for (let i = 0; i < rule.length; ++i) {
+            for (let j = 0; j < rule[i].length; j++) {
+                ruleArray[i * POSSIBLE_NEIGHBOURS + j] = rule[i][j];
+            }
         }
+
+        return { ruleArray, ruleStorage };
     }
+
+    const { ruleArray, ruleStorage } = rules(RULE);
+    console.log(ruleArray)
     device.queue.writeBuffer(ruleStorage, 0, ruleArray);
 
     // FORMAT CANVAS
@@ -126,7 +132,7 @@ async function initializeResources(rule) {
         -0.8, -0.8,
     ]);
 
-    vertexBuffer = device.createBuffer({
+    const vertexBuffer = device.createBuffer({
         label: "Cell vertices", // Error message label
         size: vertices.byteLength,
         usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
@@ -148,6 +154,7 @@ async function initializeResources(rule) {
 
     // CELL SHADER MODULE
     const cellShaderModule = device.createShaderModule(guiShaderWGSL);
+
 
     // COMPUTE SHADER RESOURCE BINDING LAYOUT
     const bindGroupLayout = device.createBindGroupLayout({
@@ -181,13 +188,13 @@ async function initializeResources(rule) {
 
 
     // PIPE LAYOUT
-    pipelineLayout = device.createPipelineLayout({
+    const pipelineLayout = device.createPipelineLayout({
         label: "Cell Pipeline Layout",
         bindGroupLayouts: [bindGroupLayout],
     });
 
     // SIMULATION PIPELINE
-    simulationPipeline = device.createComputePipeline({
+    const simulationPipeline = device.createComputePipeline({
         label: "Simulation pipeline",
         layout: pipelineLayout,
         compute: {
@@ -197,7 +204,7 @@ async function initializeResources(rule) {
     });
 
     //RENDER PIPELINE            
-    cellPipeline = device.createRenderPipeline({
+    const cellPipeline = device.createRenderPipeline({
         label: "Cell pipeline",
         layout: pipelineLayout,
         vertex: {
@@ -214,85 +221,29 @@ async function initializeResources(rule) {
         }
     });
 
-    // GROUP BINDING
-    bindGroups = [
-
-        device.createBindGroup({
-            label: "Cell renderer bind group A",
+    function createBindGroup(label, uniformBuffer, cellStateA, cellStateB, ruleStorage) {
+        return device.createBindGroup({
+            label: label,
             layout: cellPipeline.getBindGroupLayout(0),
             entries: [
-                {
-                    binding: 0,
-                    resource: { buffer: uniformBuffer }
-                },
-
-                {
-                    binding: 1,
-                    resource: { buffer: cellStateStorage[0] },
-                },
-
-                {
-                    binding: 2,
-                    resource: { buffer: cellStateStorage[1] },
-                },
-
-                {
-                    binding: 3,
-                    resource: { buffer: ruleStorage },
-                }
+                { binding: 0, resource: { buffer: uniformBuffer } },
+                { binding: 1, resource: { buffer: cellStateA } },
+                { binding: 2, resource: { buffer: cellStateB } },
+                { binding: 3, resource: { buffer: ruleStorage } },
             ],
-        }),
+        });
+    }
 
-        device.createBindGroup({
-            label: "Cell render bind group B",
-            layout: cellPipeline.getBindGroupLayout(0),
-            entries: [
-                {
-                    binding: 0,
-                    resource: { buffer: uniformBuffer },
-                },
 
-                {
-                    binding: 1,
-                    resource: { buffer: cellStateStorage[1] }
-                },
-
-                {
-                    binding: 2,
-                    resource: { buffer: cellStateStorage[0] }
-                },
-
-                {
-                    binding: 3,
-                    resource: { buffer: ruleStorage },
-                }
-            ],
-        })
+    let bindGroups = [
+        createBindGroup("Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
+        createBindGroup("Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
     ];
-}
 
-async function drawFeatures(pass) {
-    pass.setPipeline(cellPipeline);
-    pass.setVertexBuffer(0, vertexBuffer);
-    pass.setBindGroup(0, bindGroups[step % 2]);
-    pass.draw(vertices.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
-    pass.end();
-}
-
-export default async function main() {
-
-    const rule = parseRulestring(RULESTRING);
-    let step = 0
-
-    // Device setup
-    await setupDevice();
-
-    // Resource Initialization
-    await initializeResources(rule);
 
     // INITIAL CANVAS SETUP
     const encoder = device.createCommandEncoder();
-    pass = encoder.beginRenderPass({
+    const pass = encoder.beginRenderPass({
         colorAttachments:
             [{
                 view: context.getCurrentTexture().createView(),
@@ -302,10 +253,16 @@ export default async function main() {
             }]
     });
 
-    drawFeatures(pass);
+    // Draw the features
+    pass.setPipeline(cellPipeline);
+    pass.setVertexBuffer(0, vertexBuffer);
+    pass.setBindGroup(0, bindGroups[step % 2]);
+    pass.draw(vertices.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
+    pass.end();
 
     // Finish the command buffer and immediately submit it.
     device.queue.submit([encoder.finish()]);
+
 
     // Called at set interval as callback and on keyPressed
     function updateLoop() {
@@ -317,6 +274,18 @@ export default async function main() {
         }
         else {
             oneFrame = false; // Cross-script variable, do not add let,var or const
+        }
+
+        if (newRuleString) {
+            const { ruleArray, ruleStorage } = rules(parseRulestring(ruleString))
+            console.log(ruleArray)
+            device.queue.writeBuffer(ruleStorage, 0, ruleArray);
+            bindGroups = [
+                createBindGroup("Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
+                createBindGroup("Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
+            ];
+            newRuleString = false // toggle off
+
         }
 
 
@@ -346,7 +315,15 @@ export default async function main() {
         });
 
         // DRAW THE FEATURES
-        drawFeatures(pass);
+        pass.setPipeline(cellPipeline);
+        pass.setVertexBuffer(0, vertexBuffer);
+
+        pass.setBindGroup(0, bindGroups[step % 2]);
+
+        pass.draw(vertices.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
+
+        pass.end();
+
 
         // Finish the command buffer and immediately submit it.
         device.queue.submit([encoder.finish()]);
@@ -354,38 +331,9 @@ export default async function main() {
 
     setInterval(updateLoop, UPDATE_INTERVAL);
     forcedUpdate = updateLoop;
-    // Cross-script variable, enables other scripts to force an update cycle
-
-    function drawFeatures(pass) {
-        pass.setPipeline(cellPipeline);
-        pass.setVertexBuffer(0, vertexBuffer);
-        pass.setBindGroup(0, bindGroups[step % 2]);
-        pass.draw(vertices.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
-        pass.end();
-    }
-
+    // Cross-script variable, enables other scripts to force an update cylce
 }
 
-async function updateBuffer(buffer, newData) {
-    const mappedBuffer = buffer.getMappedRange();
-    new Uint32Array(mappedBuffer).set(new Uint32Array(newData));
-    buffer.unmap();
-}
-
-// // Usage example for RULE buffer
-// await updateBuffer(device, ruleStorage, newRuleArray);
-function updateRuleArray(ruleArray, newRules, possibleNeighbours) {
-    for (let i = 0; i < newRules.length; ++i) {
-        for (let j = 0; j < newRules[i].length; j++) {
-            ruleArray[i * possibleNeighbours + j] = newRules[i][j];
-        }
-    }
-}
-
-
-// // Usage
-// updateRuleArray(ruleArray, newRuleString);
-// device.queue.writeBuffer(ruleStorage, 0, ruleArray);
 
 function parseRulestring(rulestring) {
     // Output structure:
@@ -428,4 +376,3 @@ function parseRulestring(rulestring) {
 
     return RULE;
 }
-
