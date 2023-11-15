@@ -42,6 +42,13 @@
 <button id="play">Play/Pause</button>
 <button id="next">Next Frame</button>
 
+<!-- Input Box for Simulation Parameters -->
+<div class="input-container">
+  <input type="text" id="simulationInput" placeholder="Enter rulestring :3">
+  <button id="submitInput">Submit</button>
+</div>
+
+
 <body>
   <div>
     <canvas width="512" height="512" />
@@ -49,7 +56,7 @@
 
   <script type="module">
     import main from "http://localhost:5500/CAs/LifeLike/life.js";
-    main();
+    //main();
 
     // Button Event listeners
     document.getElementById('play').addEventListener('click', function () {
@@ -60,6 +67,14 @@
       oneFrame = true;
       forcedUpdate();
     });
+
+    document.getElementById('submitInput').addEventListener('click', function () {
+      const inputText = document.getElementById('simulationInput').value;
+
+      // Call a function from life.js and pass the inputText
+      main(inputText); // Assuming 'main' can accept parameters
+    });
+
 
   </script>
 </body>

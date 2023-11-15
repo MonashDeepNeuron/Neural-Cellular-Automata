@@ -7,7 +7,7 @@ const UPDATE_INTERVAL = 200;
 const WORKGROUP_SIZE = 8;
 
 /** Life like CA rulestring using Survival/Birth notation */
-const RULESTRING = "/2"; 
+const RULESTRING = "/2";
 
 /**  Number of possible neighbour states: 0-8*/
 const POSSIBLE_NEIGHBOURS = 9;
@@ -31,10 +31,10 @@ const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
-export default async function main() {
-    const RULE = parseRulestring(RULESTRING);
+export default async function main(inputRulestring) {
+    const RULE = parseRulestring(inputRulestring);
     console.log(RULE);
-    
+
     let step = 0
 
     // DEVICE SETUP - could prob be  a function. yes please make this a function
@@ -91,17 +91,15 @@ export default async function main() {
 
 
     // COPY RULES INTO GPU BUFFER
-    const ruleArray = new Uint32Array(RULE.length* RULE[0].length);
+    const ruleArray = new Uint32Array(RULE.length * RULE[0].length);
     const ruleStorage = device.createBuffer({
         label: "Rule Storage",
         size: ruleArray.byteLength,
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     });
-    for (let i = 0; i < RULE.length; ++i)
-    {
-        for (let j = 0; j < RULE[i].length; j++)
-        {
-            ruleArray[i*POSSIBLE_NEIGHBOURS + j] = RULE[i][j];
+    for (let i = 0; i < RULE.length; ++i) {
+        for (let j = 0; j < RULE[i].length; j++) {
+            ruleArray[i * POSSIBLE_NEIGHBOURS + j] = RULE[i][j];
         }
     }
     console.log(ruleArray);
@@ -239,7 +237,7 @@ export default async function main() {
 
                 {
                     binding: 3,
-                    resource: { buffer: ruleStorage},
+                    resource: { buffer: ruleStorage },
                 }
             ],
         }),
@@ -265,7 +263,7 @@ export default async function main() {
 
                 {
                     binding: 3,
-                    resource: { buffer: ruleStorage},
+                    resource: { buffer: ruleStorage },
                 }
             ],
         })
@@ -298,16 +296,14 @@ export default async function main() {
     function updateLoop() {
 
         // Only permitted to run if one frame is wanted or
-        if (!oneFrame) 
-        {
-            if (!running){ return; }
+        if (!oneFrame) {
+            if (!running) { return; }
             // Continue if running = true
         }
-        else 
-        {
+        else {
             oneFrame = false; // Cross-script variable, do not add let,var or const
         }
-        
+
 
         const encoder = device.createCommandEncoder();
 
@@ -352,57 +348,49 @@ export default async function main() {
     }
 
     setInterval(updateLoop, UPDATE_INTERVAL);
-    forcedUpdate = updateLoop; 
+    forcedUpdate = updateLoop;
     // Cross-script variable, enables other scripts to force an update cylce
 }
 
 
-function parseRulestring(rulestring)
-{
+function parseRulestring(rulestring) {
     // Output structure:
-        // [
-        //    SURVIVE[number of neighbours] = 1/0 (true/false),
-        //    BIRTH  [number of neighbours] = 1/0 (true/false)
-        // ]
-        // Where length of each SURVIVE and BIRTH is 9 (0-8)
+    // [
+    //    SURVIVE[number of neighbours] = 1/0 (true/false),
+    //    BIRTH  [number of neighbours] = 1/0 (true/false)
+    // ]
+    // Where length of each SURVIVE and BIRTH is 9 (0-8)
     // Default fill all conditions as False then parse rule string
 
     const RULE = [Array(POSSIBLE_NEIGHBOURS).fill(0), Array(POSSIBLE_NEIGHBOURS).fill(0)];
 
     let slashFound = false;
     // Parse rulestring. digits before slash indicate when a cell should 
-        // survive and digits after indicate when a cell should be born
-    for (let i = 0; i < rulestring.length; i++) 
-    {
-        if (rulestring.charAt(i) == '/')
-        {
+    // survive and digits after indicate when a cell should be born
+    for (let i = 0; i < rulestring.length; i++) {
+        if (rulestring.charAt(i) == '/') {
             slashFound = true;
-        } 
-        else 
-        {
+        }
+        else {
             const x = parseInt(rulestring.charAt(i));
-            if (Number.isNaN(x))
-            {
+            if (Number.isNaN(x)) {
                 alert("ERROR: Invalid Rulestring");
                 return;
-            } 
-            else 
-            {
-                if(!slashFound)
-                {
+            }
+            else {
+                if (!slashFound) {
                     RULE[0][x] = 1;
                     // More vigourous validity checks could be used
-                        // eg. is this index already filled as true?
+                    // eg. is this index already filled as true?
                 }
-                else 
-                {
+                else {
                     RULE[1][x] = 1;
                     // More vigourous validity checks could be used
-                        // eg. is this index already filled as true?
+                    // eg. is this index already filled as true?
                 }
             }
         }
     }
-    
+
     return RULE;
 }
