@@ -88,6 +88,10 @@ However, some useful resources for this project include:
   - [Emergent Gardens](https://www.youtube.com/@EmergentGarden)
   - [WebGPU Shader Tips](https://toji.dev/webgpu-best-practices/dynamic-shader-construction.html)
 
+- Event Handling in JavaScript
+  - [HTML DOM Events](https://www.w3schools.com/jsref/dom_obj_event.asp)
+  - [JavaScript Events](https://www.w3schools.com/js/js_events.asp)
+  - [Event handling (overview)](https://developer.mozilla.org/en-US/docs/Web/Events/Event_handlers)
 More resources will be made available in this repo as the project progresses.
 
 ## Repository Maintenance
