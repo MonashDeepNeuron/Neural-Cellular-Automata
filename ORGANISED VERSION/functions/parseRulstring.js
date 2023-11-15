@@ -1,13 +1,11 @@
 // parse rule string for life like automata
 
-function parseRuleString(ruleString, rule) {
+function parseRulestring(rulestring) {
     // ruleString is given by the user. it is a string
-    // rule is in the buffer, we update it to match ruleString
-    // rule is a U32 integer array length 1
-    rule[0] = 0; // reset the rule
-    slashFlag = false
-    for (let i = 0; i < ruleString.length; i++) {
-        char = ruleString[i];
+    let RULE = new Uint32Array(1)
+    let slashFlag = false // tells us whether we are before or after the / symbol
+    for (let i = 0; i < rulestring.length; i++) {
+        let char = rulestring[i];
         if (char === "/") {
             slashFlag = !slashFlag
             continue
@@ -15,11 +13,11 @@ function parseRuleString(ruleString, rule) {
         let num = Number(char) // the character is indeed a number
         switch (slashFlag) {
             case false: // before "/" sign. survival case
-                //console.log(rule[0] + (2 ** (num + 9)))
-                rule[0] += 2 ** (num + 9)
+                RULE[0] += 2 ** (num + 9)
                 break;
             case true: // after "/" sign. birth case
-                rule[0] += 2 ** num
+                RULE[0] += 2 ** num
         }
     }
+    return RULE
 }

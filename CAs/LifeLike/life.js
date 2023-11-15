@@ -2,7 +2,7 @@
 import { guiShaderWGSL } from "http://localhost:5500/CAs/LifeLike/guiShader.js";
 import { computeShaderWGSL } from "http://localhost:5500/CAs/LifeLike/computeShader.js";
 // SET VARIABLES
-const GRID_SIZE = 2056;
+const GRID_SIZE = 1024;
 const UPDATE_INTERVAL = 50;
 const WORKGROUP_SIZE = 8;
 
