@@ -54,6 +54,7 @@ class GrowingCA(nn.Module):
                 hidden_channels,
                 n_channels, # output channels = input channels
                 kernel_size = 1,
+                bias=False,
             )
         )
 
