@@ -29,9 +29,10 @@ class GrowingCA(nn.Module):
 
         #### Perception Step ###
         sobel_filter = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        scale_factor = 8
 
-        sobel_x = sobel_filter
-        sobel_y = sobel_filter.t() 
+        sobel_x = sobel_filter / scale_factor
+        sobel_y = sobel_filter.t() / scale_factor
 
         # They utilise an identity filter as well
         identity = torch.tensor([[0,0,0], [0,1,0], [0,0,0]])
@@ -55,6 +56,9 @@ class GrowingCA(nn.Module):
                 kernel_size = 1,
             )
         )
+
+        with torch.no_grad():
+            self.update_step[2].weight.zero_()
 
         #self.to(self.device) # send this model to device
 

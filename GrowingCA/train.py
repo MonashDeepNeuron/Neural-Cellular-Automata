@@ -65,6 +65,8 @@ def starting_seed(size, n_channels):
 def train():
     # I'll add a parser later
     BATCH_SIZE = 4
+    PADDING = 16
+    p = PADDING
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -76,6 +78,7 @@ def train():
     img_path = "cat.png"
     img_size = 32
     target_img = load_target(img_path, im_size=img_size)
+    target_img = nn.functional.pad(target_img, (p, p, p, p), "constant", 0)
     target_img = target_img.to(device) # send image to device
     target_img == target_img.repeat(BATCH_SIZE, 1, 1, 1) # we perform batch training with same image
 
@@ -86,14 +89,15 @@ def train():
     hidden_channels = 128
     device = device
     model = GrowingCA(n_channels=n_channels, hidden_channels=hidden_channels, device=device).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=5e-3)
 
     # Pool to sample from
     pool_size = 1024
     seed = starting_seed(size=img_size, n_channels=n_channels).to(device)
+    seed = nn.functional.pad(seed, (p, p, p, p), "constant", 0)
     pool = seed.clone().repeat(pool_size,1,1,1)
 
-    epochs = 5000
+    epochs = 1000
     eval_frequency = 500
     eval_iterations = 300
 
