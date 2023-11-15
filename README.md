@@ -9,21 +9,60 @@ This project involves the creation of a cellular automata model trained using ne
 - [x] Project setup
 - [x] Modularise shaders
 - [ ] Modularise .js code
-- [ ] Interactivity
 - [ ] Bigger frame with more cells
+- [ ] Update template
+- [ ] explanations for each CA
+  - [x] Life
+  - [ ] Life-like
+  - [ ] LTL
+  - [ ] Convolving CA
+  - [ ] Vec4, Vec16
 
 ### Model Development
 
+- [ ] Life
+  - [x] Get Running
+  - [ ] Find some good start state templates (bunnies, stable configurations, gliders, calculator)
+  - [ ] Implement interactions
+    - [ ] Pause / play (spacebar)
+    - [ ] Move forward one frame (full-stop button)
+    - [ ] allow selectable start state templates
+    - [ ] Change state (click)
+  - [ ] Place into template
 - [ ] Life-like CA
-  - [ ] Implement a couple different basic rulesets
-  - [ ] Dynamic shaders respond to rulestrings
+  - [x] Implement a couple different basic rule sets
+  - [ ] find good templates for select ruleset
+  - [ ] Dynamic shaders, respond to user inputted rule-strings
+  - [ ] Place into template
+- [ ] LTL CA
+  - [ ] Implement wider neighbourhoods:
+        see line 22ish of
+        [computeShader.js](My-App/src/routes/life/computeShader.js)
+  - [ ] Figure out what to do with rule strings
+  - [ ] Insert into template
+
+---
+
+The models from here down are trainable
+
+- [ ] Convolving CA
+  - [ ] Implement discrete convolution as shader function
+  - [ ] Make convolution shader function dynamic
+        (respond to input convolution)
+  - [ ] Insert into template
+- [ ] Vec4 based CA
+  - [ ] Understand vector convolutions
+  - [ ] Implement efficient way to pull info from the picture
+  - [ ] Insert into template
+- [ ] vec16 based CA (haven't written this out yet)
+  - [ ] insert into template
 
 ### Model Training
 
 - Waiting for:
   - [ ] continuity
   - [ ] convolutions
-- [ ] Create a training method that allows us to find interesting behaviours on the simple implementation as seen [here](https://neuralpatterns.io)
+- [ ] ?? Create a training method that allows us to find interesting behaviours on the simple implementation as seen [here](https://neuralpatterns.io)
 
 ## Resources
 
