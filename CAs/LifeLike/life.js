@@ -31,8 +31,8 @@ const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
-export default async function main(inputRulestring) {
-    const RULE = parseRulestring(inputRulestring);
+export default async function main() {
+    const RULE = parseRulestring(RULESTRING);
     console.log(RULE);
 
     let step = 0
@@ -90,19 +90,26 @@ export default async function main(inputRulestring) {
     device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
 
-    // COPY RULES INTO GPU BUFFER
-    const ruleArray = new Uint32Array(RULE.length * RULE[0].length);
-    const ruleStorage = device.createBuffer({
-        label: "Rule Storage",
-        size: ruleArray.byteLength,
-        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-    });
-    for (let i = 0; i < RULE.length; ++i) {
-        for (let j = 0; j < RULE[i].length; j++) {
-            ruleArray[i * POSSIBLE_NEIGHBOURS + j] = RULE[i][j];
+    function rules(rule) {
+        console.log("rules")
+        const ruleArray = new Uint32Array(rule.length * rule[0].length);
+        const ruleStorage = device.createBuffer({
+            label: "Rule Storage",
+            size: ruleArray.byteLength,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
+
+        for (let i = 0; i < rule.length; ++i) {
+            for (let j = 0; j < rule[i].length; j++) {
+                ruleArray[i * POSSIBLE_NEIGHBOURS + j] = rule[i][j];
+            }
         }
+
+        return { ruleArray, ruleStorage };
     }
-    console.log(ruleArray);
+
+    const { ruleArray, ruleStorage } = rules(RULE);
+    console.log(ruleArray)
     device.queue.writeBuffer(ruleStorage, 0, ruleArray);
 
     // FORMAT CANVAS
@@ -147,6 +154,7 @@ export default async function main(inputRulestring) {
 
     // CELL SHADER MODULE
     const cellShaderModule = device.createShaderModule(guiShaderWGSL);
+
 
     // COMPUTE SHADER RESOURCE BINDING LAYOUT
     const bindGroupLayout = device.createBindGroupLayout({
@@ -213,61 +221,25 @@ export default async function main(inputRulestring) {
         }
     });
 
-    // GROUP BINDING
-    const bindGroups = [
-
-        device.createBindGroup({
-            label: "Cell renderer bind group A",
+    function createBindGroup(label, uniformBuffer, cellStateA, cellStateB, ruleStorage) {
+        return device.createBindGroup({
+            label: label,
             layout: cellPipeline.getBindGroupLayout(0),
             entries: [
-                {
-                    binding: 0,
-                    resource: { buffer: uniformBuffer }
-                },
-
-                {
-                    binding: 1,
-                    resource: { buffer: cellStateStorage[0] },
-                },
-
-                {
-                    binding: 2,
-                    resource: { buffer: cellStateStorage[1] },
-                },
-
-                {
-                    binding: 3,
-                    resource: { buffer: ruleStorage },
-                }
+                { binding: 0, resource: { buffer: uniformBuffer } },
+                { binding: 1, resource: { buffer: cellStateA } },
+                { binding: 2, resource: { buffer: cellStateB } },
+                { binding: 3, resource: { buffer: ruleStorage } },
             ],
-        }),
+        });
+    }
 
-        device.createBindGroup({
-            label: "Cell render bind group B",
-            layout: cellPipeline.getBindGroupLayout(0),
-            entries: [
-                {
-                    binding: 0,
-                    resource: { buffer: uniformBuffer },
-                },
 
-                {
-                    binding: 1,
-                    resource: { buffer: cellStateStorage[1] }
-                },
-
-                {
-                    binding: 2,
-                    resource: { buffer: cellStateStorage[0] }
-                },
-
-                {
-                    binding: 3,
-                    resource: { buffer: ruleStorage },
-                }
-            ],
-        })
+    let bindGroups = [
+        createBindGroup("Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
+        createBindGroup("Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
     ];
+
 
     // INITIAL CANVAS SETUP
     const encoder = device.createCommandEncoder();
@@ -302,6 +274,18 @@ export default async function main(inputRulestring) {
         }
         else {
             oneFrame = false; // Cross-script variable, do not add let,var or const
+        }
+
+        if (newRuleString) {
+            const { ruleArray, ruleStorage } = rules(parseRulestring(ruleString))
+            console.log(ruleArray)
+            device.queue.writeBuffer(ruleStorage, 0, ruleArray);
+            bindGroups = [
+                createBindGroup("Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
+                createBindGroup("Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
+            ];
+            newRuleString = false // toggle off
+
         }
 
 
@@ -340,8 +324,6 @@ export default async function main(inputRulestring) {
 
         pass.end();
 
-        // const commandBuffer = encoder.finish();
-        // device.queue.submit([commandBuffer]);
 
         // Finish the command buffer and immediately submit it.
         device.queue.submit([encoder.finish()]);
