@@ -71,9 +71,10 @@ Another interesting rule set is $/2$, often called seeds.
 One can see that survival never happens, and birth happens when 2 live neighbors exist.
 Like real seeds, this rule set has the tendency to explode in size.
 
-There are 2<sup>18</sup> different possible life-like cellular automata, so we won't go through every single one.
-However, we do encourage you to enter various rule sets into the provided implementation.
-Get a feel for how different rule sets generate different cellular automata with different behaviour.
+There are 2<sup>18</sup> different possible life-like cellular automata,
+we won't go through every single one.
+However, we do encourage you to try out various rule sets into the provided implementation.
+Get a feel for how different rule sets generate cellular automata which behave differently.
 
 Also, there are other ways of notating rule strings.
 Some systems put letters before the lists, some convert things back and forth between binary and decimal.
@@ -83,15 +84,26 @@ They all represent the same concept, and we've opted for a compact rule string s
 
 The previous cellular automata only dealt with moore neighbourhoods.
 Therefore, cells always had exactly 8 neighbours, the ones it touched.
-Larger than Life cellular automata (LTL CA for short) allow different sized neighbourhoods.
-For example, a neighbourhood of a cell could be a square around it, with side length 7.
+Larger than Life cellular automata (LTL CA for short) drop this requirement,
+and allow different sized neighbourhoods.
+For example, a neighbourhood of a cell could be a square around it,
+with side length 7.
 
-We have included an implementation of bugs, a notable cellular automata first studied by Professor Kellie Evans in her PhD
+Hence, a cell may be affected by another far away cell.
+The result is patterns which are observable on a much larger scale.
+Individual cells begin to blur together,
+and the behaviour of entire grid becomes more salient
 
-wacky neighbourhoods.
-at this scale we don't really observe individual cells do we, more as blobs and stuff.
+We have included an implementation of bugs,
+a notable cellular automata first studied by Professor Kellie Evans in her PhD.
 
 ## Convolving Cellular Automata
+
+Haven't decided what to call it.
+
+- Convolution Based Cellular Automata
+- Convolving Cellular Automata
+- Continuous State Cellular Automata
 
 differentiable therefore trainable.
 whats a convolution
