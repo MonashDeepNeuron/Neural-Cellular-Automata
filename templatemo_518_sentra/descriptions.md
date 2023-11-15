@@ -30,8 +30,9 @@ The instructions are also very simple
 - Survival Condition: if a live cell has either 2 or 3 neighbours, it continues to live.
 - In all other conditions, a cell dies.
 
-Neighbours here refer to cells that are directly above, below, left, right, or diagonal to the cell in question.
+Two cells are considered neighbours if you can get from one cell to the by moving horizontally, vertically, or diagonally in one move.
 This is sometimes referred to as a "moore neighbourhood".
+It looks like a square centred at the cell, with side length 3.
 
 Life is **deterministic**, there is no chance involved.
 Yet, life is also **chaotic** and unpredictable.
@@ -67,8 +68,8 @@ To better understand the behaviour of a general cellular automata, we introduce 
 It is just an ordered list of numbers representing the conditions to survive, then a forward-slash (the $/$ symbol), then another ordered list of numbers representing birth conditions.
 
 So, if we were to notate life with this rule-string, it would be $23/3$, since survival happens with 2 or 3 live neighbours and birth only happens with exactly 3 neighbours.
-Another interesting rule set is $/2$, often called seeds.
-One can see that survival never happens, and birth happens when 2 live neighbors exist.
+Another interesting rule set is $/2$, often called "seeds".
+In this rule set, survival never happens. Birth only happens when a cell has 2 live neighbors.
 Like real seeds, this rule set has the tendency to explode in size.
 
 There are 2<sup>18</sup> different possible life-like cellular automata,
@@ -76,26 +77,32 @@ we won't go through every single one.
 However, we do encourage you to try out various rule sets into the provided implementation.
 Get a feel for how different rule sets generate cellular automata which behave differently.
 
-Also, there are other ways of notating rule strings.
+There are other ways of notating rule strings.
 Some systems put letters before the lists, some convert things back and forth between binary and decimal.
-They all represent the same concept, and we've opted for a compact rule string system that is quite popular.
+They all represent the same concept.
+We've opted for a compact rule string system that is quite popular.
 
 ## Larger than Life
 
 The previous cellular automata only dealt with moore neighbourhoods.
 Therefore, cells always had exactly 8 neighbours, the ones it touched.
 Larger than Life cellular automata (LTL CA for short) drop this requirement,
-and allow different sized neighbourhoods.
-For example, a neighbourhood of a cell could be a square around it,
+allowing larger neighbourhoods.
+The neighbourhood of a cell could be a square around it,
 with side length 7.
+One could call this a "moore neighbourhood with range 3", but terms don't matter too much.
 
-Hence, a cell may be affected by another far away cell.
+Besides moore neighbourhood, another common neighbourhood studied is the "von Neumann" neighbourhood.
+A von Neumann neighbourhood of range $n$ consists of all the cells you can get to in $n$ moves, with only horizontal and vertical moves.
+It looks like a diamond centred at the cell.
+Other neighbourhood shapes are also allowed.
+
+large neighbourhoods mean cells may be affected by other cells far away.
 The result is patterns which are observable on a much larger scale.
 Individual cells begin to blur together,
-and the behaviour of entire grid becomes more salient
+and the large-scale behaviour of grid becomes more salient.
 
-We have included an implementation of bugs,
-a notable cellular automata first studied by Professor Kellie Evans in her PhD.
+Gnarl, bugs, Professor Kellie Evans in her PhD.
 
 ## Convolving Cellular Automata
 
