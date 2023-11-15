@@ -617,6 +617,105 @@ header {
   opacity: 0.5;
 }
 
+/* LifeLike Style */
+
+#lifeLike {
+  padding-left: 60px;
+  padding-right: 60px;
+  padding-bottom: 50px;
+}
+
+#lifeLike .masonry {
+  position: relative;
+  width: 100%;
+}
+
+#lifeLike .masonry .item img {
+  transition: all 1s;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+#lifeLike .masonry .item img:hover {
+  opacity: 0.5;
+}
+
+/* largerThanLife Style */
+
+#largerThanLife {
+  padding-left: 60px;
+  padding-right: 60px;
+  padding-bottom: 50px;
+}
+
+#largerThanLife .masonry {
+  position: relative;
+  width: 100%;
+}
+
+#largerThanLife .masonry .item img {
+  transition: all 1s;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+#largerThanLife .masonry .item img:hover {
+  opacity: 0.5;
+}
+
+/* continousCA Style */
+
+#continousCA {
+  padding-left: 60px;
+  padding-right: 60px;
+  padding-bottom: 50px;
+}
+
+#continousCA .masonry {
+  position: relative;
+  width: 100%;
+}
+
+#continousCA .masonry .item img {
+  transition: all 1s;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+#continousCA .masonry .item img:hover {
+  opacity: 0.5;
+}
+
+/* vBasedcontinousCA Style */
+
+#vBasedcontinousCA {
+  padding-left: 60px;
+  padding-right: 60px;
+  padding-bottom: 50px;
+}
+
+#vBasedcontinousCA .masonry {
+  position: relative;
+  width: 100%;
+}
+
+#vBasedcontinousCA .masonry .item img {
+  transition: all 1s;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+#vBasedcontinousCA .masonry .item img:hover {
+  opacity: 0.5;
+}
+
+
+
+
 
 
 /* Video Presentation Style */
