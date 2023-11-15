@@ -31,9 +31,8 @@ const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
-export default async function main(inputRulestring) {
-    const RULE = parseRulestring(inputRulestring);
-    console.log(RULE);
+export default async function main() {
+    const RULE = parseRulestring(RULESTRING);
 
     let step = 0
 
@@ -102,7 +101,6 @@ export default async function main(inputRulestring) {
             ruleArray[i * POSSIBLE_NEIGHBOURS + j] = RULE[i][j];
         }
     }
-    console.log(ruleArray);
     device.queue.writeBuffer(ruleStorage, 0, ruleArray);
 
     // FORMAT CANVAS
@@ -340,9 +338,6 @@ export default async function main(inputRulestring) {
 
         pass.end();
 
-        // const commandBuffer = encoder.finish();
-        // device.queue.submit([commandBuffer]);
-
         // Finish the command buffer and immediately submit it.
         device.queue.submit([encoder.finish()]);
     }
@@ -352,6 +347,27 @@ export default async function main(inputRulestring) {
     // Cross-script variable, enables other scripts to force an update cylce
 }
 
+
+async function updateBuffer(device, buffer, newData) {
+    const mappedBuffer = buffer.getMappedRange();
+    new Uint32Array(mappedBuffer).set(new Uint32Array(newData));
+    buffer.unmap();
+}
+
+// // Usage example for RULE buffer
+// await updateBuffer(device, ruleStorage, newRuleArray);
+function updateRuleArray(ruleArray, newRules, possibleNeighbours) {
+    for (let i = 0; i < newRules.length; ++i) {
+        for (let j = 0; j < newRules[i].length; j++) {
+            ruleArray[i * possibleNeighbours + j] = newRules[i][j];
+        }
+    }
+}
+
+
+// // Usage
+// updateRuleArray(ruleArray, newRuleString);
+// device.queue.writeBuffer(ruleStorage, 0, ruleArray);
 
 function parseRulestring(rulestring) {
     // Output structure:
