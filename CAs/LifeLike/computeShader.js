@@ -36,7 +36,11 @@ export const computeShaderWGSL = {
                 cellActive(cell.x-1, cell.y+1);
 
             let i = cellIndex(cell.xy);
-        
+
+            //update using bit operations
+            let newState = ((rule[0] >> (cellStateIn[i] * 9)) >> activeNeighbours) & 1 ;
+            cellStateOut[i] = newState ;
+            /*
             if (cellStateIn[i] == 1)
             {
                 cellStateOut[i] = rule[activeNeighbours];
@@ -44,6 +48,6 @@ export const computeShaderWGSL = {
             else 
             {
                 cellStateOut[i] = rule[POSSIBLE_NEIGHBOURS + activeNeighbours];
-            }
+            } */
         }`
 };

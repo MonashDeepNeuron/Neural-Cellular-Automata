@@ -2,8 +2,8 @@
 import { guiShaderWGSL } from "http://localhost:5500/CAs/LifeLike/guiShader.js";
 import { computeShaderWGSL } from "http://localhost:5500/CAs/LifeLike/computeShader.js";
 // SET VARIABLES
-const GRID_SIZE = 16;
-const UPDATE_INTERVAL = 200;
+const GRID_SIZE = 2056;
+const UPDATE_INTERVAL = 50;
 const WORKGROUP_SIZE = 8;
 
 /** Life like CA rulestring using Survival/Birth notation */
@@ -33,7 +33,6 @@ const INITIAL_STATE = [
 
 export default async function main() {
     const RULE = parseRulestring(RULESTRING);
-    console.log(RULE);
 
     let step = 0
 
@@ -91,20 +90,12 @@ export default async function main() {
 
 
     function rules(rule) {
-        console.log("rules")
-        const ruleArray = new Uint32Array(rule.length * rule[0].length);
+        const ruleArray = rule;
         const ruleStorage = device.createBuffer({
             label: "Rule Storage",
             size: ruleArray.byteLength,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
-
-        for (let i = 0; i < rule.length; ++i) {
-            for (let j = 0; j < rule[i].length; j++) {
-                ruleArray[i * POSSIBLE_NEIGHBOURS + j] = rule[i][j];
-            }
-        }
-
         return { ruleArray, ruleStorage };
     }
 
@@ -335,44 +326,65 @@ export default async function main() {
 }
 
 
+// function parseRulestring(rulestring) {
+//     // Output structure:
+//     // [
+//     //    SURVIVE[number of neighbours] = 1/0 (true/false),
+//     //    BIRTH  [number of neighbours] = 1/0 (true/false)
+//     // ]
+//     // Where length of each SURVIVE and BIRTH is 9 (0-8)
+//     // Default fill all conditions as False then parse rule string
+
+//     const RULE = [Array(POSSIBLE_NEIGHBOURS).fill(0), Array(POSSIBLE_NEIGHBOURS).fill(0)];
+
+//     let slashFound = false;
+//     // Parse rulestring. digits before slash indicate when a cell should 
+//     // survive and digits after indicate when a cell should be born
+//     for (let i = 0; i < rulestring.length; i++) {
+//         if (rulestring.charAt(i) == '/') {
+//             slashFound = true;
+//         }
+//         else {
+//             const x = parseInt(rulestring.charAt(i));
+//             if (Number.isNaN(x)) {
+//                 alert("ERROR: Invalid Rulestring");
+//                 return;
+//             }
+//             else {
+//                 if (!slashFound) {
+//                     RULE[0][x] = 1;
+//                     // More vigourous validity checks could be used
+//                     // eg. is this index already filled as true?
+//                 }
+//                 else {
+//                     RULE[1][x] = 1;
+//                     // More vigourous validity checks could be used
+//                     // eg. is this index already filled as true?
+//                 }
+//             }
+//         }
+//     }
+
+//     return RULE;}
+
 function parseRulestring(rulestring) {
-    // Output structure:
-    // [
-    //    SURVIVE[number of neighbours] = 1/0 (true/false),
-    //    BIRTH  [number of neighbours] = 1/0 (true/false)
-    // ]
-    // Where length of each SURVIVE and BIRTH is 9 (0-8)
-    // Default fill all conditions as False then parse rule string
-
-    const RULE = [Array(POSSIBLE_NEIGHBOURS).fill(0), Array(POSSIBLE_NEIGHBOURS).fill(0)];
-
-    let slashFound = false;
-    // Parse rulestring. digits before slash indicate when a cell should 
-    // survive and digits after indicate when a cell should be born
+    // ruleString is given by the user. it is a string
+    let RULE = new Uint32Array(1)
+    let slashFlag = false // tells us whether we are before or after the / symbol
     for (let i = 0; i < rulestring.length; i++) {
-        if (rulestring.charAt(i) == '/') {
-            slashFound = true;
+        let char = rulestring[i];
+        if (char === "/") {
+            slashFlag = !slashFlag
+            continue
         }
-        else {
-            const x = parseInt(rulestring.charAt(i));
-            if (Number.isNaN(x)) {
-                alert("ERROR: Invalid Rulestring");
-                return;
-            }
-            else {
-                if (!slashFound) {
-                    RULE[0][x] = 1;
-                    // More vigourous validity checks could be used
-                    // eg. is this index already filled as true?
-                }
-                else {
-                    RULE[1][x] = 1;
-                    // More vigourous validity checks could be used
-                    // eg. is this index already filled as true?
-                }
-            }
+        let num = Number(char) // the character is indeed a number
+        switch (slashFlag) {
+            case false: // before "/" sign. survival case
+                RULE[0] += 2 ** (num + 9)
+                break;
+            case true: // after "/" sign. birth case
+                RULE[0] += 2 ** num
         }
     }
-
-    return RULE;
+    return RULE
 }
