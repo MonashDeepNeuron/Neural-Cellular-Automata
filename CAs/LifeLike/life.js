@@ -27,7 +27,7 @@ const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
-// get and bind events
+// get and bind events from html
 document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
 document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
 document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
