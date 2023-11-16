@@ -1,25 +1,31 @@
-// we treat is as a static class for handling event detection and sending signals
+// static class used to handle and process events
+// it uses the default constructor
 
 export default class EventManager {
-    constructor() { };
-
-    // essentially global variables that handle event related things
+    // event related global variables
     static oneFrame = false;
     static running = true;
-    static newRuleString = false;
-    static ruleString = "";
-    static forcedUpdate = () => { return; };  // anonymous func. problem child. 
+    static newRuleString = true;
+    static ruleString = "/2";
 
     // key bindings
     static PLAY_PAUSE_KEY = 'k';
     static NEXT_FRAME_KEY = '.';
 
     // static methods
-    static playPause() { EventManager.running = !EventManager.running };
-    static moveOneFrame() { EventManager.oneFrame = true; EventManager.forcedUpdate(); }
+    static forcedUpdate = () => { return; };  // anonymous func. problem child.
+
+    static playPause() {
+        EventManager.running = !EventManager.running
+    };
+
+    static moveOneFrame() {
+        EventManager.oneFrame = true;
+        EventManager.forcedUpdate();
+    };
+
     static keyListener(e) {
-        // console.log("th", this.PLAY_PAUSE_KEY);
-        // console.log("em", EventManager.PLAY_PAUSE_KEY);
+        console.log(e.key)
         switch (e.key) {
             case EventManager.PLAY_PAUSE_KEY:
                 EventManager.playPause()
@@ -29,13 +35,13 @@ export default class EventManager {
                 break;
             default:
         }
-    } // blah blah blah something static method
+    };
 
     static updateRuleString() {
         const inputText = document.getElementById('simulationInput').value;
+        console.log(inputText)
         EventManager.newRuleString = true
         EventManager.ruleString = inputText
-        console.log(inputText)
         EventManager.forcedUpdate()
     };
 }

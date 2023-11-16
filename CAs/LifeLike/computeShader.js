@@ -7,7 +7,7 @@ export const computeShader = {
         @group(0) @binding(2) var<storage, read_write> cellStateOut: array<u32>;
         @group(0) @binding(3) var<storage> rule: array<u32>;
         override WORKGROUP_SIZE: u32 = 8;
-        override POSSIBLE_NEIGHBOURS: u32 = 9;
+        // override POSSIBLE_NEIGHBOURS: u32 = 9;
         
         fn cellIndex(cell: vec2u) -> u32 {
             // Supports grid wrap-around
@@ -35,17 +35,9 @@ export const computeShader = {
 
             let i = cellIndex(cell.xy);
 
-            //update using bit operations
-            let newState = ((rule[0] >> (cellStateIn[i] * 9)) >> activeNeighbours) & 1 ;
-            cellStateOut[i] = newState ;
-            /*
-            if (cellStateIn[i] == 1)
-            {
-                cellStateOut[i] = rule[activeNeighbours];
-            }
-            else 
-            {
-                cellStateOut[i] = rule[POSSIBLE_NEIGHBOURS + activeNeighbours];
-            } */
+            // update using bit operations 
+            let shiftNumber = cellStateIn[i] * 9 + activeNeighbours;
+            let newState = (rule[0] >> shiftNumber) & 1 ;
+            cellStateOut[i] = newState ; 
         }`
 };

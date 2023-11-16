@@ -1,4 +1,4 @@
-class PipelineManager {
+export default class PipelineManager {
     // SIMULATION PIPELINE
     static simulationPipeline = DeviceManager.getDevice().createComputePipeline({
         label: "Simulation pipeline",
