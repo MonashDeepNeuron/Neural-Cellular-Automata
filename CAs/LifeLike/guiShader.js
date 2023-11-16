@@ -1,4 +1,4 @@
-export const guiShaderWGSL = {
+export const guiShader = {
     label: "Cell shader",
     code:
         /*wgsl*/`

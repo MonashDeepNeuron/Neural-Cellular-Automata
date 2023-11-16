@@ -30,26 +30,16 @@
   <script type="module">
     // imports
     import main from "./life.js";
-    import { EventManager } from "./managers/EventManager.js";
-
-    // this main() is responsible for running the cellular automata
-    main()
+    import EventManager from "./managers/EventManager.js";
 
     // Setting up event bindings
-    document.getElementById('play').addEventListener('click', EventManager.playPause);
-    document.getElementById('next').addEventListener('click', EventManager.moveOneFrame);
-    document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener);
+    document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
+    document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
+    document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
+    document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
 
-    // this one is annoying. i want it in event manager too though
-    // parsing newly inputted rule strings
-    document.getElementById('submitInput').addEventListener('click', function () {
-      const inputText = document.getElementById('simulationInput').value;
-      // Call a function from life.js and pass the inputText
-      EventManager.newRuleString = true
-      EventManager.ruleString = inputText
-      console.log(inputText)
-      EventManager.forcedUpdate()
-    });
+    // run cellular automata
+    main()
   </script>
 </body>
 

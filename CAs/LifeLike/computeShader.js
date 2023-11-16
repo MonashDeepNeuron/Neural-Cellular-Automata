@@ -1,6 +1,4 @@
-
-
-export const computeShaderWGSL = {
+export const computeShader = {
     label: "Game of Life simulation shader",
     code:
         /*wgsl*/`

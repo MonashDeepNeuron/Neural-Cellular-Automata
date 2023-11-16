@@ -1,7 +1,7 @@
 // import shaders
-import { guiShaderWGSL } from "http://localhost:5500/CAs/LifeLike/guiShader.js";
-import { computeShaderWGSL } from "http://localhost:5500/CAs/LifeLike/computeShader.js";
-import { EventManager } from "./managers/EventManager.js";
+import { guiShader } from "./guiShader.js";
+import { computeShader } from "./computeShader.js";
+import EventManager from "./managers/EventManager.js";
 // SET VARIABLES
 const GRID_SIZE = 1024;
 const UPDATE_INTERVAL = 50;
@@ -142,10 +142,10 @@ export default async function main() {
     }
 
     // COMPUTE SHADER MODULE
-    const simulationShaderModule = device.createShaderModule(computeShaderWGSL);
+    const simulationShaderModule = device.createShaderModule(computeShader);
 
     // CELL SHADER MODULE
-    const cellShaderModule = device.createShaderModule(guiShaderWGSL);
+    const cellShaderModule = device.createShaderModule(guiShader);
 
 
     // COMPUTE SHADER RESOURCE BINDING LAYOUT
