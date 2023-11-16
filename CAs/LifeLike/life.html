@@ -23,7 +23,6 @@
 
 
 <body>
-  <!-- <body onkeydown="keyListener"> -->
   <div>
     <canvas width="1024" height="1024" />
   </div>
@@ -31,24 +30,17 @@
   <script type="module">
     // imports
     import main from "./life.js";
-    import { keyListener, EventManager } from "./managers/EventManager.js";
+    import { EventManager } from "./managers/EventManager.js";
 
     // this main() is responsible for running the cellular automata
     main()
 
-    // Button Event listeners (clicks)
-    document.getElementById('play').addEventListener('click', function () {
-      EventManager.running = !EventManager.running;
-    });
+    // Setting up event bindings
+    document.getElementById('play').addEventListener('click', EventManager.playPause);
+    document.getElementById('next').addEventListener('click', EventManager.moveOneFrame);
+    document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener);
 
-    document.getElementById('next').addEventListener('click', function () {
-      EventManager.oneFrame = true;
-      EventManager.forcedUpdate();
-    });
-
-    // Listens to key presses
-    document.getElementsByTagName("body")[0].addEventListener("keydown", keyListener, false); // problem child
-
+    // this one is annoying. i want it in event manager too though
     // parsing newly inputted rule strings
     document.getElementById('submitInput').addEventListener('click', function () {
       const inputText = document.getElementById('simulationInput').value;
@@ -58,7 +50,6 @@
       console.log(inputText)
       EventManager.forcedUpdate()
     });
-
   </script>
 </body>
 
