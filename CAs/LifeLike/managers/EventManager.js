@@ -25,6 +25,3 @@ function keyListener(e) {
         default:
     }
 }
-
-// THE ENDING SCRIPT THING
-document.getElementsByTagName("body")[0].onkeypress = keyListener;
