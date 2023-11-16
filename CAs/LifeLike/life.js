@@ -1,6 +1,7 @@
 // import shaders
 import { guiShaderWGSL } from "http://localhost:5500/CAs/LifeLike/guiShader.js";
 import { computeShaderWGSL } from "http://localhost:5500/CAs/LifeLike/computeShader.js";
+import { EventManager } from "./managers/EventManager.js";
 // SET VARIABLES
 const GRID_SIZE = 1024;
 const UPDATE_INTERVAL = 50;
@@ -259,23 +260,23 @@ export default async function main() {
     function updateLoop() {
 
         // Only permitted to run if one frame is wanted or
-        if (!oneFrame) {
-            if (!running) { return; }
+        if (!EventManager.oneFrame) {
+            if (!EventManager.running) { return; }
             // Continue if running = true
         }
         else {
-            oneFrame = false; // Cross-script variable, do not add let,var or const
+            EventManager.oneFrame = false; // Cross-script variable, do not add let,var or const
         }
 
-        if (newRuleString) {
-            const { ruleArray, ruleStorage } = rules(parseRulestring(ruleString))
+        if (EventManager.newRuleString) {
+            const { ruleArray, ruleStorage } = rules(parseRulestring(EventManager.ruleString))
             console.log(ruleArray)
             device.queue.writeBuffer(ruleStorage, 0, ruleArray);
             bindGroups = [
                 createBindGroup("Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
                 createBindGroup("Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
             ];
-            newRuleString = false // toggle off
+            EventManager.newRuleString = false // toggle off
 
         }
 
@@ -321,7 +322,7 @@ export default async function main() {
     }
 
     setInterval(updateLoop, UPDATE_INTERVAL);
-    forcedUpdate = updateLoop;
+    EventManager.forcedUpdate = updateLoop;
     // Cross-script variable, enables other scripts to force an update cylce
 }
 
