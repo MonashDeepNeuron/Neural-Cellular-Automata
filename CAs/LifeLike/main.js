@@ -1,5 +1,5 @@
 // imports
-import main from "./life.js";
+import run from "./life.js";
 import EventManager from "./managers/EventManager.js";
 
 // Setting up event bindings
@@ -9,4 +9,4 @@ document.getElementsByTagName("body")[0].addEventListener("keydown", EventManage
 document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
 
 // run cellular automata
-main()
+run()

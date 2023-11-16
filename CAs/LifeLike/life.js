@@ -32,7 +32,7 @@ const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
-export default async function main() {
+export default async function run() {
     const RULE = parseRulestring(RULESTRING);
 
     let step = 0
