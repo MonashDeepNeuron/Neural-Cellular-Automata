@@ -6,7 +6,7 @@ import EventManager from "./managers/EventManager.js";
 // set global variables
 const GRID_SIZE = 1024;
 const UPDATE_INTERVAL = 50;
-const WORKGROUP_SIZE = 16; // so far only 16 and 8 work. probably has something to do with powers of 2 and the device gpu.
+const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother.
 const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -82,7 +82,7 @@ for (let i = 0; i < cellStateArray.length; i++) {
 }
 device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
-const RULE = parseRulestring(EventManager.ruleString);
+const RULE = parseRuleString(EventManager.ruleString);
 const { ruleArray, ruleStorage } = rules(RULE);
 console.log(ruleArray)
 device.queue.writeBuffer(ruleStorage, 0, ruleArray);
@@ -236,7 +236,7 @@ device.queue.submit([encoder.finish()]);
 document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
 document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
 document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
-document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
+document.getElementById('submitInput').addEventListener('click', EventManager.updateruleString); // new rule string input button
 
 // iterative update for cells
 setInterval(updateLoop, UPDATE_INTERVAL);
@@ -255,12 +255,12 @@ function createBindGroup(label, uniformBuffer, cellStateA, cellStateB, ruleStora
     });
 }
 
-function parseRulestring(rulestring) {
+function parseRuleString(ruleString) {
     // ruleString is given by the user. it is a string
     let RULE = new Uint32Array(1)
     let slashFlag = false // tells us whether we are before or after the / symbol
-    for (let i = 0; i < rulestring.length; i++) {
-        let char = rulestring[i];
+    for (let i = 0; i < ruleString.length; i++) {
+        let char = ruleString[i];
         if (char === "/") {
             slashFlag = !slashFlag
             continue
@@ -300,7 +300,7 @@ function updateLoop() {
 
     // check for new rule string
     if (EventManager.newRuleString) {
-        const { ruleArray, ruleStorage } = rules(parseRulestring(EventManager.ruleString))
+        const { ruleArray, ruleStorage } = rules(parseRuleString(EventManager.ruleString))
         console.log(ruleArray)
         device.queue.writeBuffer(ruleStorage, 0, ruleArray);
         bindGroups = [
@@ -340,11 +340,8 @@ function updateLoop() {
     // DRAW THE FEATURES
     pass.setPipeline(cellPipeline);
     pass.setVertexBuffer(0, vertexBuffer);
-
     pass.setBindGroup(0, bindGroups[step % 2]);
-
     pass.draw(vertices.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
-
     pass.end();
 
     // Finish the command buffer and immediately submit it.
