@@ -5,7 +5,7 @@ export default class EventManager {
     // event related global variables
     static oneFrame = false;
     static running = true;
-    static newRuleString = true;
+    static newRuleString = false;
     static ruleString = "/2";
 
     // key bindings

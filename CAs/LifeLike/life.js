@@ -6,8 +6,7 @@ import EventManager from "./managers/EventManager.js";
 // set global variables
 const GRID_SIZE = 1024;
 const UPDATE_INTERVAL = 50;
-const WORKGROUP_SIZE = 8;
-const RULE_STRING = "/2"; // S/B notation
+const WORKGROUP_SIZE = 16; // so far only 16 and 8 work
 const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -89,7 +88,7 @@ for (let i = 0; i < cellStateArray.length; i++) {
 }
 device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
-const RULE = parseRulestring(RULE_STRING);
+const RULE = parseRulestring(EventManager.ruleString);
 const { ruleArray, ruleStorage } = rules(RULE);
 console.log(ruleArray)
 device.queue.writeBuffer(ruleStorage, 0, ruleArray);
@@ -132,7 +131,11 @@ const vertexBufferLayout = {
 }
 
 // COMPUTE SHADER MODULE
-const simulationShaderModule = device.createShaderModule(computeShader);
+const simulationShaderModule = device.createShaderModule({
+    code: computeShader,
+    constants: { WORKGROUP_SIZE: WORKGROUP_SIZE }
+}
+);
 
 // CELL SHADER MODULE
 const cellShaderModule = device.createShaderModule(guiShader);
