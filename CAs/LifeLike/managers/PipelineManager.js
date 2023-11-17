@@ -1,6 +1,6 @@
 export default class PipelineManager {
     // SIMULATION PIPELINE
-    static simulationPipeline = DeviceManager.getDevice().createComputePipeline({
+    static simulationPipeline = device.createComputePipeline({
         label: "Simulation pipeline",
         layout: pipelineLayout,
         compute: {
@@ -25,6 +25,7 @@ export default class PipelineManager {
             }],
         }
     });
+
     static pipelines = new Map();
 
     static createRenderPipeline(device, label, layout, vertexInfo, fragmentInfo, canvasFormat) {

@@ -1,9 +1,13 @@
 // import shaders
 import { guiShader } from "./guiShader.js";
 import { computeShader } from "./computeShader.js";
+
 // import static manager classes
 import EventManager from "./managers/EventManager.js";
-// set global variables
+// import DeviceManager from "./managers/DeviceManager.js";
+// import PipelineManager from "./managers/PipelineManager.js";
+
+// Set global variables
 const GRID_SIZE = 1024;
 const UPDATE_INTERVAL = 50;
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother.
@@ -28,20 +32,16 @@ const INITIAL_STATE = [
 
 let step = 0
 
-// DEVICE SETUP - could prob be  a function. yes please make this a function
+// DEVICE SETUP - ran into issues making it a func
+
 const canvas = document.querySelector("canvas");
-if (!navigator.gpu) {
-    throw new Error("WebGPU not supported on this browser");
-}
-
+if (!navigator.gpu) { throw new Error("WebGPU not supported on this browser"); }
 const adapter = await navigator.gpu.requestAdapter();
-if (!adapter) {
-    throw new Error("No appropriate GPUAdapter found.");
-}
-
+if (!adapter) { throw new Error("No appropriate GPUAdapter found."); }
+console.log("GPU adaptor found")
 const device = await adapter.requestDevice();
-
 console.log("device setup successful")
+
 
 // Uniform grid
 const uniformArray = new Float32Array([GRID_SIZE, GRID_SIZE]);

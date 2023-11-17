@@ -23,6 +23,12 @@ canvas {
     border: 1px solid #ddd;
 }
 
+.centre {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
+
 /* Button Styling */
 button {
     background-color: pink;
