@@ -4,7 +4,7 @@ import { computeShader } from "./computeShader.js";
 
 // import static manager classes
 import EventManager from "./managers/EventManager.js";
-// import DeviceManager from "./managers/DeviceManager.js";
+import DeviceManager from "./managers/DeviceManager.js";
 // import PipelineManager from "./managers/PipelineManager.js";
 
 // Set global variables
@@ -41,6 +41,9 @@ if (!adapter) { throw new Error("No appropriate GPUAdapter found."); }
 console.log("GPU adaptor found")
 const device = await adapter.requestDevice();
 console.log("device setup successful")
+
+await DeviceManager.staticConstructor();
+console.log(DeviceManager.device.createBuffer)
 
 
 // Uniform grid
