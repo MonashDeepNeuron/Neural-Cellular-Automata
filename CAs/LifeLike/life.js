@@ -6,7 +6,7 @@ import EventManager from "./managers/EventManager.js";
 // set global variables
 const GRID_SIZE = 1024;
 const UPDATE_INTERVAL = 50;
-const WORKGROUP_SIZE = 16; // so far only 16 and 8 work
+const WORKGROUP_SIZE = 16; // so far only 16 and 8 work. probably has something to do with powers of 2 and the device gpu.
 const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -25,12 +25,6 @@ const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
-
-// get and bind events from html
-document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
-document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
-document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
-document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
 
 let step = 0
 
@@ -132,13 +126,17 @@ const vertexBufferLayout = {
 
 // COMPUTE SHADER MODULE
 const simulationShaderModule = device.createShaderModule({
+    label: 'shader that computes next state',
     code: computeShader,
     constants: { WORKGROUP_SIZE: WORKGROUP_SIZE }
 }
 );
 
 // CELL SHADER MODULE
-const cellShaderModule = device.createShaderModule(guiShader);
+const cellShaderModule = device.createShaderModule({
+    label: 'shader that draws',
+    code: guiShader
+});
 
 // COMPUTE SHADER RESOURCE BINDING LAYOUT
 const bindGroupLayout = device.createBindGroupLayout({
@@ -233,6 +231,12 @@ pass.end();
 
 // Finish the command buffer and immediately submit it.
 device.queue.submit([encoder.finish()]);
+
+// get and bind events from html
+document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
+document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
+document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
+document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
 
 // iterative update for cells
 setInterval(updateLoop, UPDATE_INTERVAL);
