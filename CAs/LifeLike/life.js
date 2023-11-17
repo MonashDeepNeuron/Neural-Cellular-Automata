@@ -6,10 +6,13 @@ import { computeShader } from "./computeShader.js";
 import EventManager from "./managers/EventManager.js";
 import DeviceManager from "./managers/DeviceManager.js";
 // import PipelineManager from "./managers/PipelineManager.js";
+// construct static classes lol
+await DeviceManager.staticConstructor();
+const device = DeviceManager.device
+const canvas = DeviceManager.canvas
 
 // Set global variables
-const GRID_SIZE = 1024;
-const UPDATE_INTERVAL = 50;
+const GRID_SIZE = document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother.
 const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -33,18 +36,6 @@ const INITIAL_STATE = [
 let step = 0
 
 // DEVICE SETUP - ran into issues making it a func
-
-const canvas = document.querySelector("canvas");
-if (!navigator.gpu) { throw new Error("WebGPU not supported on this browser"); }
-const adapter = await navigator.gpu.requestAdapter();
-if (!adapter) { throw new Error("No appropriate GPUAdapter found."); }
-console.log("GPU adaptor found")
-const device = await adapter.requestDevice();
-console.log("device setup successful")
-
-await DeviceManager.staticConstructor();
-console.log(DeviceManager.device.createBuffer)
-
 
 // Uniform grid
 const uniformArray = new Float32Array([GRID_SIZE, GRID_SIZE]);
@@ -239,10 +230,19 @@ device.queue.submit([encoder.finish()]);
 document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
 document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
 document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
-document.getElementById('submitInput').addEventListener('click', EventManager.updateruleString); // new rule string input button
+document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
+document.getElementById('speedInput').addEventListener('click', () => {
+    EventManager.updateSpeed();
+    clearInterval(Interval);
+    console.log(EventManager.updateInterval)
+    Interval = setInterval(updateLoop, EventManager.updateInterval)
+}
+
+); // change speed
 
 // iterative update for cells
-setInterval(updateLoop, UPDATE_INTERVAL);
+console.log(EventManager.updateInterval);
+var Interval = setInterval(updateLoop, EventManager.updateInterval);
 EventManager.forcedUpdate = updateLoop;
 
 function createBindGroup(label, uniformBuffer, cellStateA, cellStateB, ruleStorage) {

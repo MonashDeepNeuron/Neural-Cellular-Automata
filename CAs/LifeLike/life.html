@@ -19,11 +19,15 @@
 
     <!-- Input Box for Simulation Parameters -->
     <input type="text" id="simulationInput" placeholder="Enter rulestring :3">
-    <button id="submitInput">Submit</button>
+    <button id="submitInput">Submit Rule</button>
+
+    <!-- Input Box for Speed -->
+    <input type="text" id="speedInputBox" placeholder="1-100:3">
+    <button id="speedInput">Submit Speed </button>
   </div>
 
   <!-- Canvas containing cellular automata -->
-  <div> <canvas width="1024" height="1024" /> </div>
+  <div> <canvas id="canvas" width="1024" height="1024" /> </div>
   <script type="module" src="life.js"></script>
 </body>
 

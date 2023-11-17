@@ -7,6 +7,7 @@ export default class EventManager {
     static running = true;
     static newRuleString = false;
     static ruleString = "/2";
+    static updateInterval = 50;
 
     // key bindings
     static PLAY_PAUSE_KEY = 'k';
@@ -44,4 +45,11 @@ export default class EventManager {
         EventManager.ruleString = inputText
         EventManager.forcedUpdate()
     };
+
+    static updateSpeed() {
+        const inputSpeed = document.getElementById('speedInputBox').value;
+        console.log(inputSpeed);
+        const newUpdateInterval = 50 + (2 * (100 - inputSpeed));
+        EventManager.updateInterval = newUpdateInterval;
+    }
 }
