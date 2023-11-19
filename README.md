@@ -24,8 +24,8 @@ This project involves the creation of a cellular automata model trained using ne
   - [x] Get Running
   - [ ] Find some good start state templates (bunnies, stable configurations, gliders, calculator)
   - [ ] Implement interactions
-    - [ ] Pause / play (spacebar)
-    - [ ] Move forward one frame (full-stop button)
+    - [x] Pause / play (spacebar)
+    - [x] Move forward one frame (full-stop button)
     - [ ] allow selectable start state templates
     - [ ] Change state (click)
   - [ ] Place into template
@@ -86,7 +86,9 @@ However, some useful resources for this project include:
   - ["Rule-String" Notation](https://conwaylife.com/wiki/Rulestring)
   - [CAs and Computational Systems](https://direct.mit.edu/isal/proceedings/isal2021/33/105/102949)
   - [Emergent Gardens](https://www.youtube.com/@EmergentGarden)
+- WebGPU Resources
   - [WebGPU Shader Tips](https://toji.dev/webgpu-best-practices/dynamic-shader-construction.html)
+  - [Typescript & WebGPU Examples](https://webgpu.github.io/webgpu-samples/samples/helloTriangle)
 
 - Event Handling in JavaScript
   - [HTML DOM Events](https://www.w3schools.com/jsref/dom_obj_event.asp)
