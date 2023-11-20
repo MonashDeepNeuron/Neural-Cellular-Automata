@@ -2,5 +2,5 @@
 
 @vertex
 fn main() {
-
+    @binding(0) var<storage> 
 };
