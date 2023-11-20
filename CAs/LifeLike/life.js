@@ -35,8 +35,6 @@ const INITIAL_STATE = [
 
 let step = 0
 
-// DEVICE SETUP - ran into issues making it a func
-
 // Uniform grid
 const uniformArray = new Float32Array([GRID_SIZE, GRID_SIZE]);
 const uniformBuffer = device.createBuffer({
