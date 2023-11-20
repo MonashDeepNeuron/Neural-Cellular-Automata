@@ -1,0 +1,23 @@
+// parse rule string for life like automata
+
+function parseRulestring(rulestring) {
+    // ruleString is given by the user. it is a string
+    let RULE = new Uint32Array(1)
+    let slashFlag = false // tells us whether we are before or after the / symbol
+    for (let i = 0; i < rulestring.length; i++) {
+        let char = rulestring[i];
+        if (char === "/") {
+            slashFlag = !slashFlag
+            continue
+        }
+        let num = Number(char) // the character is indeed a number
+        switch (slashFlag) {
+            case false: // before "/" sign. survival case
+                RULE[0] += 2 ** (num + 9)
+                break;
+            case true: // after "/" sign. birth case
+                RULE[0] += 2 ** num
+        }
+    }
+    return RULE
+}
