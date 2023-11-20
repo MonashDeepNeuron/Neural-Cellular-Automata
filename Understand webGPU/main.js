@@ -9,7 +9,7 @@ import vertex from "./vertex.wgsl"
 const canvas = document.querySelector("canvas");
 
 // DEVICE
-//  these things let us talk about the GPUdevice
+// these things let us talk about/to the GPU
 const adapter = await navigator.gpu.requestAdapter(); // returns 
 const device = await adapter.requestDevice();
 
@@ -38,7 +38,7 @@ const vertices = new Float32Array([
 const vertexBuffer = device.createBuffer({
     label: "a triangle",
     size: vertices.byteLength,
-    usage: GPUBufferUsage.VERTEX // vertex buffers are kinda special
+    usage: GPUBufferUsage.VERTEX, // vertex buffers are kinda special
 });
 
 // put the binary information into the buffer
@@ -50,13 +50,11 @@ device.queue.writeBuffer(vertexBuffer, 0, vertices); // dst, offset, src
 // note: bind groups also have other purposes (e.g. textures?? and samplers??)
 const bindGroupLayout = device.createBindGroupLayout({
     label: "basic bind group layout",
-    entries: [
-        {
-            binding: 0,
-            visibility: GPUShaderStage.VERTEX, // the gpu sees it at different points depending on flag
-            buffer: vertexBuffer,
-        }
-    ]
+    entries: [{
+        binding: 0,
+        visibility: GPUShaderStage.VERTEX, // the gpu sees it at different points depending on flag
+        buffer: vertexBuffer,
+    }],
 });
 const bindGroup = device.createBindGroup({
     label: "basic bind group thing",
@@ -64,19 +62,21 @@ const bindGroup = device.createBindGroup({
     entries: [{
         binding: 0,
         resource: { buffer: vertexBuffer },
-    }], // i don't know why they always put a comma after the last thing surely that makes it look ugly
+    }], // comma for consistency i guess
 });
 
 // PIPELINE CREATION
 // a pipeline specifies the bindings to the GPU
-const pipelineLayout = device.createPipelineLayout(
-    // something needs to go in here, presumably the bind group(s)
-);
+const pipelineLayout = device.createPipelineLayout({
+    label: "basic layout",
+    entries: { bindGroupLayouts: [bindGroupLayout] }
+});
 const pipeline = device.createRenderPipeline({
     label: "main pipeline",
     layout: pipelineLayout,
-    vertex: {}, // necessary, this is the .wgsl file which I will write later
+    vertex: {}, // necessary, this is the .wgsl module which I will write later
 }); // p
 
 // ENCODER
-// makes the GPU actually do things by queuing commands
+// makes the GPU actually do things by queuing to the command buffer
+// command buffer != buffer 
