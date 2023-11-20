@@ -39,6 +39,10 @@ This project involves the creation of a cellular automata model trained using ne
 - [ ] Life-like CA
   - [x] Implement a couple different basic rule sets
   - [ ] optimise memory for cell state buffer
+    - [ ] change the template input (life.js)
+    - [ ] change the "array" (life.js)
+    - [ ] change the buffer (life.js)
+    - [ ] change the shader (computeShader.js)
   - [ ] find good templates for select ruleset
   - [x] Dynamic shaders, respond to user inputted rule-strings
   - [ ] Place into template
