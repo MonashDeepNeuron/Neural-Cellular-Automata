@@ -12,7 +12,7 @@ const device = DeviceManager.device
 const canvas = DeviceManager.canvas
 
 // Set global variables
-const GRID_SIZE = document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
+const GRID_SIZE = canvas.width; // from canvas size in life.html
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother.
 const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -107,7 +107,7 @@ const vertexBuffer = device.createBuffer({
     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
 });
 
-device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, vertices);
+device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/ 0, vertices);
 
 const vertexBufferLayout = {
     arrayStride: 8, // 32bit = 4 bytes, 4x2 = 8 bytes to skip to find next vertex
@@ -254,7 +254,7 @@ function createBindGroup(label, uniformBuffer, cellStateA, cellStateB, ruleStora
             { binding: 1, resource: { buffer: cellStateA } },
             { binding: 2, resource: { buffer: cellStateB } },
             { binding: 3, resource: { buffer: ruleStorage } },
-        ],
+        ]
     });
 }
 

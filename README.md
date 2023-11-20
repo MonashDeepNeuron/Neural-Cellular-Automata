@@ -102,6 +102,7 @@ However, some useful resources for this project include:
 - WebGPU Resources
   - [WebGPU Shader Tips](https://toji.dev/webgpu-best-practices/dynamic-shader-construction.html)
   - [Typescript & WebGPU Examples](https://webgpu.github.io/webgpu-samples/samples/helloTriangle)
+  - [Learn WebGPU playlist](https://www.youtube.com/playlist?list=PLn3eTxaOtL2Ns3wkxdyS3CiqkJuwQdZzn)
 
 - Event Handling in JavaScript
   - [HTML DOM Events](https://www.w3schools.com/jsref/dom_obj_event.asp)
