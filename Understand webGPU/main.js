@@ -96,7 +96,7 @@ const renderPass = commandEncoder.beginRenderPass({
 
 renderPass.setPipeline(pipeline);
 renderPass.setBindGroup(0, bindGroup)
-renderPass.draw(3, 1, 0, 0);
+renderPass.draw(3, 1);
 renderPass.end();
 
 device.queue.submit([commandEncoder.finish()]);
