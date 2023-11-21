@@ -1,7 +1,7 @@
 // wrong bad ugly imports
 import vertex from "./vertex.wgsl"
 
-// synopsis: canvas, device, buffer, bindings, pipeline, encoder.
+// synopsis: canvas, device, texture, buffer, bindings, pipeline, encoder
 // SET UP 
 
 // CANVAS
@@ -20,6 +20,9 @@ context.configure({
     device: device,
     format: format,
 });
+// TEXTURE 
+// like buffer but you get some special operations
+const texture = context.getCurrentTexture(); // basic
 
 // BUFFER
 // buffer is raw binary data that gets sent to the gpu
@@ -52,7 +55,7 @@ const bindGroupLayout = device.createBindGroupLayout({
     label: "basic bind group layout",
     entries: [{
         binding: 0,
-        visibility: GPUShaderStage.VERTEX, // the gpu sees it at different points depending on flag
+        visibility: GPUShaderStage.VERTEX, // the gpu sees it at different stages depending on flag
         buffer: vertexBuffer,
     }],
 });
@@ -74,9 +77,26 @@ const pipelineLayout = device.createPipelineLayout({
 const pipeline = device.createRenderPipeline({
     label: "main pipeline",
     layout: pipelineLayout,
-    vertex: {}, // necessary, this is the .wgsl module which I will write later
+    vertex: vertex, // necessary, this is the .wgsl module which I will write later
 }); // p
 
 // ENCODER
 // makes the GPU actually do things by queuing to the command buffer
 // command buffer != buffer 
+
+const commandEncoder = device.createCommandEncoder();
+const renderPass = commandEncoder.beginRenderPass({
+    label: "pass encoder",
+    colorAttachment: {
+        loadOp: "clear", // better for performance than load.
+        storeOp: "store", // try discard later
+        view: texture.createView(), // to view the texture
+    },
+});
+
+renderPass.setPipeline(pipeline);
+renderPass.setBindGroup(0, bindGroup)
+renderPass.draw(3, 1, 0, 0);
+renderPass.end();
+
+device.queue.submit([commandEncoder.finish()]);
