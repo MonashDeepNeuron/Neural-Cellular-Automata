@@ -1,3 +1,6 @@
+function INSERT_HERE() {
+    throw new Error("the code isn't finished");
+};
 // synopsis: canvas, device, texture, buffer, bindings, pipeline, encoder
 // SET UP 
 
@@ -21,6 +24,8 @@ const texture = context.getCurrentTexture(); // basic
 // BUFFER; raw binary data that gets sent to the gpu
 
 // write predetermined vertices to buffer
+// make layout
+const bufferLayout = error;
 // declare information that will be written
 const vertices = new Float32Array([ // whats with this new shit?
     // X,    Y,
@@ -79,25 +84,33 @@ const shaders = device.createShaderModule({
 
 
 // PIPELINE CREATION; specifies the bindings and modules to the GPU
-/*
+
 const pipelineLayout = device.createPipelineLayout({
     label: "basic layout",
     entries: { bindGroupLayouts: [bindGroupLayout] }
 });
-*/
+
 const pipeline = device.createRenderPipeline({
     label: "main pipeline",
-    layout: "auto",
     vertex: { // FILL THIS IN
         module: shaders,
-        entryPoint: "vertexMain", // not this
-        buffer: 0, // not this(?)
+        entryPoint: "vertexMain",
+        buffer: [{
+            arrayStride: 0,
+            attributes: {
+                format: INSERT_HERE(),
+                offset: INSERT_HERE(),
+                shaderLocation: INSERT_HERE(),
+            },
+        }], // !!
     },
     fragment: {
         module: shaders,
-        entryPoint: "fragmentMain", // not this
-        targets: [{ format: format }], // not this(?)
-    }
+        entryPoint: "fragmentMain",
+        targets: [{ format: format }],
+    },
+    primitive: { topology: "triangle-list" },
+    layout: pipelineLayout,
 }); // p
 
 // ENCODER; queues instructions to the GPU via command buffer
