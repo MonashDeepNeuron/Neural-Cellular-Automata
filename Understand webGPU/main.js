@@ -4,12 +4,10 @@ import vertex from "./vertex.wgsl"
 // synopsis: canvas, device, texture, buffer, bindings, pipeline, encoder
 // SET UP 
 
-// CANVAS
-// the thing on the html page
+// CANVAS; the thing on the html page
 const canvas = document.querySelector("canvas");
 
-// DEVICE
-// these things let us talk about/to the GPU
+// DEVICE; how to talk about/to the GPU
 const adapter = await navigator.gpu.requestAdapter(); // returns 
 const device = await adapter.requestDevice();
 
@@ -20,15 +18,12 @@ context.configure({
     device: device,
     format: format,
 });
-// TEXTURE 
-// like buffer but you get some special operations
+// TEXTURE; buffer with special operations (good for 2D and 3D data)
 const texture = context.getCurrentTexture(); // basic
 
-// BUFFER
-// buffer is raw binary data that gets sent to the gpu
+// BUFFER;  is raw binary data that gets sent to the gpu
 
 // write predetermined vertices to buffer
-
 // declare information that will be written
 const vertices = new Float32Array([
     // X,    Y,
@@ -47,8 +42,8 @@ const vertexBuffer = device.createBuffer({
 // put the binary information into the buffer
 device.queue.writeBuffer(vertexBuffer, 0, vertices); // dst, offset, src
 
-// BIND GROUPS
-// bind groups instruct the GPU how to interpret things in the buffer
+// BIND GROUPS; instruct the GPU how to interpret things in the buffer
+
 // they "binds" the binary data in the buffer to a data type
 // note: bind groups also have other purposes (e.g. textures?? and samplers??)
 const bindGroupLayout = device.createBindGroupLayout({
@@ -68,8 +63,7 @@ const bindGroup = device.createBindGroup({
     }], // comma for consistency i guess
 });
 
-// PIPELINE CREATION
-// a pipeline specifies the bindings to the GPU
+// PIPELINE CREATION; specifies the bindings and modules to the GPU
 const pipelineLayout = device.createPipelineLayout({
     label: "basic layout",
     entries: { bindGroupLayouts: [bindGroupLayout] }
@@ -77,11 +71,14 @@ const pipelineLayout = device.createPipelineLayout({
 const pipeline = device.createRenderPipeline({
     label: "main pipeline",
     layout: pipelineLayout,
-    vertex: vertex, // necessary, this is the .wgsl module which I will write later
+    vertex: { // FILL THIS IN
+        module: 0,
+        entryPoint: 0,
+        buffer: 0,
+    }, // necessary, this is the .wgsl module which I will write later
 }); // p
 
-// ENCODER
-// makes the GPU actually do things by queuing to the command buffer
+// ENCODER; queues instructions to the GPU via command buffer
 // command buffer != buffer 
 
 const commandEncoder = device.createCommandEncoder();
