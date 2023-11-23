@@ -25,7 +25,6 @@ const texture = context.getCurrentTexture(); // basic
 
 // write predetermined vertices to buffer
 // make layout
-const bufferLayout = error;
 // declare information that will be written
 const vertices = new Float32Array([ // whats with this new shit?
     // X,    Y,
@@ -53,7 +52,7 @@ const bindGroupLayout = device.createBindGroupLayout({
     entries: [{
         binding: 0,
         visibility: GPUShaderStage.VERTEX, // the gpu sees it at different stages depending on flag
-        buffer: {},
+        buffer: { type: "storage" },
     }],
 });
 const bindGroup = device.createBindGroup({
@@ -86,7 +85,7 @@ const shaders = device.createShaderModule({
 // PIPELINE CREATION; specifies the bindings and modules to the GPU
 
 const pipelineLayout = device.createPipelineLayout({
-    label: "basic layout",
+    label: "basic pipeline layout",
     entries: { bindGroupLayouts: [bindGroupLayout] }
 });
 
@@ -96,11 +95,11 @@ const pipeline = device.createRenderPipeline({
         module: shaders,
         entryPoint: "vertexMain",
         buffer: [{
-            arrayStride: 0,
+            arrayStride: 8,
             attributes: {
-                format: INSERT_HERE(),
-                offset: INSERT_HERE(),
-                shaderLocation: INSERT_HERE(),
+                format: "float32x2",
+                offset: 0,
+                shaderLocation: 0,
             },
         }], // !!
     },
