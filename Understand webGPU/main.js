@@ -37,7 +37,7 @@ const vertices = new Float32Array([ // whats with this new shit?
 const vertexBuffer = device.createBuffer({
     label: "a triangle",
     size: vertices.byteLength,
-    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST, // vertex buffers are kinda special
+    usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE, // vertex buffers are kinda special
 });
 
 // put the binary information into the buffer
@@ -52,7 +52,7 @@ const bindGroupLayout = device.createBindGroupLayout({
     entries: [{
         binding: 0,
         visibility: GPUShaderStage.VERTEX, // the gpu sees it at different stages depending on flag
-        resource: { buffer: { type: "storage" } },
+        buffer: { type: "read-only-storage" },
     }],
 });
 const bindGroup = device.createBindGroup({
