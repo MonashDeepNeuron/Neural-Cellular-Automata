@@ -52,7 +52,7 @@ const bindGroupLayout = device.createBindGroupLayout({
     entries: [{
         binding: 0,
         visibility: GPUShaderStage.VERTEX, // the gpu sees it at different stages depending on flag
-        buffer: { type: "storage" },
+        resource: { buffer: { type: "storage" } },
     }],
 });
 const bindGroup = device.createBindGroup({
@@ -86,7 +86,7 @@ const shaders = device.createShaderModule({
 
 const pipelineLayout = device.createPipelineLayout({
     label: "basic pipeline layout",
-    entries: { bindGroupLayouts: [bindGroupLayout] }
+    bindGroupLayouts: [bindGroupLayout],
 });
 
 const pipeline = device.createRenderPipeline({
@@ -94,7 +94,7 @@ const pipeline = device.createRenderPipeline({
     vertex: { // FILL THIS IN
         module: shaders,
         entryPoint: "vertexMain",
-        buffer: [{
+        buffer: [{ // PROBLEM CHILD
             arrayStride: 8,
             attributes: {
                 format: "float32x2",
