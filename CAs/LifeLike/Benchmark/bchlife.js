@@ -9,30 +9,34 @@ await DeviceManager.staticConstructor();
 const device = DeviceManager.device
 const canvas = DeviceManager.canvas
 
-var updateLoop = () => {}; // This set up makes it possible to benchmark easily
+const buffers = [];
+
+let updateLoop = () => {}; // This set up makes it possible to benchmark easily
+const CLEAN_BUFFERS = () => 
+    {
+        for (const element of buffers){ 
+            element.destroy(); 
+            buffers.splice(0, 1);
+        }
+    };
 // import PipelineManager from "./managers/PipelineManager.js";
 
 
-// TESTING
-console.log('Setup started');
+// TESTING SETUP
 
 document.getElementById("output").innerText = `Setting up test. Please wait...`;
 
-const suite = new Benchmark.Suite("My Perf. test");
+const suiteSetup = new Benchmark.Suite("BENCH SETUP");
 
 // COMPLETE
-suite.on("complete", (event) => {
+suiteSetup.on("complete", (event) => {
   const suite = event.currentTarget;
   const fastestOption = suite.filter("fastest").map("name");
   console.log(`The fastest option is ${fastestOption}`);
-
-  document.getElementById("output").innerText = 
-          document.getElementById("output").innerText 
-          + "\n" + `The fastest option is ${fastestOption}`;
 }); 
 
 // CYCLE
-suite.on("cycle", (event) => {
+suiteSetup.on("cycle", (event) => {
   const benchmark = event.target;
   console.log(benchmark.toString());
   document.getElementById("output").innerText = 
@@ -40,16 +44,27 @@ suite.on("cycle", (event) => {
           + "\n" + benchmark.toString();
 });
 
-console.log('Begin testing');
+suiteSetup.on("reset", (event) => {
+  CLEAN_BUFFERS();});
 
-document.getElementById("output").innerText = `Running benchmark...`;
-suite
-    .add("StandardSetup", () => setup())
-    .add("String#indexOf", () => "Hello World!".indexOf("o") > -1)
-    .run();
+// TESTING SETUP: UPDATE LOOP
 
+const suiteUpdate = new Benchmark.Suite("BENCH UPDATE LOOP");
 
-console.log(suite);
+// COMPLETE
+suiteUpdate.on("complete", (event) => {
+  const suite = event.currentTarget;
+}); 
+
+// CYCLE
+suiteUpdate.on("cycle", (event) => {
+  const benchmark = event.target;
+  console.log(benchmark.toString());
+  document.getElementById("output").innerText = 
+          document.getElementById("output").innerText 
+          + "\n" + benchmark.toString();
+});
+
 
 // END TESTING CODE
 
@@ -90,6 +105,7 @@ async function setup(){       // This set up makes it possible to benchmark easi
         size: uniformArray.byteLength,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
+    buffers.push(uniformBuffer);
 
     device.queue.writeBuffer(uniformBuffer, 0, uniformArray);
 
@@ -108,9 +124,11 @@ async function setup(){       // This set up makes it possible to benchmark easi
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         })
     ];
+    buffers.push(cellStateStorage[0]);
+    buffers.push(cellStateStorage[1]);
 
     // write to buffer A
-    for (let i = 0; i < cellStateArray.length; ++i) {
+    for (let i = 0; i < INITIAL_STATE.length; ++i) {
         // cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
         cellStateArray[i] = INITIAL_STATE[i];
     }
@@ -118,13 +136,13 @@ async function setup(){       // This set up makes it possible to benchmark easi
 
     // write to buffer B
     for (let i = 0; i < cellStateArray.length; i++) {
-        cellStateArray[i] = i % 2;
+        cellStateArray[i] = 0;
     }
     device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
     const RULE = parseRuleString(EventManager.ruleString);
     const { ruleArray, ruleStorage } = rules(RULE);
-    console.log(ruleArray)
+
     device.queue.writeBuffer(ruleStorage, 0, ruleArray);
 
     // FORMAT CANVAS
@@ -152,6 +170,7 @@ async function setup(){       // This set up makes it possible to benchmark easi
         size: vertices.byteLength,
         usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     });
+    buffers.push(vertexBuffer);
 
     device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, vertices);
 
@@ -280,7 +299,6 @@ async function setup(){       // This set up makes it possible to benchmark easi
     document.getElementById('speedInput').addEventListener('click', () => {
         EventManager.updateSpeed();
         clearInterval(Interval);
-        console.log(EventManager.updateInterval)
         Interval = setInterval(updateLoop, EventManager.updateInterval)
     }
 
@@ -316,7 +334,7 @@ async function setup(){       // This set up makes it possible to benchmark easi
         // check for new rule string
         if (EventManager.newRuleString) {
             const { ruleArray, ruleStorage } = rules(parseRuleString(EventManager.ruleString))
-            console.log(ruleArray)
+
             device.queue.writeBuffer(ruleStorage, 0, ruleArray);
             bindGroups = [
                 createBindGroup("Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
@@ -362,12 +380,9 @@ async function setup(){       // This set up makes it possible to benchmark easi
         // Finish the command buffer and immediately submit it.
         device.queue.submit([encoder.finish()]);
     }
-}
 
-// iterative update for cells
-console.log(EventManager.updateInterval);
-var Interval = setInterval(updateLoop, EventManager.updateInterval);
-EventManager.forcedUpdate = updateLoop;
+
+}
 
 function rules(rule) {
     const ruleArray = rule;
@@ -376,6 +391,7 @@ function rules(rule) {
         size: ruleArray.byteLength,
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     });
+    buffers.push(ruleStorage);
     return { ruleArray, ruleStorage };
 }
 
@@ -400,3 +416,20 @@ function parseRuleString(ruleString) {
     }
     return RULE
 }
+
+
+
+// RUN TEST
+console.log('Begin testing');
+
+// document.getElementById("output").innerText = document.getElementById("output").innerText+ `\nRunning benchmark on SETUP...`;
+// suiteSetup
+//     .add("StandardSetup", () => setup())
+//     .run();
+
+setup();
+
+document.getElementById("output").innerText = document.getElementById("output").innerText+ `\nRunning benchmark on UPDATE LOOP...`;
+suiteUpdate
+    .add("StandardSetup", () => updateLoop())
+    .run();

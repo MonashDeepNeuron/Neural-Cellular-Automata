@@ -36,6 +36,15 @@ const INITIAL_STATE = [
 let step = 0
 
 // DEVICE SETUP - ran into issues making it a func
+// Currently running in 0.025s
+// Update loop is currently running in approx. 0.005 seconds
+// With high variation (~25%)
+// Can't really think of any real optimisations at this point?
+
+
+// TODO: Destroy discarded buffers
+// TODO: Fix initial state dimensions and location
+
 
 // Uniform grid
 const uniformArray = new Float32Array([GRID_SIZE, GRID_SIZE]);
