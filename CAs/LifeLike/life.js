@@ -58,6 +58,17 @@ const SQUARE_VERTICIES = new Float32Array([
 // TODO: Fix initial state dimensions and location
 
 
+
+// DEVICE SETUP - ran into issues making it a func
+// Currently running in 0.025s
+// Update loop is currently running in approx. 0.005 seconds
+// With high variation (~25%)
+// Can't really think of any real optimisations at this point?
+
+
+// TODO: Destroy discarded buffers? There is a garbage collector though
+// TODO: Fix initial state dimensions and location
+
 let step = 0; // How many compute passes have been made
 
 // DEVICE SETUP - ran into issues making it a func
