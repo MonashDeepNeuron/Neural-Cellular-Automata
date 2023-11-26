@@ -40,7 +40,6 @@ export default class EventManager {
 
     static updateRuleString() {
         const inputText = document.getElementById('simulationInput').value;
-        console.log(inputText)
         EventManager.newRuleString = true
         EventManager.ruleString = inputText
         EventManager.forcedUpdate()
@@ -48,7 +47,6 @@ export default class EventManager {
 
     static updateSpeed() {
         const inputSpeed = document.getElementById('speedInputBox').value;
-        console.log(inputSpeed);
         const newUpdateInterval = 50 + (2 * (100 - inputSpeed));
         EventManager.updateInterval = newUpdateInterval;
     }
