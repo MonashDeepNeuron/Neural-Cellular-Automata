@@ -15,7 +15,7 @@ const canvas = DeviceManager.canvas
 
 // Set global variables
 const GRID_SIZE = document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
-const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother.
+const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
 const INITIAL_STATE = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -130,47 +130,16 @@ const simulationPipeline = device.createComputePipeline({
 const bindGroups = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, EventManager.ruleString);
 
 
-// INITIAL CANVAS SETUP
+// INITIAL CANVAS SETUP, 1st render pass
 const encoder = device.createCommandEncoder();
-const pass = encoder.beginRenderPass({
-    colorAttachments:
-        [{
-            view: context.getCurrentTexture().createView(),
-            loadOp: "clear",
-            clearValue: { r: 0, g: 0, b: 0, a: 1 }, // New line
-            storeOp: "store",
-        }]
-});
-
-// Draw the features
-pass.setPipeline(renderPipeline);
-pass.setVertexBuffer(0, vertexBuffer);
-pass.setBindGroup(0, bindGroups[step % 2]);
-pass.draw(SQUARE_VERTICIES.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
-pass.end();
+renderPass(encoder);
 
 // Finish the command buffer and immediately submit it.
 device.queue.submit([encoder.finish()]);
 
-// get and bind events from html
-document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
-document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
-document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
-document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
-document.getElementById('speedInput').addEventListener('click', () => {
-    EventManager.updateSpeed();
-    clearInterval(interval);
-    interval = setInterval(updateLoop, EventManager.updateInterval)
-}
+EventManager.bindEvents();
 
-); // change speed
-
-
-// iterative update for cells
-var interval = setInterval(updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
-EventManager.forcedUpdate = updateLoop;
-
-function updateLoop() {
+EventManager.updateLoop = () => {
 
     // Only permitted to run if one frame is wanted or
     if (!EventManager.oneFrame) {
@@ -194,6 +163,50 @@ function updateLoop() {
     const encoder = device.createCommandEncoder();
 
     // CREATE COMPUTE TOOL & PERFORM COMPUTATION TASKS
+    computePass(encoder);
+
+    // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
+    step++;
+    renderPass(encoder);
+
+    // Finish the command buffer and immediately submit it.
+    device.queue.submit([encoder.finish()]);
+}
+
+
+
+// start iterative update for cells
+EventManager.currentTimer = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
+EventManager.forcedUpdate = EventManager.updateLoop;
+console.log(`The EventManager.currentTimer is ${EventManager.currentTimer}`)
+
+
+
+
+// FUNCTIONS for convenient break-up of code
+    // Can't be removed because relies on a ton of 
+    // definitions from this chunk of code.
+function renderPass(encoder){
+    const renderPass = encoder.beginRenderPass({
+        colorAttachments:
+            [{
+                view: context.getCurrentTexture().createView(),
+                loadOp: "clear",
+                clearValue: { r: 0, g: 0, b: 0, a: 1 }, // New line
+                storeOp: "store",
+            }]
+    });
+    
+    // Draw the features
+    renderPass.setPipeline(renderPipeline);
+    renderPass.setVertexBuffer(0, vertexBuffer);
+    renderPass.setBindGroup(0, bindGroups[step % 2]);
+    renderPass.draw(SQUARE_VERTICIES.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
+    renderPass.end();
+}
+
+
+function computePass(encoder){
     const computePass = encoder.beginComputePass();
 
     computePass.setPipeline(simulationPipeline);
@@ -203,26 +216,4 @@ function updateLoop() {
     computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
 
     computePass.end();
-
-    // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
-    step++;
-    const pass = encoder.beginRenderPass({
-        colorAttachments:
-            [{
-                view: context.getCurrentTexture().createView(),
-                loadOp: "clear",
-                clearValue: { r: 0, g: 0, b: 0, a: 1 }, // New line
-                storeOp: "store",
-            }]
-    });
-
-    // DRAW THE FEATURES
-    pass.setPipeline(renderPipeline);
-    pass.setVertexBuffer(0, vertexBuffer);
-    pass.setBindGroup(0, bindGroups[step % 2]);
-    pass.draw(SQUARE_VERTICIES.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
-    pass.end();
-
-    // Finish the command buffer and immediately submit it.
-    device.queue.submit([encoder.finish()]);
 }
