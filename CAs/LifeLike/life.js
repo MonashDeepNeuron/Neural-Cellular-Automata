@@ -7,6 +7,7 @@ import EventManager from "./managers/EventManager.js";
 import DeviceManager from "./managers/DeviceManager.js";
 
 import BufferManager from "./managers/BufferManager.js";
+import { parseRuleString } from "./managers/General.js";
 // import PipelineManager from "./managers/PipelineManager.js";
 // construct static classes lol
 await DeviceManager.staticConstructor();
@@ -127,7 +128,7 @@ const simulationPipeline = device.createComputePipeline({
     }
 });
 
-const bindGroups = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, EventManager.ruleString);
+const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, EventManager.ruleString);
 
 
 // INITIAL CANVAS SETUP, 1st render pass
@@ -152,7 +153,7 @@ EventManager.updateLoop = () => {
 
     // check for new rule string
     if (EventManager.newRuleString) {
-        const { ruleStorage } = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+        const ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
   
@@ -178,7 +179,6 @@ EventManager.updateLoop = () => {
 // start iterative update for cells
 EventManager.currentTimer = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
 EventManager.forcedUpdate = EventManager.updateLoop;
-console.log(`The EventManager.currentTimer is ${EventManager.currentTimer}`)
 
 
 

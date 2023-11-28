@@ -28,7 +28,6 @@ export default class EventManager {
     };
 
     static keyListener(e) {
-        console.log(e.key)
         switch (e.key) {
             case EventManager.PLAY_PAUSE_KEY:
                 EventManager.playPause()
@@ -59,12 +58,9 @@ export default class EventManager {
         document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
         document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
         document.getElementById('speedInput').addEventListener('click', () => {
-        EventManager.updateSpeed();
-        clearInterval(EventManager.currentTimer);
-        EventManager.currentTimer = setInterval(EventManager.updateLoop, EventManager.updateInterval)
-        console.log(`The EventManager.currentTimer is ${EventManager.currentTimer}`)
-    }
-
-    ); // change speed
+            EventManager.updateSpeed();
+            clearInterval(EventManager.currentTimer);
+            EventManager.currentTimer = setInterval(EventManager.updateLoop, EventManager.updateInterval)
+        }); // change speed
     }
 }
