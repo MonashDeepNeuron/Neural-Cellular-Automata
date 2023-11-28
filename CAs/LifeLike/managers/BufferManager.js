@@ -73,7 +73,7 @@ export default class BufferManager {
             BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
             BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
         ];    
-        return bindGroups ;
+        return {bindGroups, uniformBuffer, cellStateStorage, ruleStorage}  ;
     }
 
     static createBindGroupLayout(device){
