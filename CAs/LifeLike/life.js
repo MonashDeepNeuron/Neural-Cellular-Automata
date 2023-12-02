@@ -7,7 +7,7 @@ import EventManager from "./managers/EventManager.js";
 import DeviceManager from "./managers/DeviceManager.js";
 
 import BufferManager from "./managers/BufferManager.js";
-import { parseRuleString } from "./managers/General.js";
+import { parseRuleString } from "./managers/Parse.js";
 // import PipelineManager from "./managers/PipelineManager.js";
 // construct static classes lol
 await DeviceManager.staticConstructor();

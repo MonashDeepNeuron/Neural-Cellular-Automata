@@ -1,4 +1,4 @@
-import { parseRuleString } from "./General.js";
+import { parseRuleString } from "./Parse.js";
 
 export default class BufferManager {
     static loadShapeVertexBuffer(device, shapeVerticies){
