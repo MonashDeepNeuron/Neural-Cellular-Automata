@@ -6,8 +6,8 @@ export default class EventManager {
     static oneFrame = false;
     static running = true;
     static newRuleString = false;
-    static ruleString = "R1, S2-3, B3, NM"; // Start with Conway's life // Temporarily removed C2 as second entry
-    static updateInterval = 50;
+    static ruleString = "R5, S34-58,B34-45,NM"; // Start with Conway's life // Temporarily removed C2 as second entry
+    static updateInterval = 50000;
     static currentTimer = 0; // Update interval
     static updateLoop = () => {};
 
