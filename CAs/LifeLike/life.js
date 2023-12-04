@@ -17,7 +17,8 @@ const canvas = DeviceManager.canvas
 
 // Set global variables
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
-const INITIAL_STATE = startingPatterns[2];
+const INITIAL_TEMPLATE_NO = 4;
+const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO-1];
 const GRID_SIZE = INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 
@@ -43,6 +44,7 @@ for (let i = 0; i < startingPatterns.length; i++){
     template.value = i;
     select.add(template);
 }
+document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO-1;
 
 
 const SQUARE_VERTICIES = new Float32Array([

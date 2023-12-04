@@ -1,4 +1,3 @@
-import EventManager from "../Shared/managers/EventManager";
 
 export function parseRuleString(ruleString) {
   // ruleString is given by the user. it is a string
