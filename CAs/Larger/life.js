@@ -7,7 +7,7 @@ import EventManager from "../Shared/managers/EventManager.js";
 import DeviceManager from "../Shared/managers/DeviceManager.js";
 
 import BufferManager from "../Shared/managers/BufferManager.js";
-import { parseRuleString } from "./Parse.js";
+import { parseRuleString, displayRule } from "./Parse.js";
 import startingPatterns from "./startingPatterns.js";
 // import PipelineManager from "./managers/PipelineManager.js";
 // construct static classes lol
@@ -21,6 +21,7 @@ const INITIAL_STATE = startingPatterns[3];
 const GRID_SIZE = INITIAL_STATE.minGrid*4;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
+displayRule(EventManager.ruleString);
 
 const SQUARE_VERTICIES = new Float32Array([
     // X,    Y,
@@ -32,6 +33,37 @@ const SQUARE_VERTICIES = new Float32Array([
     0.8, -0.8,
     -0.8, -0.8,
 ]);
+
+EventManager.getRule = () => { 
+    let ruleString = "R";
+    ruleString += document.getElementById("simulationInputR").value;
+    ruleString += ",C";
+    ruleString += document.getElementById("simulationInputC").value;
+    ruleString += ",S";
+    ruleString += document.getElementById("simulationInputS").value;
+    ruleString += ",B";
+    ruleString += document.getElementById("simulationInputB").value;
+    ruleString += ",N";
+    ruleString += document.getElementById("simulationInputN").value;
+    return ruleString;
+}
+
+
+
+let select = document.getElementById("templateSelect");
+
+let template = document.createElement("option");
+template.text = "Random";
+template.value = -1;
+select.add(template);
+
+for (let i = 0; i < startingPatterns.length; i++){
+    let template = document.createElement("option");
+    template.text = startingPatterns[i].name;
+    template.value = i;
+    select.add(template);
+}
+
 
 
 let step = 0; // How many compute passes have been made
@@ -116,20 +148,6 @@ device.queue.submit([encoder.finish()]);
 
 EventManager.bindEvents();
 
-EventManager.getRule = () => { 
-    let ruleString = "R";
-    ruleString += document.getElementById("simulationInputR").value;
-    ruleString += ",C";
-    ruleString += document.getElementById("simulationInputC").value;
-    ruleString += ",S";
-    ruleString += document.getElementById("simulationInputS").value;
-    ruleString += ",B";
-    ruleString += document.getElementById("simulationInputB").value;
-    ruleString += ",N";
-    ruleString += document.getElementById("simulationInputN").value;
-    return ruleString;
-}
-
 EventManager.updateLoop = () => {
 
     // Only permitted to run if one frame is wanted or
@@ -141,14 +159,37 @@ EventManager.updateLoop = () => {
         EventManager.oneFrame = false; // Cross-script variable, do not add let,var or const
     }
 
+    if (EventManager.resetTemplate){
+        console.log(`Resetting canvas bump`)
+        let initialState = null;
+        if (EventManager.templateNo >= 0){
+            initialState = startingPatterns[EventManager.templateNo];
+        }
+
+        if (initialState != null){
+            EventManager.ruleString = initialState.rule;
+        }
+
+        const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+
+        const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
+
+        EventManager.resetTemplate = false;
+        step = 0;
+        EventManager.running = true;
+
+        displayRule(EventManager.ruleString);
+    }
+    
     // check for new rule string
     if (EventManager.newRuleString) {
-        const ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
+        const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], newRuleStorage);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], newRuleStorage);
   
         EventManager.newRuleString = false // toggle off
-
     }
 
     const encoder = device.createCommandEncoder();
@@ -168,7 +209,10 @@ EventManager.updateLoop = () => {
 
 // start iterative update for cells
 EventManager.currentTimer = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
-EventManager.forcedUpdate = EventManager.updateLoop;
+EventManager.forcedUpdate = () => {
+    EventManager.oneFrame = true;
+    EventManager.updateLoop();
+}
 
 
 
