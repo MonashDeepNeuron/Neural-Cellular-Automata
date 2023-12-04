@@ -10,6 +10,7 @@ export default class EventManager {
     static updateInterval = 50;
     static currentTimer = 0; // Update interval
     static updateLoop = () => {};
+    static getRule = () => {}; // Caters for differnt interface setups
 
     // key bindings
     static PLAY_PAUSE_KEY = 'k';
@@ -40,9 +41,8 @@ export default class EventManager {
     };
 
     static updateRuleString() {
-        const inputText = document.getElementById('simulationInput').value;
         EventManager.newRuleString = true
-        EventManager.ruleString = inputText
+        EventManager.ruleString = EventManager.getRule();
         EventManager.forcedUpdate()
     };
 

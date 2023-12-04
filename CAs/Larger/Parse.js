@@ -22,6 +22,9 @@ export function parseRuleString(ruleString) {
     // is denoted through the use of negatives
         // eg. 2-5, 7, 11-13, ...,
         // push 2, 5, -7, 11, 13, ...,
+    if (ruleString.length < 8) {
+        return null;
+    }
 
     let ruleList = []
 
@@ -49,8 +52,10 @@ export function parseRuleString(ruleString) {
     i++;
 
     ruleList.push(nextNumber());
-    // ruleList.push(nextNumber()); // C (multiple states) excluded bc i don't get it
-
+    ruleList.push(nextNumber()); // C (multiple states) excluded bc i don't get it
+    while (ruleString[i] != 'S'){
+        i++;
+    }
 
     ruleList.push(0);
     let sConditionCountIndex = ruleList.length-1;
@@ -61,20 +66,18 @@ export function parseRuleString(ruleString) {
     // 2-4, 34-36, B3-4, ...
     //    ^ -----
 
-    
-
     while (ruleString[lastS] != 'B'){
         lastS++;
     }
     lastS-= 3; 
-    while (ruleString[lastS] != ','){
+    while (ruleString[lastS] != ',' && ruleString[lastS] != 'S'){
         lastS--;
     }
     
-    console.log(`Last S range at index ${lastS}`);
+    console.log(`Last S range at index ${lastS}, current index at ${i}`);
 
     // eg. 2-5, 7, 11-13, ...,
-    // push 2, 5, -7, 11, 13, ...,
+    // push 2, 5, 7, 7, 11, 13, ...,
     while (i <= lastS) {
         ruleList.push(nextNumber());
         ruleList[sConditionCountIndex]++;
@@ -85,15 +88,17 @@ export function parseRuleString(ruleString) {
         }
 
         if (ruleString[i] == '-'){
+            i++; // Exclude dash to prevent misinterpretation as negative
             ruleList.push(nextNumber());
             ruleList[sConditionCountIndex]++;
         } else {
-            ruleList[ruleList.length -1] = -ruleList[ruleList.length -1];
+            ruleList.push(ruleList[ruleList.length -1]);
+            ruleList[sConditionCountIndex]++;
         }
     } // NOTE: this will over-push by one number i.e. it will include the 
      // number refered to by lastS
 
-    console.log(`Update after finding survivials: ${ruleString}`);
+    console.log(`Update after finding survivials: ${ruleList}`);
     
     ruleList.push(0);
     let bConditionCountIndex = ruleList.length-1;
@@ -108,7 +113,7 @@ export function parseRuleString(ruleString) {
         lastB++;
     }
     lastB-= 3; 
-    while (ruleString[lastB] != ','){
+    while (ruleString[lastB] != ',' && ruleString[lastB] != 'B'){
         lastB--;
     }
 

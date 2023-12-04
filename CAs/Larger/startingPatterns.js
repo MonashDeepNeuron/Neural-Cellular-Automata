@@ -1,4 +1,5 @@
 const spaceship1 = {
+    name:"Conway's life glider",
     pattern: [
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -20,13 +21,13 @@ const spaceship1 = {
     width: 16,
     height: 16,
     minGrid: 16,
-    rule:'R1,S2-3,B3,NM'
+    rule:'R1,C0,S2-3,B3,NM'
 };
 
 
 
 const littleThings = {
-  
+  name: "Conway's Life Common patterns",
   pattern: [
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -48,11 +49,12 @@ const littleThings = {
   width: 16,
   height: 16,
   minGrid: 16,
-  rule:'R1,S2-3,B3,NM'
+  rule:'R1,C0,S2-3,B3,NM'
 };
 
 // Min grid size 32
 const B29 = {
+    name: "Conway's Life B29 glider",
     pattern: [
         0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -66,12 +68,13 @@ const B29 = {
     width: 32,
     height: 8,
     minGrid: 32,
-    rule:'R1,S2-3,B3,NM' 
+    rule:'R1,C0,S2-3,B3,NM' 
 };
 
 
 // NOTE Minimum gridsize 64
 const bug = {
+  name: "Bosco Bug",
   pattern: [
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -93,11 +96,12 @@ const bug = {
     width: 16,
     height: 16,
     minGrid: 64,
-    rule: "R5,S33-57,B34-45,NM" // Bosco rule
+    rule: "R5,C0,S33-57,B34-45,NM" // Bosco rule
 };
 
 
 const brick = {
+  name: "Bosco: 6x6 Brick",
   pattern: [
         0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 
         0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 
@@ -109,15 +113,15 @@ const brick = {
     width: 16,
     height: 6,
     minGrid: 32,
-    rule: "R5,S33-57,B34-45,NM"
+    rule: "R5,C0, S33-57,B34-45,NM"
 };
 
 
-export default {
-    cgl_spaceship1: spaceship1,
-    cgl_littleThings: littleThings,
-    cgl_B29: B29,
-    bsc_bug: bug,
-    bsc_brick: brick,
+export default [
+    spaceship1,
+    littleThings,
+    B29,
+    bug,
+    brick,
 
-};
+];

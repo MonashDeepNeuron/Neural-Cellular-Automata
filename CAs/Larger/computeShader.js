@@ -34,13 +34,13 @@ export const computeShader =
         let thisCell = cellIndex(cell.xy);
         activeNeighbours = activeNeighbours - cellStateIn[thisCell];
 
-        //  0                   1    ... (no.srange items) ... no.srange+2 
-        // [r, (c excluded), no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
+        //  0   1                2    ... (no.srange items) ... no.srange+3 
+        // [r, c, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
         //                      ^if alive                         ^if dead
         // See parse for origin
 
         let thisState = cellStateIn[thisCell]; // State of this cell
-        let ruleOffset =  1-(thisState-1)*(rule[1]+1); // Index of either no.sranges or no.branges
+        let ruleOffset =  2-(thisState-1)*(rule[2]+1); // Index of either no.sranges or no.branges
             // More complex than strictly necessary bc I got birth and survival the inconventient way around
         var ruleIter = ruleOffset+1; // Index of current range we are checking
         
