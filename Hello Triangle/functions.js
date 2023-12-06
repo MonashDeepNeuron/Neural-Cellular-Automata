@@ -1,13 +1,9 @@
-export function vertices() {
-    const vertices = new Float32Array([
-        // X,    Y,
-        -0.8, -0.8,
-        -0.8, 0.8,
-        0.8, 0.8,
-    ]);
-
-    return vertices
-};
+export const vertices = new Float32Array([
+    // X,    Y,
+    -0.8, -0.8,
+    -0.8, 0.8,
+    0.8, 0.8,
+]);
 
 export function vertexBufferLayout() {
     const vertexBufferLayout = {

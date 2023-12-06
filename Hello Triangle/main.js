@@ -21,7 +21,7 @@ context.configure({
 const texture = context.getCurrentTexture();
 
 // BUFFER, raw binary data that gets sent to the gpu
-const vertices = initialise.vertices();
+const vertices = initialise.vertices;
 const vertexBufferLayout = initialise.vertexBufferLayout();
 const vertexBuffer = initialise.vertexBuffer(device, vertices);
 device.queue.writeBuffer(vertexBuffer, 0, vertices);
