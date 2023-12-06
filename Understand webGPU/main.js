@@ -1,6 +1,3 @@
-function INSERT_HERE() {
-    throw new Error("the code isn't finished");
-};
 // synopsis: canvas, device, texture, buffer, bindings, pipeline, encoder
 // SET UP 
 
@@ -19,7 +16,7 @@ context.configure({
     format: format,
 });
 // TEXTURE; buffer with special operations (good for 2D and 3D data)
-const texture = context.getCurrentTexture(); // basic
+const texture = context.getCurrentTexture(); // basic ???
 
 // BUFFER; raw binary data that gets sent to the gpu
 
@@ -28,7 +25,7 @@ const texture = context.getCurrentTexture(); // basic
 // declare information that will be written
 const vertices = new Float32Array([ // whats with this new shit?
     // X,    Y,
-    -0.8, -0.8, // Triangle 1
+    -0.8, -0.8,
     -0.8, 0.8,
     0.8, 0.8,
 ]);
@@ -37,16 +34,26 @@ const vertices = new Float32Array([ // whats with this new shit?
 const vertexBuffer = device.createBuffer({
     label: "a triangle",
     size: vertices.byteLength,
-    usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE, // vertex buffers are kinda special
+    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE, // vertex buffers are kinda special
 });
 
 // put the binary information into the buffer
 device.queue.writeBuffer(vertexBuffer, 0, vertices); // dst, offset, src
 
-// BIND GROUPS; instruct the GPU how to interpret things in the buffer
+// Buffer Layout
+const vertexBufferLayout = { // PROBLEM CHILD
+    arrayStride: 8,
+    attributes: [{
+        format: "float32x2",
+        offset: 0,
+        shaderLocation: 0,
+    }],
+}; // !! AARRGGH
 
-// they "binds" the binary data in the buffer to a data type
-// note: bind groups also have other purposes (e.g. textures?? and samplers??)
+// BIND GROUPS; bunch of buffers together
+
+// its how the GPU can see multiple buffers at same time
+// you can also bind other things tgt (samplers, textures, etc)
 const bindGroupLayout = device.createBindGroupLayout({
     label: "basic bind group layout",
     entries: [{
@@ -70,8 +77,7 @@ const shaders = device.createShaderModule({
     code:
         /*wgsl*/`
         @vertex
-        fn vertexMain(@location(0) pos: vec2f) ->
-          @builtin(position) vec4f {
+        fn vertexMain(@location(0) pos: vec2f) -> @builtin(position) vec4f {
           return vec4f(pos, 0, 1);
         }
 
@@ -91,17 +97,10 @@ const pipelineLayout = device.createPipelineLayout({
 
 const pipeline = device.createRenderPipeline({
     label: "main pipeline",
-    vertex: { // FILL THIS IN
+    vertex: {
         module: shaders,
         entryPoint: "vertexMain",
-        buffer: [{ // PROBLEM CHILD
-            arrayStride: 8,
-            attributes: {
-                format: "float32x2",
-                offset: 0,
-                shaderLocation: 0,
-            },
-        }], // !!
+        buffers: [vertexBufferLayout],
     },
     fragment: {
         module: shaders,
@@ -126,12 +125,13 @@ const renderPass = commandEncoder.beginRenderPass({
     }],
 });
 
-renderPass.setPipeline(pipeline);
+renderPass.setPipeline(pipeline); // THIS IS INVALID?
+renderPass.setVertexBuffer(0, vertexBuffer)
 renderPass.setBindGroup(0, bindGroup)
 renderPass.draw(3, 1);
 renderPass.end();
 
-device.queue.submit([commandEncoder.finish()]);
+device.queue.submit([commandEncoder.finish()]); // THIS IS INVALID?
 
 
 /*
