@@ -1,6 +1,10 @@
+// Imports
 import { shaderSrc } from "./shaders.js";
 import * as initialise from "./functions.js";
 import { performRenderPass } from "./other.js";
+
+// Broad Overview
+// Canvas, Device, Texture, Buffer, Bind Groups, Shaders, Pipeline, Encoder, Pass
 
 // CANVAS; the thing on the html page
 const canvas = document.querySelector("canvas");
@@ -44,4 +48,4 @@ const commandEncoder = device.createCommandEncoder();
 const renderPass = initialise.renderPass(commandEncoder, texture);
 performRenderPass(renderPass, pipeline, vertexBuffer, bindGroup)
 
-device.queue.submit([commandEncoder.finish()]); // THIS IS INVALID?
+device.queue.submit([commandEncoder.finish()]); 
