@@ -1,5 +1,9 @@
 // Imports
-import { shaderSrc } from "./shaders.js";
+import shaderManager from "./managers/shader.js";
+import bufferManager from "./managers/buffer.js"
+import bindGroupManager from "./managers/bindGroup.js"
+import pipelineManager from "./managers/pipeline.js"
+import renderManager from "./managers/render.js"
 
 // Broad Overview
 // Canvas, Device, Texture, 
@@ -7,11 +11,11 @@ import { shaderSrc } from "./shaders.js";
 // Pipeline, Encoder, Pass
 
 // SETUP
-const canvas = document.querySelector("canvas");
 const adapter = await navigator.gpu.requestAdapter();
 const device = await adapter.requestDevice();
-const context = canvas.getContext("webgpu");
+const canvas = document.querySelector("canvas");
 const format = navigator.gpu.getPreferredCanvasFormat();
+const context = canvas.getContext("webgpu");
 context.configure({
     device: device,
     format: format,
@@ -21,95 +25,51 @@ context.configure({
 const texture = context.getCurrentTexture();
 
 // BUFFER, raw binary data that gets sent to the gpu
-const vertices = new Float32Array([
-    // X,    Y,
-    -0.8, -0.8,
-    -0.8, 0.8,
-    0.8, 0.8,
-]);
-
-const vertexBufferLayout = {
-    arrayStride: 8,
-    attributes: [{
-        format: "float32x2",
-        offset: 0,
-        shaderLocation: 0,
-    }]
-};
-
-const vertexBuffer = device.createBuffer({
-    label: "vertex buffer",
-    size: vertices.byteLength,
-    usage:
-        GPUBufferUsage.VERTEX |
-        GPUBufferUsage.COPY_DST |
-        GPUBufferUsage.STORAGE,
+const vertices = bufferManager.triangle;
+const vertexBufferLayout = bufferManager.layout;
+const vertexBufferDescriptor = bufferManager.createDescriptor({
+    size: vertices.byteLength
 });
-
+const vertexBuffer = device.createBuffer(vertexBufferDescriptor);
 device.queue.writeBuffer(vertexBuffer, 0, vertices);
 
 // BIND GROUPS, bunch of data bound together
-const bindGroupLayout = device.createBindGroupLayout({
-    label: "basic bind group layout",
-    entries: [{
-        binding: 0,
-        visibility: GPUShaderStage.VERTEX,
-        buffer: { type: "read-only-storage" },
-    }],
-});
-
-const bindGroup = device.createBindGroup({
-    label: "basic bind group thing",
+const bindGroupLayout = device.createBindGroupLayout(bindGroupManager.layoutDescriptor);
+const bindGroupDescriptor = bindGroupManager.createDescriptor({
     layout: bindGroupLayout,
-    entries: [{
-        binding: 0,
-        resource: { buffer: vertexBuffer },
-    }], // comma for consistency i guess
+    buffer: vertexBuffer
 });
+const bindGroup = device.createBindGroup(bindGroupDescriptor);
 
-// SHADER, code that runs on GPU
-const shaders = device.createShaderModule(shaderSrc);
+// SHADER, GPU code 
+const shaders = {
+    vertex: device.createShaderModule(shaderManager.vertexShader),
+    fragment: device.createShaderModule(shaderManager.fragmentShader),
+};
+
 
 // PIPELINE, specifies the bindings and modules to the GPU
-const pipelineLayout = device.createPipelineLayout({
-    label: "basic pipeline layout",
-    bindGroupLayouts: [bindGroupLayout],
-});
+const pipelineLayoutDescriptor = pipelineManager.createLayoutDescriptor({ bindGroupLayout: bindGroupLayout });
+const pipelineLayout = device.createPipelineLayout(pipelineLayoutDescriptor);
 
-const pipeline = device.createRenderPipeline({
-    label: "main pipeline",
-    vertex: {
-        module: shaders,
-        entryPoint: "vertexMain",
-        buffers: [vertexBufferLayout],
-    },
-    fragment: {
-        module: shaders,
-        entryPoint: "fragmentMain",
-        targets: [{ format: format }],
-    },
-    primitive: { topology: "triangle-list" },
+const pipelineDescriptor = pipelineManager.createDescriptor({
+    shaders: shaders,
+    vertexBufferLayout: vertexBufferLayout,
+    format: format,
     layout: pipelineLayout,
 });
+const pipeline = device.createRenderPipeline(pipelineDescriptor);
 
 // ENCODER, queues instructions to the GPU via command buffer
 const commandEncoder = device.createCommandEncoder();
 
 // RENDER PASS, one sequence of instructions
-const renderPass = commandEncoder.beginRenderPass({
-    label: "pass encoder",
-    colorAttachments: [{
-        view: texture.createView(), // to view the texture
-        loadOp: "clear", // better for performance than load.
-        clearValue: { r: 0, g: 0, b: 0.4, a: 1.0 }, // what is empty
-        storeOp: "store", // try discard later
-    }],
-});
-
+const renderPassDescriptor = renderManager.createDescriptor({ texture: texture })
+const renderPass = commandEncoder.beginRenderPass(renderPassDescriptor);
 renderPass.setPipeline(pipeline);
 renderPass.setVertexBuffer(0, vertexBuffer);
 renderPass.setBindGroup(0, bindGroup);
-renderPass.draw(3, 1);
+renderPass.draw(vertices.length / 2, 1);
 renderPass.end();
 
 device.queue.submit([commandEncoder.finish()]); 
