@@ -1,4 +1,5 @@
 // Imports
+import setupManager from "./managers/setup.js";
 import shaderManager from "./managers/shader.js";
 import bufferManager from "./managers/buffer.js"
 import bindGroupManager from "./managers/bindGroup.js"
@@ -11,15 +12,9 @@ import renderManager from "./managers/render.js"
 // Pipeline, Encoder, Pass
 
 // SETUP
-const adapter = await navigator.gpu.requestAdapter();
-const device = await adapter.requestDevice();
-const canvas = document.querySelector("canvas");
+const device = await setupManager.device();
 const format = navigator.gpu.getPreferredCanvasFormat();
-const context = canvas.getContext("webgpu");
-context.configure({
-    device: device,
-    format: format,
-});
+const context = setupManager.context({ device: device, format: format });
 
 // TEXTURE, buffer with special operations (good for 2D and 3D data)
 const texture = context.getCurrentTexture();
