@@ -11,7 +11,7 @@ import renderManager from "./managers/render.js"
 // Buffer, Bind Groups, Shaders, (this part might be different between models)
 // Pipeline, Encoder, Pass
 
-// SETUP
+// SETUP, not sure what most terms are
 const device = await setupManager.device();
 const format = navigator.gpu.getPreferredCanvasFormat();
 const context = setupManager.context({ device: device, format: format });
@@ -19,7 +19,7 @@ const context = setupManager.context({ device: device, format: format });
 // TEXTURE, buffer with special operations (good for 2D and 3D data)
 const texture = context.getCurrentTexture();
 
-// BUFFER, raw binary data that gets sent to the gpu
+// BUFFER, binary data, sent to GPU
 const vertices = bufferManager.triangle;
 const vertexBufferLayout = bufferManager.layout;
 const vertexBufferDescriptor = bufferManager.createDescriptor({
@@ -28,7 +28,7 @@ const vertexBufferDescriptor = bufferManager.createDescriptor({
 const vertexBuffer = device.createBuffer(vertexBufferDescriptor);
 device.queue.writeBuffer(vertexBuffer, 0, vertices);
 
-// BIND GROUPS, bunch of data bound together
+// BIND GROUP, bunch of data bound together
 const bindGroupLayout = device.createBindGroupLayout(bindGroupManager.layoutDescriptor);
 const bindGroupDescriptor = bindGroupManager.createDescriptor({
     layout: bindGroupLayout,
@@ -42,8 +42,7 @@ const shaders = {
     fragment: device.createShaderModule(shaderManager.fragmentShader),
 };
 
-
-// PIPELINE, specifies the bindings and modules to the GPU
+// PIPELINE, specifies location of everything to GPU
 const pipelineLayoutDescriptor = pipelineManager.createLayoutDescriptor({ bindGroupLayout: bindGroupLayout });
 const pipelineLayout = device.createPipelineLayout(pipelineLayoutDescriptor);
 
