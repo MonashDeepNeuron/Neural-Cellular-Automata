@@ -2,18 +2,17 @@
 import { shaderSrc } from "./shaders.js";
 import * as initialise from "./functions.js";
 import { performRenderPass } from "./other.js";
+import * as resources from "./resources.js";
 
 // Broad Overview
-// Canvas, Device, Texture, Buffer, Bind Groups, Shaders, Pipeline, Encoder, Pass
+// Canvas, Device, Texture, 
+// Buffer, Bind Groups, Shaders, (this part might be different between models)
+// Pipeline, Encoder, Pass
 
-// CANVAS; the thing on the html page
+// SETUP
 const canvas = document.querySelector("canvas");
-
-// DEVICE; how to talk about/to the GPU
 const adapter = await navigator.gpu.requestAdapter();
 const device = await adapter.requestDevice();
-
-// auxiliary setup
 const context = canvas.getContext("webgpu");
 const format = navigator.gpu.getPreferredCanvasFormat();
 context.configure({
@@ -25,9 +24,10 @@ context.configure({
 const texture = context.getCurrentTexture();
 
 // BUFFER, raw binary data that gets sent to the gpu
-const vertices = initialise.vertices;
-const vertexBufferLayout = initialise.vertexBufferLayout();
-const vertexBuffer = initialise.vertexBuffer(device, vertices);
+const vertices = resources.vertices;
+const vertexBufferLayout = resources.vertexBufferLayout;
+const vertexBufferDescriptor = resources.vertexBufferDescriptor(vertices);
+const vertexBuffer = device.createBuffer(vertexBufferDescriptor);
 device.queue.writeBuffer(vertexBuffer, 0, vertices);
 
 // BIND GROUPS, bunch of data bound together
@@ -46,6 +46,11 @@ const commandEncoder = device.createCommandEncoder();
 
 // RENDER PASS, one sequence of instructions
 const renderPass = initialise.renderPass(commandEncoder, texture);
-performRenderPass(renderPass, pipeline, vertexBuffer, bindGroup)
+
+renderPass.setPipeline(pipeline);
+renderPass.setVertexBuffer(0, vertexBuffer);
+renderPass.setBindGroup(0, bindGroup);
+renderPass.draw(3, 1);
+renderPass.end();
 
 device.queue.submit([commandEncoder.finish()]); 

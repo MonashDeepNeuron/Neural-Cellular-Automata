@@ -7,3 +7,9 @@ export function performRenderPass(
     renderPass.draw(3, 1);
     renderPass.end();
 }
+
+
+
+// Canvas, Device, 
+// Texture, Buffer, Bind Groups, Shaders, (this part might be different between models)
+// Pipeline, Encoder, Pass

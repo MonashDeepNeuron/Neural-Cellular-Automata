@@ -1,31 +1,3 @@
-export const vertices = new Float32Array([
-    // X,    Y,
-    -0.8, -0.8,
-    -0.8, 0.8,
-    0.8, 0.8,
-]);
-
-export function vertexBufferLayout() {
-    const vertexBufferLayout = {
-        arrayStride: 8,
-        attributes: [{
-            format: "float32x2",
-            offset: 0,
-            shaderLocation: 0,
-        }]
-    };
-    return vertexBufferLayout;
-};
-
-export function vertexBuffer(device, vertices) {
-    const vertexBuffer = device.createBuffer({
-        label: "a triangle",
-        size: vertices.byteLength,
-        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE,
-    });
-    return vertexBuffer;
-};
-
 export function bindGroupLayout(device) {
     const bindGroupLayout = device.createBindGroupLayout({
         label: "basic bind group layout",
