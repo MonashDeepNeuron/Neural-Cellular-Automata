@@ -46,3 +46,7 @@ button:hover {
     background-color: #ff69b4;
     /* A darker shade of pink for hover effect */
 }
+
+.ltlRuleIn{
+    width:50px;
+}
