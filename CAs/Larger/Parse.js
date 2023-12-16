@@ -25,6 +25,7 @@ export function parseRuleString(ruleString) {
     // is denoted through the use of negatives
         // eg. 2-5, 7, 11-13, ...,
         // push 2, 5, -7, 11, 13, ...,
+    // TODO: BUG - When no given birth or survival cases given, results in error
     if (ruleString.length < 8) {
         return null;
     }
@@ -60,10 +61,12 @@ export function parseRuleString(ruleString) {
         i++;
     }
 
+    ruleList.push(0); // Save a space for neighbourhood type
+
     ruleList.push(0);
     let sConditionCountIndex = ruleList.length-1;
 
-    // Rule list should be 3 long now
+    // Rule list should be 4 long now
     // See how many characters are occupies by survival rule
     let lastS = i; // Index of the start of last set of numbers
     // 2-4, 34-36, B3-4, ...
@@ -140,8 +143,8 @@ export function parseRuleString(ruleString) {
             ruleList.push(ruleList[ruleList.length -1]);
             ruleList[bConditionCountIndex]++;
         }
-    } // NOTE: this will over-push by one number i.e. it will include the 
-     // number refered to by lastS
+    } // NOTE: this may over-push by one number i.e. it will include the 
+     // number refered to by lastB
     
     
     // from i: ,Nn, S..., B...,
@@ -152,22 +155,22 @@ export function parseRuleString(ruleString) {
     }
     i++;
     switch (ruleString[i]){
-        case 'M': ruleList.push(0); break;
-        case 'N': ruleList.push(1); break;
-        case 'C': ruleList.push(2); break;
+        case 'M': ruleList[2] = 0; break;
+        case 'N': ruleList[2] = 1; break;
+        case 'C': ruleList[2] = 2; break;
         default: return null;
     }
 
     i++;
 
-  let RULE = new Uint32Array(ruleList.length);
-  for (let i = 0; i < ruleList.length; i++){
-    RULE[i] = ruleList[i];
-  }
+    let RULE = new Uint32Array(ruleList.length);
+    for (let i = 0; i < ruleList.length; i++){
+        RULE[i] = ruleList[i];
+    }
 
-    console.log(ruleString);
-    console.log(ruleList);
-  return RULE
+        console.log(ruleString);
+        console.log(ruleList);
+    return RULE
 }
 
 export function displayRule(ruleString){

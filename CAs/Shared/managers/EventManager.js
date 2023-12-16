@@ -58,7 +58,6 @@ export default class EventManager {
         EventManager.templateNo = document.getElementById('templateSelect').value
         EventManager.resetTemplate = true;
         console.log(`Resetting canvas... Template:${EventManager.templateNo}`);
-        EventManager.running = false;
         EventManager.forcedUpdate();
     }
 

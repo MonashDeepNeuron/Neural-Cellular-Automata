@@ -17,9 +17,9 @@ const canvas = DeviceManager.canvas
 
 // Set global variables
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
-const INITIAL_TEMPLATE_NO = 4;
+const INITIAL_TEMPLATE_NO = 8;
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO-1];
-const GRID_SIZE = INITIAL_STATE.minGrid*4;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
+const GRID_SIZE = INITIAL_STATE.minGrid;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
 displayRule(EventManager.ruleString);
@@ -180,7 +180,6 @@ EventManager.updateLoop = () => {
 
         EventManager.resetTemplate = false;
         step = 0;
-        EventManager.running = true;
 
         displayRule(EventManager.ruleString);
     }
@@ -215,7 +214,6 @@ EventManager.forcedUpdate = () => {
     EventManager.oneFrame = true;
     EventManager.updateLoop();
 }
-
 
 
 
