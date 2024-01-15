@@ -215,7 +215,7 @@ const nmBug = {
     width: 32,
     height: 64,
     minGrid: 64,
-    rule: "R5,C25,S13-20,B15-17,NN" 
+    rule: "R5,C0,S13-20,B15-17,NN" 
 
 }
 
