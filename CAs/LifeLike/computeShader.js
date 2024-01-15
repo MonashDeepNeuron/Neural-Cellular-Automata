@@ -35,5 +35,6 @@ export const computeShader =
 
         // update using bit operations 
         let shiftNumber = cellStateIn[i] * 9 + activeNeighbours;
-        cellStateOut[i] = (rule[0] >> shiftNumber) & 1 ; // New state of cell
+        let newState = (rule[0] >> shiftNumber) & 1 ;
+        cellStateOut[i] = newState ; 
     }`;
