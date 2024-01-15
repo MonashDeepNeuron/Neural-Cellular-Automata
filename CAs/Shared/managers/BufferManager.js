@@ -1,5 +1,3 @@
-import { parseRuleString } from "./Parse.js";
-
 export default class BufferManager {
     static loadShapeVertexBuffer(device, shapeVerticies){
     
@@ -25,7 +23,7 @@ export default class BufferManager {
     }
 
 
-    static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, ruleString){
+    static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, rule){
         // Uniform grid
         const uniformArray = new Float32Array([gridSize, gridSize]);
         const uniformBuffer = device.createBuffer({
@@ -53,9 +51,17 @@ export default class BufferManager {
         ];
     
         // write to buffer A
-        for (let i = 0; i < cellStateArray.length; ++i) {
+        for (let i = 0; i < cellStateArray.length; i++) {
             // cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
-            cellStateArray[i] = initialState[i];
+            cellStateArray[i] = 0;
+        }
+
+        const centreOffset = Math.floor((gridSize-initialState.width)/2);
+
+        for (let i = 0; i < initialState.width; i++) {
+            for (let j = 0; j < initialState.height; j++){
+                cellStateArray[i+centreOffset+(j+centreOffset)*gridSize] = initialState.pattern[i+j*initialState.width];
+            }
         }
         device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
     
@@ -65,8 +71,7 @@ export default class BufferManager {
         }
         device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
-        const RULE = parseRuleString(ruleString);
-        const ruleStorage = BufferManager.setRuleBuffer(device, RULE);
+        const ruleStorage = BufferManager.setRuleBuffer(device, rule);
     
         // setup bind groups
         const bindGroups = [
