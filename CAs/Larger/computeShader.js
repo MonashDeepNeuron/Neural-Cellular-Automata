@@ -14,7 +14,11 @@ export const computeShader =
     }
 
     fn cellActive(x : u32, y: u32) -> u32 {
-        return cellStateIn[cellIndex(vec2(x,y))];
+        if (cellStateIn[cellIndex(vec2(x,y))] > 0){
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     fn countMooreNeighbours(cell:vec3u, thisCell:u32, radius:u32) -> u32 {
@@ -68,7 +72,7 @@ export const computeShader =
         // Determine number of neighbours
         let thisCell = cellIndex(cell.xy);
         let activeNeighbours = getActiveNeighbours(rule[2], cell, thisCell, rule[0]);
-
+        let states = rule[1];
         //  0  1  2       3       4    ... (no.srange items) ... no.srange+3 
         // [r, c, n, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
         //                      ^if alive                         ^if dead
@@ -84,10 +88,22 @@ export const computeShader =
 
         for (var i = 0u; i < valsToCheck; i=i+2){
             if (activeNeighbours >= rule[ruleOffset+i+1] && activeNeighbours <= rule[ruleIter+1]){
-                cellStateOut[thisCell] = 1;
+                if (thisState <= 0){
+                    if (states > 1){
+                        cellStateOut[thisCell] = states-1;
+                    } else {
+                        cellStateOut[thisCell] = 1;
+                    }
+                } else {
+                    cellStateOut[thisCell] = thisState;
+                }
                 return;
             }
             ruleIter = ruleIter + 2;
         }
-        cellStateOut[thisCell] = 0;
+        if (thisState > 0){
+            cellStateOut[thisCell] = thisState -1;
+        } else {
+            cellStateOut[thisCell] = 0;
+        }
     }`;

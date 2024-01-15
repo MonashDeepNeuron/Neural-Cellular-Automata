@@ -55,8 +55,11 @@ export function parseRuleString(ruleString) {
 
     i++;
 
-    ruleList.push(nextNumber());
-    ruleList.push(nextNumber()); // C (multiple states) excluded bc i don't get it
+    ruleList.push(nextNumber()); // Radius
+    ruleList.push(nextNumber()); // C (multiple states) 
+    if (ruleList[1] < 2){
+        ruleList[1] = 2; // Lowest possiple number of states allowable
+    }
     while (ruleString[i] != 'S'){
         i++;
     }

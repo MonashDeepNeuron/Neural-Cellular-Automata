@@ -215,7 +215,7 @@ const nmBug = {
     width: 32,
     height: 64,
     minGrid: 64,
-    rule: "R5,C0,S13-20,B15-17,NN" // Bosco rule
+    rule: "R5,C25,S13-20,B15-17,NN" 
 
 }
 
@@ -259,7 +259,7 @@ const test = {
     width: 32,
     height: 32,
     minGrid: 32,
-    rule: "R2,C0,S0-11,B12,NN" // Bosco rule
+    rule: "R2,C0,S0-11,B12,NN" 
 }
     
 

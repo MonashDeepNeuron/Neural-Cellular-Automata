@@ -138,7 +138,7 @@ const simulationPipeline = device.createComputePipeline({
     }
 });
 
-const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
+let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
 
 
 // INITIAL CANVAS SETUP, 1st render pass
@@ -178,6 +178,7 @@ EventManager.updateLoop = () => {
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
 
+        cellStateStorage = newCellStateStorage;
         EventManager.resetTemplate = false;
         step = 0;
 

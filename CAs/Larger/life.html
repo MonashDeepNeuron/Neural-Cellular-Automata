@@ -18,14 +18,22 @@
       
       <!-- Instructions for rulestring input -->
       <h3>Larger than life rulestring</h3>
-      <p>Rulestring is given as Rr, Cc, Ss Bb, Nn where:</p>
+      <p>Rulestring is given as Rr, Cc, Ss, Bb, Nn where:</p>
       <p> r is the radius in units<br>
-          c is the number of possible states (not implemented atm bc i don't get it)<br>
+          c is the number of cycles before cell death<br>
           s is ranges in the form a-b, c-d, e, ... giving the conditions of survival<br>
           b is ranges in the form a-b, c-d, e, ... giving the conditions of birth<br>
-          n is the type of neighbourhood (eg. square, cicular?) (not implemented yet)<br>
-          See <a href=https://golly.sourceforge.io/Help/Algorithms/Larger_than_Life.html>Larger than Life</a><br>
+          n is the type of neighbourhood (eg. square, cicular) <br>
+          Rulestring based on that used by Golly LifeVier and MCell: <a href=https://golly.sourceforge.io/Help/Algorithms/Larger_than_Life.html>Ltl Rulestring</a><br>
       </p>
+      <p>
+        Supported neighbourhood types: <br>
+      </p>
+      <ul>
+        <li>(M) <i>Moore Neighbourhood</i>: the square neighbourhood</li>
+        <li>(N) <i>von Neumann Neighbourhood</i>: all cells within the <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Manhatten distance</a> specified by the given radius</li>
+        <li>(C) <i>Circular</i>: all cells within the actual (circular) radius, measured in cell lengths <i>COMING SOON!</i></li>
+      </ul>
       <!-- Input Box for Simulation Parameters -->
         <!-- 
           Boxes arranged as follows for user conveniance: 
