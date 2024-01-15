@@ -7,7 +7,7 @@ import EventManager from "../Shared/managers/EventManager.js";
 import DeviceManager from "../Shared/managers/DeviceManager.js";
 
 import BufferManager from "../Shared/managers/BufferManager.js";
-import { parseRuleString } from "./Parse.js";
+import { parseRuleString, displayRule } from "./Parse.js";
 import startingPatterns from "./startingPatterns.js";
 // import PipelineManager from "./managers/PipelineManager.js";
 // construct static classes lol
@@ -17,28 +17,35 @@ const canvas = DeviceManager.canvas
 
 // Set global variables
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
-const INITIAL_STATE = startingPatterns.cgl_B29;
+const INITIAL_TEMPLATE_NO = 4;
+const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO-1];
 const GRID_SIZE = INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
-// [
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
-//     0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1,
-//     0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0,
-//     0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0,
-//     0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1,
-//     0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-// ];
+
 
 EventManager.ruleString = INITIAL_STATE.rule;
+displayRule(EventManager.ruleString);
+
+EventManager.getRule = () => {
+    return document.getElementById('simulationInput').value;
+}
+
+
+
+let select = document.getElementById("templateSelect");
+
+let template = document.createElement("option");
+template.text = "Random";
+template.value = -1;
+select.add(template);
+
+for (let i = 0; i < startingPatterns.length; i++){
+    let template = document.createElement("option");
+    template.text = startingPatterns[i].name;
+    template.value = i;
+    select.add(template);
+}
+document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO-1;
+
 
 const SQUARE_VERTICIES = new Float32Array([
     // X,    Y,
@@ -122,7 +129,7 @@ const simulationPipeline = device.createComputePipeline({
     }
 });
 
-const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
+let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
 
 
 // INITIAL CANVAS SETUP, 1st render pass
@@ -145,9 +152,32 @@ EventManager.updateLoop = () => {
         EventManager.oneFrame = false; // Cross-script variable, do not add let,var or const
     }
 
+    if (EventManager.resetTemplate){
+        console.log(`Resetting canvas bump`)
+        let initialState = null;
+        if (EventManager.templateNo >= 0){
+            initialState = startingPatterns[EventManager.templateNo];
+        }
+
+        if (initialState != null){
+            EventManager.ruleString = initialState.rule;
+        }
+
+        ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+        cellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
+        
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
+
+        EventManager.resetTemplate = false;
+        step = 0;
+        
+        displayRule(EventManager.ruleString);
+    }
+
     // check for new rule string
     if (EventManager.newRuleString) {
-        const ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+        ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
   
@@ -172,7 +202,11 @@ EventManager.updateLoop = () => {
 
 // start iterative update for cells
 EventManager.currentTimer = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
-EventManager.forcedUpdate = EventManager.updateLoop;
+EventManager.forcedUpdate = () => {
+    EventManager.oneFrame = true;
+    EventManager.updateLoop();
+}
+
 
 
 

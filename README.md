@@ -33,7 +33,7 @@ This project involves the creation of a cellular automata model trained using ne
     - [x] Pause / play (spacebar)
     - [x] Move forward one frame (full-stop button)
     - [x] change speed while sim is running
-    - [ ] allow selectable start state templates
+    - [x] allow selectable start state templates
     - [ ] Change state (click)
   - [ ] Place into template
 - [ ] Life-like CA

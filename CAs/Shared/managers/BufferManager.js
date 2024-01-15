@@ -35,7 +35,20 @@ export default class BufferManager {
         });
         device.queue.writeBuffer(uniformBuffer, 0, uniformArray);
     
+        let cellStateStorage = BufferManager.setInitialStateBuffer(device, gridSize, initialState);
+
+        const ruleStorage = BufferManager.setRuleBuffer(device, rule);
     
+        // setup bind groups
+        const bindGroups = [
+            BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
+            BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
+        ];    
+        return {bindGroups, uniformBuffer, cellStateStorage, ruleStorage}  ;
+    }
+
+    static setInitialStateBuffer(device, gridSize, initialState){
+        // If initial state = null, assign random
         // Cell state arrays
         const cellStateArray = new Uint32Array(gridSize * gridSize);
         const cellStateStorage = [
@@ -53,17 +66,22 @@ export default class BufferManager {
         ];
     
         // write to buffer A
-        for (let i = 0; i < cellStateArray.length; i++) {
-            // cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
-            cellStateArray[i] = 0;
-        }
-
-        const centreOffset = Math.floor((gridSize-initialState.width)/2);
-
-        for (let i = 0; i < initialState.width; i++) {
-            for (let j = 0; j < initialState.height; j++){
-                cellStateArray[i+centreOffset+(j+centreOffset)*gridSize] = initialState.pattern[i+j*initialState.width];
+        if (initialState == null){
+            for (let i = 0; i < cellStateArray.length; i++) {
+                cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
             }
+            console.log("Randomising canvas ...");
+        } else {
+            for (let i = 0; i < cellStateArray.length; i++) {
+                cellStateArray[i] = 0;
+            }
+            const centreOffset = Math.floor((gridSize-initialState.width)/2);
+            for (let i = 0; i < initialState.width; i++) {
+                for (let j = 0; j < initialState.height; j++){
+                    cellStateArray[i+centreOffset+(j+centreOffset)*gridSize] = initialState.pattern[i+j*initialState.width];
+                }
+            }
+            console.log(`Implementing ${initialState.name}`);
         }
         device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
     
@@ -73,15 +91,9 @@ export default class BufferManager {
         }
         device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
-        const ruleStorage = BufferManager.setRuleBuffer(device, rule);
-    
-        // setup bind groups
-        const bindGroups = [
-            BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
-            BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
-        ];    
-        return {bindGroups, uniformBuffer, cellStateStorage, ruleStorage}  ;
+        return cellStateStorage;
     }
+
 
     static createBindGroupLayout(device){
         return device.createBindGroupLayout({
@@ -107,7 +119,7 @@ export default class BufferManager {
         
                 {
                     binding: 3,
-                    visibility: GPUShaderStage.COMPUTE,
+                    visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
                     buffer: { type: "read-only-storage" } // Ruleset
                 }
             ]
