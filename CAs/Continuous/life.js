@@ -122,7 +122,7 @@ const simulationPipeline = device.createComputePipeline({
     }
 });
 
-const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
+const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, EventManager.kernel);
 
 
 // INITIAL CANVAS SETUP, 1st render pass
@@ -146,13 +146,12 @@ EventManager.updateLoop = () => {
     }
 
     // check for new rule string
-    if (EventManager.newRuleString) {
-        const ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+    if (EventManager.newKernel) {
+        const ruleStorage = BufferManager.setRuleBuffer(device, EventManager.kernel);
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
   
-        EventManager.newRuleString = false // toggle off
-
+        EventManager.newKernel = false // toggle off
     }
 
     const encoder = device.createCommandEncoder();

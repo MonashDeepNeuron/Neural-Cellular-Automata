@@ -6,17 +6,23 @@ This project involves the creation of a cellular automata model trained using ne
 
 ### General
 
-- [x] Project setup
-- [x] Modularise shaders
-- [ ] Modularise .js code
-- [ ] Bigger frame with more cells
-- [ ] Update template
+- [x] Project setup (boiler plate)
+- [x] Bigger frame with more cells
+- [x] Update template
 - [ ] explanations for each CA
   - [x] Life
-  - [ ] Life-like
+  - [x] Life-like
   - [ ] LTL
   - [ ] Convolving CA
   - [ ] Vec4, Vec16
+
+### Modularisation
+
+- [x] Modularise shaders
+- [x] Set up Event manager
+- [x] Set up Device manager
+- [ ] Set up Pipeline manager (in progress)
+- [ ] Set up Resource manager
 
 ### Model Development
 
@@ -26,13 +32,19 @@ This project involves the creation of a cellular automata model trained using ne
   - [ ] Implement interactions
     - [x] Pause / play (spacebar)
     - [x] Move forward one frame (full-stop button)
+    - [x] change speed while sim is running
     - [ ] allow selectable start state templates
     - [ ] Change state (click)
   - [ ] Place into template
 - [ ] Life-like CA
   - [x] Implement a couple different basic rule sets
+  - [ ] optimise memory for cell state buffer
+    - [ ] change the template input (life.js)
+    - [ ] change the "array" (life.js)
+    - [ ] change the buffer (life.js)
+    - [ ] change the shader (computeShader.js)
   - [ ] find good templates for select ruleset
-  - [ ] Dynamic shaders, respond to user inputted rule-strings
+  - [x] Dynamic shaders, respond to user inputted rule-strings
   - [ ] Place into template
 - [ ] LTL CA
   - [ ] Implement wider neighbourhoods:
@@ -48,14 +60,19 @@ The models from here down are trainable
 - [ ] Convolving CA
   - [ ] Implement discrete convolution as shader function
   - [ ] Make convolution shader function dynamic
-        (respond to input convolution)
+        (respond to input convolution) (see neural patterns)
   - [ ] Insert into template
 - [ ] Vec4 based CA
-  - [ ] Understand vector convolutions
+  - [x] Understand vector convolutions
   - [ ] Implement efficient way to pull info from the picture
   - [ ] Insert into template
 - [ ] vec16 based CA (haven't written this out yet)
+  - [x] develop .py models based on paper
   - [ ] insert into template
+  - [ ] transfer into .js format for easy usage
+  - [ ] parser to:
+    - [ ] pull the necessary information from the .py file and
+    - [ ] make it into a shader
 
 ### Model Training
 
