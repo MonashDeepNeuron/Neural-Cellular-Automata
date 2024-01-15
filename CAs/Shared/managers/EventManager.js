@@ -6,12 +6,15 @@ export default class EventManager {
     static oneFrame = false;
     static running = true;
     static newRuleString = false;
+    static resetTemplate = false;
     static ruleString = "R5,S33-57,B34-45,NM"; // Start with Conway's life // Temporarily removed C2 as second entry
     static newKernel = false;
     static kernel = new Uint32Array([0, 0, 0, 0, 0, 0, 0, 0, 1])
     static updateInterval = 50;
+    static templateNo = 0;
     static currentTimer = 0; // Update interval
     static updateLoop = () => {};
+    static getRule = () => {}; // Caters for differnt interface setups
 
     // key bindings
     static PLAY_PAUSE_KEY = 'k';
@@ -42,9 +45,8 @@ export default class EventManager {
     };
 
     static updateRuleString() {
-        const inputText = document.getElementById('simulationInput').value;
         EventManager.newRuleString = true
-        EventManager.ruleString = inputText
+        EventManager.ruleString = EventManager.getRule();
         EventManager.forcedUpdate()
     };
 
@@ -69,12 +71,19 @@ export default class EventManager {
         EventManager.updateInterval = newUpdateInterval;
     }
 
+    static resetCanvas(){
+        EventManager.templateNo = document.getElementById('templateSelect').value
+        EventManager.resetTemplate = true;
+        console.log(`Resetting canvas... Template:${EventManager.templateNo}`);
+        EventManager.forcedUpdate();
+    }
+
     static bindEvents(){
         document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
         document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
         document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
-        //document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
-        document.getElementById('submitKernel').addEventListener('click', EventManager.updateKernel);
+        document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
+        document.getElementById('reset').addEventListener('click', EventManager.resetCanvas);
         document.getElementById('speedInput').addEventListener('click', () => {
             EventManager.updateSpeed();
             clearInterval(EventManager.currentTimer);
