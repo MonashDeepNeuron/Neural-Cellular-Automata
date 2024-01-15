@@ -26,7 +26,8 @@ This project involves the creation of a cellular automata model trained using ne
   - [ ] Implement interactions
     - [x] Pause / play (spacebar)
     - [x] Move forward one frame (full-stop button)
-    - [ ] allow selectable start state templates
+    - [x] change speed while sim is running
+    - [x] allow selectable start state templates
     - [ ] Change state (click)
   - [ ] Place into template
 - [ ] Life-like CA

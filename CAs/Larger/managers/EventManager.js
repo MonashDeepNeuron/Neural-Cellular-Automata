@@ -6,8 +6,10 @@ export default class EventManager {
     static oneFrame = false;
     static running = true;
     static newRuleString = false;
-    static ruleString = "/2";
-    static updateInterval = 50;
+    static ruleString = "R5, S34-58,B34-45,NM"; // Start with Conway's life // Temporarily removed C2 as second entry
+    static updateInterval = 50000;
+    static currentTimer = 0; // Update interval
+    static updateLoop = () => {};
 
     // key bindings
     static PLAY_PAUSE_KEY = 'k';
@@ -26,7 +28,6 @@ export default class EventManager {
     };
 
     static keyListener(e) {
-        console.log(e.key)
         switch (e.key) {
             case EventManager.PLAY_PAUSE_KEY:
                 EventManager.playPause()
@@ -40,7 +41,6 @@ export default class EventManager {
 
     static updateRuleString() {
         const inputText = document.getElementById('simulationInput').value;
-        console.log(inputText)
         EventManager.newRuleString = true
         EventManager.ruleString = inputText
         EventManager.forcedUpdate()
@@ -48,8 +48,19 @@ export default class EventManager {
 
     static updateSpeed() {
         const inputSpeed = document.getElementById('speedInputBox').value;
-        console.log(inputSpeed);
         const newUpdateInterval = 50 + (2 * (100 - inputSpeed));
         EventManager.updateInterval = newUpdateInterval;
+    }
+
+    static bindEvents(){
+        document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
+        document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
+        document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
+        document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
+        document.getElementById('speedInput').addEventListener('click', () => {
+            EventManager.updateSpeed();
+            clearInterval(EventManager.currentTimer);
+            EventManager.currentTimer = setInterval(EventManager.updateLoop, EventManager.updateInterval)
+        }); // change speed
     }
 }

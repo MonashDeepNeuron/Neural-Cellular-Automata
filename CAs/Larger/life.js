@@ -17,16 +17,36 @@ const canvas = DeviceManager.canvas
 
 // Set global variables
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
-const INITIAL_TEMPLATE_NO = 4;
+const INITIAL_TEMPLATE_NO = 8;
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO-1];
-const GRID_SIZE = INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
-
+const GRID_SIZE = INITIAL_STATE.minGrid;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
 displayRule(EventManager.ruleString);
 
-EventManager.getRule = () => {
-    return document.getElementById('simulationInput').value;
+const SQUARE_VERTICIES = new Float32Array([
+    // X,    Y,
+    -0.8, -0.8, // Triangle 1
+    -0.8, 0.8,
+    0.8, 0.8,
+
+    0.8, 0.8, // Triangle 2
+    0.8, -0.8,
+    -0.8, -0.8,
+]);
+
+EventManager.getRule = () => { 
+    let ruleString = "R";
+    ruleString += document.getElementById("simulationInputR").value;
+    ruleString += ",C";
+    ruleString += document.getElementById("simulationInputC").value;
+    ruleString += ",S";
+    ruleString += document.getElementById("simulationInputS").value;
+    ruleString += ",B";
+    ruleString += document.getElementById("simulationInputB").value;
+    ruleString += ",N";
+    ruleString += document.getElementById("simulationInputN").value;
+    return ruleString;
 }
 
 
@@ -42,21 +62,10 @@ for (let i = 0; i < startingPatterns.length; i++){
     let template = document.createElement("option");
     template.text = startingPatterns[i].name;
     template.value = i;
+    template.id = startingPatterns[i].name;
     select.add(template);
 }
 document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO-1;
-
-
-const SQUARE_VERTICIES = new Float32Array([
-    // X,    Y,
-    -0.8, -0.8, // Triangle 1
-    -0.8, 0.8,
-    0.8, 0.8,
-
-    0.8, 0.8, // Triangle 2
-    0.8, -0.8,
-    -0.8, -0.8,
-]);
 
 
 let step = 0; // How many compute passes have been made
@@ -163,26 +172,26 @@ EventManager.updateLoop = () => {
             EventManager.ruleString = initialState.rule;
         }
 
-        ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        cellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
-        
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
+        const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
 
+        const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
+
+        cellStateStorage = newCellStateStorage;
         EventManager.resetTemplate = false;
         step = 0;
-        
+
         displayRule(EventManager.ruleString);
     }
-
+    
     // check for new rule string
     if (EventManager.newRuleString) {
-        ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
+        const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], newRuleStorage);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], newRuleStorage);
   
         EventManager.newRuleString = false // toggle off
-
     }
 
     const encoder = device.createCommandEncoder();
@@ -206,8 +215,6 @@ EventManager.forcedUpdate = () => {
     EventManager.oneFrame = true;
     EventManager.updateLoop();
 }
-
-
 
 
 
