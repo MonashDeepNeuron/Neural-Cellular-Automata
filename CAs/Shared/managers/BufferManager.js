@@ -1,3 +1,5 @@
+
+
 export default class BufferManager {
     static loadShapeVertexBuffer(device, shapeVerticies){
     
