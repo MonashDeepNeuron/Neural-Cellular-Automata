@@ -1,5 +1,10 @@
 // TODO: rulestring validation function.
 
+export const NEIGHBOURHOOD_MAP = {
+    M: 0,
+    N: 1,
+    C: 2,
+};
 
 export function parseRuleString(ruleString) {
 
@@ -60,12 +65,14 @@ export function parseRuleString(ruleString) {
     if (ruleList[1] < 2){
         ruleList[1] = 2; // Lowest possiple number of states allowable
     }
+    ruleList.push(0); // Save a space for neighbourhood type
+
+
+    // Parse survival cases
+
     while (ruleString[i] != 'S'){
         i++;
     }
-
-    ruleList.push(0); // Save a space for neighbourhood type
-
     ruleList.push(0);
     let sConditionCountIndex = ruleList.length-1;
 
@@ -157,13 +164,9 @@ export function parseRuleString(ruleString) {
         i++;
     }
     i++;
-    switch (ruleString[i]){
-        case 'M': ruleList[2] = 0; break;
-        case 'N': ruleList[2] = 1; break;
-        case 'C': ruleList[2] = 2; break;
-        default: return null;
-    }
 
+    ruleList[2] = NEIGHBOURHOOD_MAP[ruleString[i]];
+    
     i++;
 
     let RULE = new Uint32Array(ruleList.length);
