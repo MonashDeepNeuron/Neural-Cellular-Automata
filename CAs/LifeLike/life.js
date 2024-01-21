@@ -22,6 +22,7 @@ const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = INITIAL_STATE.minGrid * 2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 
+
 EventManager.ruleString = INITIAL_STATE.rule;
 displayRule(EventManager.ruleString);
 
@@ -30,13 +31,8 @@ EventManager.getRule = () => {
 }
 
 
-
+// Set up template selector based on pre-defined template list
 let select = document.getElementById("templateSelect");
-
-let template = document.createElement("option");
-template.text = "Random";
-template.value = -1;
-select.add(template);
 
 for (let i = 0; i < startingPatterns.length; i++) {
     let template = document.createElement("option");
@@ -143,27 +139,35 @@ EventManager.bindEvents();
 
 const updateLoop = () => {
 
-    if (EventManager.resetTemplate) {
+    if (EventManager.resetTemplate || EventManager.randomiseGrid) {
+
+        // Assume that reset template and radomise grid are mutually exclusive events
+        // Prioritise resetTemplate
+
         console.log(`Resetting canvas bump`)
+        let newRuleStorage = null;
         let initialState = null;
-        if (EventManager.templateNo >= 0) {
+
+        if (EventManager.resetTemplate) {
             initialState = startingPatterns[EventManager.templateNo];
-        }
-
-        if (initialState != null) {
             EventManager.ruleString = initialState.rule;
+            newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+        } else {
+            newRuleStorage = ruleStorage;
         }
+     
+        const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
 
-        ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        cellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
-
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
-
+        cellStateStorage = newCellStateStorage;
+        ruleStorage = newRuleStorage;
         EventManager.resetTemplate = false;
+        EventManager.randomiseGrid = false;
         step = 0;
 
         displayRule(EventManager.ruleString);
+
     }
 
     // check for new rule string

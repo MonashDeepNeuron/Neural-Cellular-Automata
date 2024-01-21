@@ -6,6 +6,7 @@ export default class EventManager {
     static running = true;
     static newRuleString = false;
     static resetTemplate = false;
+    static randomiseGrid = false;
     static ruleString = "R5,S33-57,B34-45,NM"; // Start with Conway's life // Temporarily removed C2 as second entry
     static updateInterval = 50;
     static templateNo = 0;
@@ -38,6 +39,12 @@ export default class EventManager {
     };
 
 
+    static randomise() {
+        EventManager.randomiseGrid = true;
+        EventManager.moveOneFrame();
+    }
+
+
     static keyListener(e) {
         switch (e.key) {
             case EventManager.PLAY_PAUSE_KEY:
@@ -49,6 +56,8 @@ export default class EventManager {
             default:
         }
     };
+
+
 
 
     static setUpdateLoop(newUpdateLoop) {
@@ -79,6 +88,7 @@ export default class EventManager {
     static bindEvents() {
         document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
         document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
+        document.getElementById('randomise').addEventListener('click', EventManager.randomise); //Randomise the grid 
         document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
         document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
         document.getElementById('reset').addEventListener('click', EventManager.resetCanvas);
