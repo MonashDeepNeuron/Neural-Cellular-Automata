@@ -150,7 +150,7 @@ device.queue.submit([encoder.finish()]);
 
 EventManager.bindEvents();
 
-EventManager.updateLoop = () => {
+const updateLoop = () => {
 
 
     if (EventManager.resetTemplate) {

@@ -18,23 +18,23 @@ export default class EventManager {
     static NEXT_FRAME_KEY = '.';
 
     static playPause() {
-        if (this.running) {
+        if (EventManager.running) {
             // Pause
-            clearInterval(this.loopID);
-            this.loopID = null;
+            clearInterval(EventManager.loopID);
+            EventManager.loopID = null;
         } else {
             // Play
-            this.loopID = setInterval(this.updateLoop, this.updateInterval);
+            EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval);
         };
 
-        this.running = !this.running;
+        EventManager.running = !EventManager.running;
     };
 
     static moveOneFrame() {
-        if (this.loopID != null) {
+        if (EventManager.loopID != null) {
             return;
         }
-        this.updateLoop(); // Forced update
+        EventManager.updateLoop(); // Forced update
     };
 
 
@@ -52,7 +52,7 @@ export default class EventManager {
 
 
     static setUpdateLoop(newUpdateLoop) {
-        this.updateLoop = newUpdateLoop;
+        EventManager.updateLoop = newUpdateLoop;
 
     }
 
