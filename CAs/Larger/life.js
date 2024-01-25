@@ -17,8 +17,8 @@ const canvas = DeviceManager.canvas
 
 // Set global variables
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
-const INITIAL_TEMPLATE_NO = 8;
-const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO-1];
+const INITIAL_TEMPLATE_NO = 9;
+const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = INITIAL_STATE.minGrid;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
@@ -35,7 +35,7 @@ const SQUARE_VERTICIES = new Float32Array([
     -0.8, -0.8,
 ]);
 
-EventManager.getRule = () => { 
+EventManager.getRule = () => {
     let ruleString = "R";
     ruleString += document.getElementById("simulationInputR").value;
     ruleString += ",C";
@@ -58,14 +58,14 @@ template.text = "Random";
 template.value = -1;
 select.add(template);
 
-for (let i = 0; i < startingPatterns.length; i++){
+for (let i = 0; i < startingPatterns.length; i++) {
     let template = document.createElement("option");
     template.text = startingPatterns[i].name;
     template.value = i;
     template.id = startingPatterns[i].name;
     select.add(template);
 }
-document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO-1;
+document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO - 1;
 
 
 let step = 0; // How many compute passes have been made
@@ -82,7 +82,7 @@ context.configure({
 
 // DRAWING STUFF setup code 
 // vertex setup for a square
-const {vertexBuffer, vertexBufferLayout} = BufferManager.loadShapeVertexBuffer(device, SQUARE_VERTICIES);
+const { vertexBuffer, vertexBufferLayout } = BufferManager.loadShapeVertexBuffer(device, SQUARE_VERTICIES);
 
 // load shader code for drawing operations
 const cellShaderModule = device.createShaderModule({
@@ -138,7 +138,7 @@ const simulationPipeline = device.createComputePipeline({
     }
 });
 
-let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
+let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString));
 
 
 // INITIAL CANVAS SETUP, 1st render pass
@@ -152,23 +152,15 @@ EventManager.bindEvents();
 
 EventManager.updateLoop = () => {
 
-    // Only permitted to run if one frame is wanted or
-    if (!EventManager.oneFrame) {
-        if (!EventManager.running) { return; }
-        // Continue if running = true
-    }
-    else {
-        EventManager.oneFrame = false; // Cross-script variable, do not add let,var or const
-    }
 
-    if (EventManager.resetTemplate){
+    if (EventManager.resetTemplate) {
         console.log(`Resetting canvas bump`)
         let initialState = null;
-        if (EventManager.templateNo >= 0){
+        if (EventManager.templateNo >= 0) {
             initialState = startingPatterns[EventManager.templateNo];
         }
 
-        if (initialState != null){
+        if (initialState != null) {
             EventManager.ruleString = initialState.rule;
         }
 
@@ -184,13 +176,13 @@ EventManager.updateLoop = () => {
 
         displayRule(EventManager.ruleString);
     }
-    
+
     // check for new rule string
     if (EventManager.newRuleString) {
         const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], newRuleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], newRuleStorage);
-  
+
         EventManager.newRuleString = false // toggle off
     }
 
@@ -210,18 +202,16 @@ EventManager.updateLoop = () => {
 
 
 // start iterative update for cells
-EventManager.currentTimer = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
-EventManager.forcedUpdate = () => {
-    EventManager.oneFrame = true;
-    EventManager.updateLoop();
-}
+EventManager.setUpdateLoop(updateLoop);
+EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
+
 
 
 
 // FUNCTIONS for convenient break-up of code
-    // Can't be removed because relies on a ton of 
-    // definitions from this chunk of code.
-function renderPass(encoder){
+// Can't be removed because relies on a ton of 
+// definitions from this chunk of code.
+function renderPass(encoder) {
     const renderPass = encoder.beginRenderPass({
         colorAttachments:
             [{
@@ -231,7 +221,7 @@ function renderPass(encoder){
                 storeOp: "store",
             }]
     });
-    
+
     // Draw the features
     renderPass.setPipeline(renderPipeline);
     renderPass.setVertexBuffer(0, vertexBuffer);
@@ -241,7 +231,7 @@ function renderPass(encoder){
 }
 
 
-function computePass(encoder){
+function computePass(encoder) {
     const computePass = encoder.beginComputePass();
 
     computePass.setPipeline(simulationPipeline);

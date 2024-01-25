@@ -18,8 +18,8 @@ const canvas = DeviceManager.canvas
 // Set global variables
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
 const INITIAL_TEMPLATE_NO = 4;
-const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO-1];
-const GRID_SIZE = INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
+const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
+const GRID_SIZE = INITIAL_STATE.minGrid * 2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 
 EventManager.ruleString = INITIAL_STATE.rule;
@@ -38,13 +38,13 @@ template.text = "Random";
 template.value = -1;
 select.add(template);
 
-for (let i = 0; i < startingPatterns.length; i++){
+for (let i = 0; i < startingPatterns.length; i++) {
     let template = document.createElement("option");
     template.text = startingPatterns[i].name;
     template.value = i;
     select.add(template);
 }
-document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO-1;
+document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO - 1;
 
 
 const SQUARE_VERTICIES = new Float32Array([
@@ -73,7 +73,7 @@ context.configure({
 
 // DRAWING STUFF setup code 
 // vertex setup for a square
-const {vertexBuffer, vertexBufferLayout} = BufferManager.loadShapeVertexBuffer(device, SQUARE_VERTICIES);
+const { vertexBuffer, vertexBufferLayout } = BufferManager.loadShapeVertexBuffer(device, SQUARE_VERTICIES);
 
 // load shader code for drawing operations
 const cellShaderModule = device.createShaderModule({
@@ -129,7 +129,7 @@ const simulationPipeline = device.createComputePipeline({
     }
 });
 
-let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
+let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString));
 
 
 // INITIAL CANVAS SETUP, 1st render pass
@@ -143,35 +143,26 @@ EventManager.bindEvents();
 
 EventManager.updateLoop = () => {
 
-    // Only permitted to run if one frame is wanted or
-    if (!EventManager.oneFrame) {
-        if (!EventManager.running) { return; }
-        // Continue if running = true
-    }
-    else {
-        EventManager.oneFrame = false; // Cross-script variable, do not add let,var or const
-    }
-
-    if (EventManager.resetTemplate){
+    if (EventManager.resetTemplate) {
         console.log(`Resetting canvas bump`)
         let initialState = null;
-        if (EventManager.templateNo >= 0){
+        if (EventManager.templateNo >= 0) {
             initialState = startingPatterns[EventManager.templateNo];
         }
 
-        if (initialState != null){
+        if (initialState != null) {
             EventManager.ruleString = initialState.rule;
         }
 
         ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
         cellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
-        
+
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
 
         EventManager.resetTemplate = false;
         step = 0;
-        
+
         displayRule(EventManager.ruleString);
     }
 
@@ -180,7 +171,7 @@ EventManager.updateLoop = () => {
         ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
-  
+
         EventManager.newRuleString = false // toggle off
 
     }
@@ -201,20 +192,18 @@ EventManager.updateLoop = () => {
 
 
 // start iterative update for cells
-EventManager.currentTimer = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
-EventManager.forcedUpdate = () => {
-    EventManager.oneFrame = true;
-    EventManager.updateLoop();
-}
+EventManager.setUpdateLoop(updateLoop);
+EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
+
 
 
 
 
 
 // FUNCTIONS for convenient break-up of code
-    // Can't be removed because relies on a ton of 
-    // definitions from this chunk of code.
-function renderPass(encoder){
+// Can't be removed because relies on a ton of 
+// definitions from this chunk of code.
+function renderPass(encoder) {
     const renderPass = encoder.beginRenderPass({
         colorAttachments:
             [{
@@ -224,7 +213,7 @@ function renderPass(encoder){
                 storeOp: "store",
             }]
     });
-    
+
     // Draw the features
     renderPass.setPipeline(renderPipeline);
     renderPass.setVertexBuffer(0, vertexBuffer);
@@ -234,7 +223,7 @@ function renderPass(encoder){
 }
 
 
-function computePass(encoder){
+function computePass(encoder) {
     const computePass = encoder.beginComputePass();
 
     computePass.setPipeline(simulationPipeline);

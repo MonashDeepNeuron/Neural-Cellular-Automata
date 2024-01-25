@@ -5,7 +5,6 @@ export const computeShader =
     @group(0) @binding(2) var<storage, read_write> cellStateOut: array<u32>;
     @group(0) @binding(3) var<storage> rule: array<u32>;
     override WORKGROUP_SIZE: u32 = 16;
-    // override POSSIBLE_NEIGHBOURS: u32 = 9;
     
     fn cellIndex(cell: vec2u) -> u32 {
         // Supports grid wrap-around
@@ -58,10 +57,49 @@ export const computeShader =
         return activeNeighbours;
     }
 
+    
+    fn countCircularNeighbours(cell:vec3u, thisCell:u32, radius:u32) -> u32{
+        // Circular neighbourhood is calculated based on the circular radius from the cell in question
+        // Radius will be considered as sqrt(cells_across^2 + cells_up^2)
+        // This will give the cell-centre to cell-centre distance from cell to cell
+
+        var activeNeighbours = 0u;
+        // Start at r cells above the centre point
+        // 'Feel out' how much wider each row is than the last
+        var currentWidth = 0u;
+        for (var i = radius; i > 0; i--) { // Row iterator
+            currentWidth = u32(pow(f32(radius*radius) - f32(i*i), 0.5));
+
+            for (var j = 1u; j <= currentWidth; j++){
+                // reflect on 4 quarters
+                activeNeighbours = activeNeighbours + cellActive(cell.x+j, cell.y +i);
+                activeNeighbours = activeNeighbours + cellActive(cell.x-j, cell.y +i);
+                activeNeighbours = activeNeighbours + cellActive(cell.x+j, cell.y -i);
+                activeNeighbours = activeNeighbours + cellActive(cell.x-j, cell.y -i);
+            }
+
+
+            // Do centre of row
+            activeNeighbours = activeNeighbours + cellActive(cell.x, cell.y+i);
+            activeNeighbours = activeNeighbours + cellActive(cell.x, cell.y-i);
+
+        }
+
+        for (var j = 1u; j <= radius; j++){
+            activeNeighbours = activeNeighbours + cellActive(cell.x +j, cell.y);
+            activeNeighbours = activeNeighbours + cellActive(cell.x -j, cell.y);
+        }
+
+        activeNeighbours = activeNeighbours + cellActive(cell.x, cell.y);
+
+        return activeNeighbours;
+    }
+
     fn getActiveNeighbours(neighbourhoodType:u32, cell:vec3u, thisCell:u32, radius:u32) -> u32 {
         switch (neighbourhoodType){
             case 0: {return countMooreNeighbours(cell, thisCell, radius);}
             case 1: {return countVonNeumannNeighbours(cell, thisCell, radius);}
+            case 2: {return countCircularNeighbours(cell, thisCell, radius);}
             default: {return countMooreNeighbours(cell, thisCell, radius);}
         }
     }

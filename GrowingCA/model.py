@@ -21,28 +21,35 @@ class GrowingCA(nn.Module):
         - Determines which device we perform computations on.
 
     '''
-    def __init__(self, n_channels = 16, hidden_channels = 128, device = None):
+    def __init__(self, n_channels = 16, hidden_channels = 128, scale_factor = 1, device = None):
         super().__init__()
 
         self.n_channels = n_channels
         self.device = device 
 
         #### Perception Step ###
-        sobel_filter = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
-        scale_factor = 8
+        # The paper utilises a stack of hard-coded filters for this step
+        
+        # Identity
+        self.identity = torch.tensor([[0,0,0], [0,1,0], [0,0,0]])
+        
+        # Sobel filters
+        self.sobel_filter = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        self.scale_factor = scale_factor
 
-        sobel_x = sobel_filter / scale_factor
-        sobel_y = sobel_filter.t() / scale_factor
+        self.sobel_x = self.sobel_filter / self.scale_factor
+        self.sobel_y = self.sobel_filter.t() / self.scale_factor
 
-        # They utilise an identity filter as well
-        identity = torch.tensor([[0,0,0], [0,1,0], [0,0,0]])
+        # Stack the filters so that we can apply all for every channel in our grid
+        # Dimensions: [n_channels*3, 3, 3] as we have three 3x3 filters
+        filters = torch.stack([self.identity, self.sobel_x, self.sobel_y]).repeat((n_channels, 1, 1))
 
-        # Need to apply all three filters for every channel in our grid
-        filters = torch.stack([identity, sobel_x, sobel_y]).repeat((n_channels, 1, 1))
-
+        # Dimensions: [n_channels*3, 1, 3, 3] -> adding an extra dimension
+        # Send filter to device
         self.filters = filters[:, None, ...].type(torch.FloatTensor).to(self.device) # send these hardcoded filters to the device
 
         ### Update Step ###
+        # Either use 1x1 convolutions or a densenet but make sure to vectorise input 
         self.update_step = nn.Sequential(
             nn.Conv2d(
                 3 * n_channels, # We have 3 * n_channels as we are apply 3 kernels to each channel (perception step)
@@ -143,4 +150,5 @@ class GrowingCA(nn.Module):
         is_alive = (pre_mask & post_mask).to(torch.float32)
 
         return x * is_alive
-
+    
+    

@@ -4,63 +4,9 @@ import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from PIL import Image
-
 from model import GrowingCA
-
-def load_target(path, im_size=32):
-    '''
-    
-    Load target image.
-
-    Parameters:
-    - path : string
-        - Path to image (RGBA)
-
-    - im_size : int
-        - Size to resize image (we'll use square images for now)
-
-    Returns:
-    - torch.tensor
-        - Our image in tensor format.
-    '''
-    img = Image.open(path)
-    img = img.resize((im_size, im_size))
-    img = np.float32(img) / 255.0
-    img[..., :3] *= img[..., 3:]
-
-    return torch.from_numpy(img).permute(2, 0, 1)[None, ...]
-
-def to_rgb(img_rgba):
-    '''
-    
-    Convert RGBA image to RGB.
-
-    '''
-    rgb, a = img_rgba[:, :3, ...], torch.clamp(img_rgba[:, 3:, ...], 0, 1)
-    return torch.clamp(1.0 - a + rgb, 0, 1)
-
-def starting_seed(size, n_channels):
-    '''
-    
-    Create a starting tensor for training. Note that when starting, the 
-    only active pixels are going to be in the middle of the grid.
-
-    Parameters:
-    - size: int
-        - height/width of grid
-
-    - n_channels: int
-        - Number of input channels
-
-    Returns:
-    - torch.Tensor
-        - Seed (1, n_channels, size, size)
-
-    '''
-    x = torch.zeros((1, n_channels, size, size), dtype=torch.float32)
-    x[:, 3:, size // 2, size // 2] = 1
-    return x
+import utils
+from utils import utils
 
 def train():
     # I'll add a parser later
@@ -77,12 +23,12 @@ def train():
     # Target 
     img_path = "cat.png"
     img_size = 32
-    target_img = load_target(img_path, im_size=img_size)
+    target_img = utils.load_target(img_path, im_size=img_size)
     target_img_ = nn.functional.pad(target_img, (p, p, p, p), "constant", 0)
     target_img = target_img_.to(device)
     target_img = target_img.repeat(BATCH_SIZE, 1, 1, 1)
 
-    tensorboard_writer.add_image("Target Image", to_rgb(target_img)[0])
+    tensorboard_writer.add_image("Target Image", utils.to_rgb(target_img)[0])
 
     # Model
     n_channels = 16
@@ -93,7 +39,7 @@ def train():
 
     # Pool to sample from
     pool_size = 1024
-    seed = starting_seed(img_size, n_channels).to(device)
+    seed = utils.starting_seed(img_size, n_channels).to(device)
     seed = nn.functional.pad(seed, (p, p, p, p), "constant", 0)
     pool = seed.clone().repeat(pool_size, 1, 1, 1)
 
@@ -134,11 +80,15 @@ def train():
 
             for it_eval in range(eval_iterations):
                 x_eval = model(x_eval)
-                x_eval_out = to_rgb(x_eval[:, :4].detach().cpu())
+                x_eval_out = utils.to_rgb(x_eval[:, :4].detach().cpu())
                 eval_video[0, it_eval] = x_eval_out
 
             tensorboard_writer.add_video("eval", eval_video, epoch, fps=60)
 
+    return model, seed
+
 if __name__ == "__main__":
     print(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
-    train()
+    model, seed = train()
+    x = seed.clone()
+    utils.make_video(x, model)
