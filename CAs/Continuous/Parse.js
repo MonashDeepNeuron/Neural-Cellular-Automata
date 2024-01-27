@@ -2,7 +2,7 @@ export function parseRuleString(ruleString) {
     console.log(ruleString);
 
 
-    let RULE = new Uint32Array(9)
+    let RULE = new Float32Array(9)
 
     let parseIndex = 0;
 

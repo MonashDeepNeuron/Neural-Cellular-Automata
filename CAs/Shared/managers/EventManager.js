@@ -6,7 +6,8 @@ export default class EventManager {
     static running = true;
     static newRuleString = false;
     static resetTemplate = false;
-    static ruleString = "R5,S33-57,B34-45,NM"; // Start with Conway's life // Temporarily removed C2 as second entry
+    static randomiseGrid = false;
+    static ruleString = ""; // Start with Conway's life // Temporarily removed C2 as second entry
     static updateInterval = 50;
     static templateNo = 0;
     static loopID = 0; // Update interval
@@ -18,24 +19,30 @@ export default class EventManager {
     static NEXT_FRAME_KEY = '.';
 
     static playPause() {
-        if (this.running) {
+        if (EventManager.running) {
             // Pause
-            clearInterval(this.loopID);
-            this.loopID = null;
+            clearInterval(EventManager.loopID);
+            EventManager.loopID = null;
         } else {
             // Play
-            this.loopID = setInterval(this.updateLoop, this.updateInterval);
+            EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval);
         };
 
-        this.running = !this.running;
+        EventManager.running = !EventManager.running;
     };
 
     static moveOneFrame() {
-        if (this.loopID != null) {
+        if (EventManager.loopID != null) {
             return;
         }
-        this.updateLoop(); // Forced update
+        EventManager.updateLoop(); // Forced update
     };
+
+
+    static randomise() {
+        EventManager.randomiseGrid = true;
+        EventManager.moveOneFrame();
+    }
 
 
     static keyListener(e) {
@@ -51,8 +58,10 @@ export default class EventManager {
     };
 
 
+
+
     static setUpdateLoop(newUpdateLoop) {
-        this.updateLoop = newUpdateLoop;
+        EventManager.updateLoop = newUpdateLoop;
 
     }
 
@@ -63,20 +72,6 @@ export default class EventManager {
         EventManager.updateLoop()
     };
 
-    // static updateKernel() {
-    //     const kernel1 = document.getElementById('kernel1').value;
-    //     const kernel2 = document.getElementById('kernel2').value;
-    //     const kernel3 = document.getElementById('kernel3').value;
-    //     const kernel4 = document.getElementById('kernel4').value;
-    //     const kernel5 = document.getElementById('kernel5').value;
-    //     const kernel6 = document.getElementById('kernel6').value;
-    //     const kernel7 = document.getElementById('kernel7').value;
-    //     const kernel8 = document.getElementById('kernel8').value;
-    //     const kernel9 = document.getElementById('kernel9').value;
-    //     EventManager.newKernel = true
-    //     EventManager.kernel = [kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, kernel7, kernel8, kernel9]
-    //     console.log(EventManager.kernel)
-    // }
 
     static updateSpeed() {
         const inputSpeed = document.getElementById('speedInputBox').value;
@@ -94,6 +89,7 @@ export default class EventManager {
     static bindEvents() {
         document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
         document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
+        document.getElementById('randomise').addEventListener('click', EventManager.randomise); //Randomise the grid 
         document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
         document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
         document.getElementById('reset').addEventListener('click', EventManager.resetCanvas);

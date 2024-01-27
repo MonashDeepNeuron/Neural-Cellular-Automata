@@ -1,11 +1,10 @@
 export const computeShader =
     /*wgsl*/`
     @group(0) @binding(0) var<uniform> grid: vec2f;
-    @group(0) @binding(1) var<storage> cellStateIn: array<u32>;
-    @group(0) @binding(2) var<storage, read_write> cellStateOut: array<u32>;
-    @group(0) @binding(3) var<storage> rule: array<u32>;
+    @group(0) @binding(1) var<storage> cellStateIn: array<f32>;
+    @group(0) @binding(2) var<storage, read_write> cellStateOut: array<f32>;
+    @group(0) @binding(3) var<storage> rule: array<f32>;
     override WORKGROUP_SIZE: u32 = 16;
-    // override POSSIBLE_NEIGHBOURS: u32 = 9;
     
     fn cellIndex(cell: vec2u) -> u32 {
         // Supports grid wrap-around
@@ -13,7 +12,7 @@ export const computeShader =
         return (cell.y % u32(grid.y))*u32(grid.x)+(cell.x % u32(grid.x));
     }
 
-    fn cellActive(x : u32, y: u32) -> u32 {
+    fn cellValue(x : u32, y: u32) -> f32 {
         return cellStateIn[cellIndex(vec2(x,y))];
     }
 
@@ -26,24 +25,18 @@ export const computeShader =
         // k1 | k2 | k3
         // k4 | k5 | k6
         // k7 | k8 | k9
-        let k1 = cellActive(cell.x-1, cell.y-1) * rule[0] ;
-        let k2 = cellActive(cell.x, cell.y-1) * rule[1] ;
-        let k3 = cellActive(cell.x+1, cell.y-1) * rule[2] ;
-        let k4 = cellActive(cell.x-1, cell.y) * rule[3] ;
-        let k5 = cellActive(cell.x, cell.y) * rule[4] ;
-        let k6 = cellActive(cell.x+1, cell.y) * rule[5] ;
-        let k7 = cellActive(cell.x-1, cell.y+1) * rule[6] ;
-        let k8 = cellActive(cell.x, cell.y+1) * rule[7] ;
-        let k9 = cellActive(cell.x+1, cell.y+1) * rule[8] ;
+        let k1 = cellValue(cell.x-1, cell.y-1) * rule[0];
+        let k2 = cellValue(cell.x, cell.y-1) * rule[1] ;
+        let k3 = cellValue(cell.x+1, cell.y-1) * rule[2] ;
+        let k4 = cellValue(cell.x-1, cell.y) * rule[3] ;
+        let k5 = cellValue(cell.x, cell.y) * rule[4] ;
+        let k6 = cellValue(cell.x+1, cell.y) * rule[5] ;
+        let k7 = cellValue(cell.x-1, cell.y+1) * rule[6] ;
+        let k8 = cellValue(cell.x, cell.y+1) * rule[7] ;
+        let k9 = cellValue(cell.x+1, cell.y+1) * rule[8] ;
 
         let result = k1 + k2 + k3 + k4 + k5 + k6 + k7 + k8 + k9 ;
-        let threshold = u32(0.5);
 
-        if result > threshold {
-            cellStateOut[i] = 1;
-        } else {
-            cellStateOut[i] = 0;
-        }
-
-        
+        cellStateOut[i] = result;
+                
     }`;

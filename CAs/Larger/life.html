@@ -7,16 +7,13 @@
   </head>
 
   <div class="text-column">
-    <h1>Game of Life</h1>
+    <h1>Larger Than Life</h1>
   </div>
 
   <body>
-    <div class="centre">
-      <!-- Buttons corresponding to key clicks -->
-      <button id="play">Play/Pause</button>
-      <button id="next">Next Frame</button>
       
-      <!-- Instructions for rulestring input -->
+    <!-- Instructions for rulestring input -->
+    <div class="centre">
       <h3>Larger than life rulestring</h3>
       <p>Rulestring is given as Rr, Cc, Ss, Bb, Nn where:</p>
       <p> r is the radius in units<br>
@@ -34,38 +31,40 @@
         <li>(N) <i>von Neumann Neighbourhood</i>: all cells within the <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Manhatten distance</a> specified by the given radius</li>
         <li>(C) <i>Circular</i>: all cells within the actual (circular) radius, measured in cell lengths</li>
       </ul>
-      <!-- Input Box for Simulation Parameters -->
-        <!-- 
-          Boxes arranged as follows for user conveniance: 
-          R[<input>], C[<input>], S[<input>], B[<input>], N[<input>]
-          Input is restricted
-        -->
-      <div>
-        <p>
-          <label for="simulationInputR">R</label><input class="ltlRuleIn" type="number" id="simulationInputR" value="1" maxlength="3">,
-          <label for="simulationInputC">C</label><input class="ltlRuleIn" type="number" id="simulationInputC" value="0">, 
-          <label for="simulationInputS">S</label><input class="ltlRuleIn" type="text" id="simulationInputS" value="2-3" pattern="[0-9]|-|,">, 
-          <label for="simulationInputB">B</label><input class="ltlRuleIn" type="text" id="simulationInputB" value="3">, 
-          <label for="simulationInputN">N</label><input class="ltlRuleIn" type="text" id="simulationInputN" value="M">
-          <button id="submitInput">Submit Rule</button>
-        </p>
-      </div>
+    </div>
+    <div class="controlPanel">
+      <!-- Buttons corresponding to key clicks -->
+      <button id="play">Play/Pause</button>
+      <button id="next">Next Frame</button>
+      <button id="randomise">Randomise Grid</button>
+      <br>
 
+      <!-- Input Box for Simulation Parameters -->
+      <!-- 
+        Boxes arranged as follows for user conveniance: 
+        R[<input>], C[<input>], S[<input>], B[<input>], N[<input>]
+        Input is restricted
+      -->
+      <label for="simulationInputR">R</label><input class="ltlRuleIn" type="number" id="simulationInputR" value="1" maxlength="3">,
+      <label for="simulationInputC">C</label><input class="ltlRuleIn" type="number" id="simulationInputC" value="0">, 
+      <label for="simulationInputS">S</label><input class="ltlRuleIn" type="text" id="simulationInputS" value="2-3" pattern="[0-9]|-|,">, 
+      <label for="simulationInputB">B</label><input class="ltlRuleIn" type="text" id="simulationInputB" value="3">, 
+      <label for="simulationInputN">N</label><input class="ltlRuleIn" type="text" id="simulationInputN" value="M">
+      <button id="submitInput">Submit Rule</button>
 
       <!-- Input Box for Speed -->
-      <div>
-        <input type="text" id="speedInputBox" placeholder="1-100:3">
-        <button id="speedInput">Submit Speed </button>
-      </div>
+      <br>
+      <label for="speedInputBox">Speed(1-100):</label><input type="text" id="speedInputBox" value="100">
+      <button id="speedInput">Submit Speed </button>
 
-      <!-- Selection options for templates -->
-      <div>
-        <label for="templateSelect">Starting Template:</label>
-        <select id="templateSelect">
-          <!-- See javascript -->
-        </select>
-        <button id="reset">Reset</button>
-      </div>
+        <!-- Selection options for templates -->
+      <br>
+      <label for="templateSelect">Starting Template:</label>
+      <select id="templateSelect">
+        <!-- See javascript -->
+      </select>
+      <button id="reset">Reset</button>
+
 
     </div>
 
