@@ -17,26 +17,8 @@ const canvas = DeviceManager.canvas
 
 // Set global variables
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
-const INITIAL_STATE = startingPatterns.bsc_bug;
+const INITIAL_STATE = startingPatterns[3];
 const GRID_SIZE = INITIAL_STATE.minGrid*4;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
-// [
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
-//     0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1,
-//     0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0,
-//     0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0,
-//     0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1,
-//     0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-// ];
 
 EventManager.ruleString = INITIAL_STATE.rule;
 
@@ -133,6 +115,20 @@ renderPass(encoder);
 device.queue.submit([encoder.finish()]);
 
 EventManager.bindEvents();
+
+EventManager.getRule = () => { 
+    let ruleString = "R";
+    ruleString += document.getElementById("simulationInputR").value;
+    ruleString += ",C";
+    ruleString += document.getElementById("simulationInputC").value;
+    ruleString += ",S";
+    ruleString += document.getElementById("simulationInputS").value;
+    ruleString += ",B";
+    ruleString += document.getElementById("simulationInputB").value;
+    ruleString += ",N";
+    ruleString += document.getElementById("simulationInputN").value;
+    return ruleString;
+}
 
 EventManager.updateLoop = () => {
 

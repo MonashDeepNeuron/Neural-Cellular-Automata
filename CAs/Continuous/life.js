@@ -19,26 +19,16 @@ const canvas = DeviceManager.canvas
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
 const INITIAL_STATE = startingPatterns.cgl_B29;
 const GRID_SIZE = INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
-// [
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
-//     0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1,
-//     0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0,
-//     0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0,
-//     0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1,
-//     0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-// ];
 
 EventManager.ruleString = INITIAL_STATE.rule;
+EventManager.getRule = () => {
+    let ruleString = "";
+    for (let i = 0; i < 10; i++){
+        ruleString += (document.getElementById('kernel' + i).value + ',');
+    }
+    console.log(`The rule string is ${ruleString}`);
+    return ruleString;
+}
 
 const SQUARE_VERTICIES = new Float32Array([
     // X,    Y,
@@ -122,7 +112,7 @@ const simulationPipeline = device.createComputePipeline({
     }
 });
 
-const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, EventManager.kernel);
+const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
 
 
 // INITIAL CANVAS SETUP, 1st render pass
@@ -146,12 +136,13 @@ EventManager.updateLoop = () => {
     }
 
     // check for new rule string
-    if (EventManager.newKernel) {
-        const ruleStorage = BufferManager.setRuleBuffer(device, EventManager.kernel);
+    if (EventManager.newRuleString) {
+        const ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
   
-        EventManager.newKernel = false // toggle off
+        EventManager.newRuleString = false // toggle off
+
     }
 
     const encoder = device.createCommandEncoder();

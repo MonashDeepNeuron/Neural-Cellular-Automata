@@ -22,8 +22,19 @@
       R[<input>], C[<input>], S[<input>], B[<input>], N[<input>]
       We can then restrict input to numerical only with html I believe.
     -->
-    <input type="text" id="simulationInput" placeholder="Enter rulestring :3">
-    <button id="submitInput">Submit Rule</button>
+
+    <div>
+      <p>
+        <label>R</label><input class="ruleIn" type="number" id="simulationInputR" value="2" maxlength="3">, 
+        C<input class="ruleIn" type="number" id="simulationInputC" value="0">, 
+        S<input class="ruleIn" type="text" id="simulationInputS" value="33-57" pattern="[0-9]|-|,">, 
+        B<input class="ruleIn" type="text" id="simulationInputB" value="34-45">, 
+        N<input class="ruleIn" type="text" id="simulationInputN" value="M">
+        <button id="submitInput">Submit Rule</button>
+      </p>
+    
+    </div>
+
 
     <!-- Input Box for Speed -->
     <input type="text" id="speedInputBox" placeholder="1-100:3">
