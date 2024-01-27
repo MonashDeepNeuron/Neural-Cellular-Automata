@@ -53,6 +53,11 @@ EventManager.getRule = () => {
 
 let select = document.getElementById("templateSelect");
 
+let template = document.createElement("option");
+template.text = "Random";
+template.value = -1;
+select.add(template);
+
 for (let i = 0; i < startingPatterns.length; i++) {
     let template = document.createElement("option");
     template.text = startingPatterns[i].name;
@@ -148,41 +153,33 @@ EventManager.bindEvents();
 const updateLoop = () => {
 
 
-    if (EventManager.resetTemplate || EventManager.randomiseGrid) {
-
-        // Assume that reset template and radomise grid are mutually exclusive events
-        // Prioritise resetTemplate
-
+    if (EventManager.resetTemplate) {
         console.log(`Resetting canvas bump`)
-        let newRuleStorage = null;
         let initialState = null;
-
-        if (EventManager.resetTemplate) {
+        if (EventManager.templateNo >= 0) {
             initialState = startingPatterns[EventManager.templateNo];
-            EventManager.ruleString = initialState.rule;
-            newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        } else {
-            newRuleStorage = ruleStorage;
         }
-     
+
+        if (initialState != null) {
+            EventManager.ruleString = initialState.rule;
+        }
+
+        const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+
         const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
 
         cellStateStorage = newCellStateStorage;
-        ruleStorage = newRuleStorage;
         EventManager.resetTemplate = false;
-        EventManager.randomiseGrid = false;
         step = 0;
 
         displayRule(EventManager.ruleString);
-
     }
 
     // check for new rule string
     if (EventManager.newRuleString) {
         const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        ruleStorage = newRuleStorage;
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], newRuleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], newRuleStorage);
 
