@@ -2,6 +2,9 @@
 
 
 export function parseRuleString(ruleString) {
+
+    ruleString = ruleString.replace(/\s/g, "").toUpperCase(); // Cut out white space and assert uppercase
+
     console.log("Getting RULE...");
     // Larger than life rulestring
     // Rulestring is given as Rr, Cc, Ss Bb, Nn where:
@@ -35,7 +38,7 @@ export function parseRuleString(ruleString) {
     }
 
     let nextNumber = () => {
-        console.log(`Parsing at ${i}`);
+        //console.log(`Parsing at ${i}`);
         while (!isDigit(ruleString[i])){
             i++;
         }
@@ -44,7 +47,7 @@ export function parseRuleString(ruleString) {
         while (isDigit(ruleString[i])){
             i++;
         }
-        console.log(`Extracted ${ruleString.substring(numStart, i)}`)
+        //console.log(`Extracted ${ruleString.substring(numStart, i)}`)
         return Number(ruleString.substring(numStart, i));
     }
 
@@ -83,7 +86,7 @@ export function parseRuleString(ruleString) {
         ruleList[sConditionCountIndex]++;
 
         while (ruleString[i] != '-' && ruleString[i] != ','){
-            console.log(`Rejected ${ruleString[i]} in survive parse`);
+            //console.log(`Rejected ${ruleString[i]} in survive parse`);
             i++;
         }
 
@@ -98,7 +101,7 @@ export function parseRuleString(ruleString) {
     } // NOTE: this will over-push by one number i.e. it will include the 
      // number refered to by lastS
 
-    console.log(`Update after finding survivials: ${ruleList}`);
+    //console.log(`Update after finding survivials: ${ruleList}`);
     
     ruleList.push(0);
     let bConditionCountIndex = ruleList.length-1;
@@ -118,7 +121,7 @@ export function parseRuleString(ruleString) {
     }
 
     
-    console.log(`Last B range at index ${lastB}`);
+    //console.log(`Last B range at index ${lastB}`);
 
     // eg. 2-5, 7, 11-13, ...,
     // push 2, 5, -7, 11, 13, ...,
@@ -165,6 +168,86 @@ export function parseRuleString(ruleString) {
     console.log(ruleString);
     console.log(ruleList);
   return RULE
+}
+
+export function displayRule(ruleString){
+    console.log(`Displaying ${ruleString}`);
+    
+    let i = 0;
+    while (ruleString[i] != 'R'){
+        i++;
+    }
+    i++;
+
+    let R = "";
+
+    while (ruleString[i] != ','){
+        R += ruleString[i];
+        i++;
+    }
+
+    document.getElementById("simulationInputR").value = R;
+
+    while (ruleString[i] != 'C'){
+        i++;
+    }
+    i++;
+
+    let C = "";
+
+    while (ruleString[i] != ','){
+        C += ruleString[i];
+        i++;
+    }
+
+    document.getElementById("simulationInputC").value = C;
+
+    while (ruleString[i] != 'S'){
+        i++;
+    }
+    i++;
+
+
+    let sStart = i;
+
+    while (ruleString[i] != 'B'){
+        i++;
+    }
+
+    while (ruleString[i] != ','){
+        i--;
+    }
+    
+    
+    let S = ruleString.substring(sStart, i);
+    document.getElementById("simulationInputS").value = S;
+
+    while (ruleString[i] != 'B'){
+        i++;
+    }
+    i++;
+
+
+    let bStart = i;
+
+    while (ruleString[i] != 'N'){
+        i++;
+    }
+
+    while (ruleString[i] != ','){
+        i--;
+    }
+    
+    let B = ruleString.substring(bStart, i);
+
+    document.getElementById("simulationInputB").value = B;
+
+    while (ruleString[i] != 'N'){
+        i++;
+    }
+    i++;
+
+    document.getElementById("simulationInputN").value = ruleString[i];
 }
 
 

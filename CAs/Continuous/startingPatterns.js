@@ -1,4 +1,5 @@
 const spaceship1 = {
+    name:"Conway's life glider",
     pattern: [
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -26,8 +27,8 @@ const spaceship1 = {
 
 
 const littleThings = {
-  
-  pattern: [
+    name: "Conway's Life Common patterns",
+    pattern: [
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
@@ -45,13 +46,14 @@ const littleThings = {
             0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         ],
-  width: 16,
-  height: 16,
-  minGrid: 16,
-  rule:'0,0,0,0,0,0,0,0,1,'
+    width: 16,
+    height: 16,
+    minGrid: 16,
+    rule:'0,0,0,0,0,0,0,0,1,'
 };
 
 const B29 = {
+    name:"Conway's life B29 Glider",
     pattern: [
         0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -70,10 +72,8 @@ const B29 = {
 
 
 
-
-export default {
-    cgl_spaceship1: spaceship1,
-    cgl_littleThings: littleThings,
-    cgl_B29: B29,
-
-};
+export default [
+    spaceship1,
+    littleThings,
+    B29,
+];

@@ -1,3 +1,5 @@
+import EventManager from "../Shared/managers/EventManager";
+
 export function parseRuleString(ruleString) {
   // ruleString is given by the user. it is a string
   let RULE = new Uint32Array(1)
@@ -20,3 +22,7 @@ export function parseRuleString(ruleString) {
   return RULE
 }
 
+
+export function displayRule(ruleString){
+    document.getElementById("simulationInput").value = ruleString;
+}

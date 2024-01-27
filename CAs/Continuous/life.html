@@ -31,9 +31,20 @@
     </div>
     
     <!-- Input Box for Speed -->
-    <input type="text" id="speedInputBox" placeholder="1-100:3">
+    <label for="speedInputBox">Speed(1-100):</label><input type="text" id="speedInputBox" value="3">
     <button id="speedInput">Submit Speed </button>
+
+    
+    <!-- Selection options for templates -->
+    <div>
+      <label for="templateSelect">Starting Template:</label>
+      <select id="templateSelect">
+        <!-- See javascript -->
+      </select>
+      <button id="reset">Reset</button>
+    </div>
   </div>
+
 
   <!-- Canvas containing cellular automata -->
   <div> <canvas id="canvas" width="1024" height="1024" /> </div>

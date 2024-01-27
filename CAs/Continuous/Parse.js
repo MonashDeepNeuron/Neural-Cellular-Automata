@@ -29,3 +29,24 @@ export function parseRuleString(ruleString) {
 function isNumerical(c){ // Digits and "."
     return (c >= '0' && c <= '9') || (c == '.');
 }
+
+
+export function displayRule(ruleString){
+    let parseIndex = 0;
+
+    let nextNumber = () => {
+        while (!isNumerical(ruleString[parseIndex])){
+            parseIndex++;
+        }
+
+        let numStart = parseIndex;
+        while (isNumerical(ruleString[parseIndex])){
+            parseIndex++;
+        }
+        return Number(ruleString.substring(numStart, parseIndex));
+    }
+    
+    for (let i = 1; i < 10; i++){
+        document.getElementById("kernel" + i).value = nextNumber();
+    }
+}
