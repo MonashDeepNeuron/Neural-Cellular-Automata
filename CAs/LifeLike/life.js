@@ -171,7 +171,6 @@ EventManager.updateLoop = () => {
 
         EventManager.resetTemplate = false;
         step = 0;
-        EventManager.running = true;
         
         displayRule(EventManager.ruleString);
     }

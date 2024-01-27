@@ -17,9 +17,9 @@ const canvas = DeviceManager.canvas
 
 // Set global variables
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
-const INITIAL_TEMPLATE_NO = 4;
+const INITIAL_TEMPLATE_NO = 9;
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO-1];
-const GRID_SIZE = INITIAL_STATE.minGrid*4;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
+const GRID_SIZE = INITIAL_STATE.minGrid;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
 displayRule(EventManager.ruleString);
@@ -138,7 +138,7 @@ const simulationPipeline = device.createComputePipeline({
     }
 });
 
-const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
+let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString) );
 
 
 // INITIAL CANVAS SETUP, 1st render pass
@@ -178,9 +178,9 @@ EventManager.updateLoop = () => {
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
 
+        cellStateStorage = newCellStateStorage;
         EventManager.resetTemplate = false;
         step = 0;
-        EventManager.running = true;
 
         displayRule(EventManager.ruleString);
     }
@@ -215,7 +215,6 @@ EventManager.forcedUpdate = () => {
     EventManager.oneFrame = true;
     EventManager.updateLoop();
 }
-
 
 
 
