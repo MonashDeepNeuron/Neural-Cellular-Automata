@@ -6,6 +6,7 @@ export default class EventManager {
     static running = true;
     static newRuleString = false;
     static resetTemplate = false;
+    static randomiseGrid = false;
     static ruleString = "R5,S33-57,B34-45,NM"; // Start with Conway's life // Temporarily removed C2 as second entry
     static updateInterval = 50;
     static templateNo = 0;
@@ -18,24 +19,30 @@ export default class EventManager {
     static NEXT_FRAME_KEY = '.';
 
     static playPause() {
-        if (this.running) {
+        if (EventManager.running) {
             // Pause
-            clearInterval(this.loopID);
-            this.loopID = null;
+            clearInterval(EventManager.loopID);
+            EventManager.loopID = null;
         } else {
             // Play
-            this.loopID = setInterval(this.updateLoop, this.updateInterval);
+            EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval);
         };
 
-        this.running = !this.running;
+        EventManager.running = !EventManager.running;
     };
 
     static moveOneFrame() {
-        if (this.loopID != null) {
+        if (EventManager.loopID != null) {
             return;
         }
-        this.updateLoop(); // Forced update
+        EventManager.updateLoop(); // Forced update
     };
+
+
+    static randomise() {
+        EventManager.randomiseGrid = true;
+        EventManager.moveOneFrame();
+    }
 
 
     static keyListener(e) {
@@ -51,8 +58,10 @@ export default class EventManager {
     };
 
 
+
+
     static setUpdateLoop(newUpdateLoop) {
-        this.updateLoop = newUpdateLoop;
+        EventManager.updateLoop = newUpdateLoop;
 
     }
 
@@ -79,6 +88,7 @@ export default class EventManager {
     static bindEvents() {
         document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
         document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
+        document.getElementById('randomise').addEventListener('click', EventManager.randomise); //Randomise the grid 
         document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
         document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
         document.getElementById('reset').addEventListener('click', EventManager.resetCanvas);
