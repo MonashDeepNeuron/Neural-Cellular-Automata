@@ -141,7 +141,7 @@ device.queue.submit([encoder.finish()]);
 
 EventManager.bindEvents();
 
-const updateLoop = () => {
+EventManager.updateLoop = () => {
 
     if (EventManager.resetTemplate) {
         console.log(`Resetting canvas bump`)
@@ -190,9 +190,14 @@ const updateLoop = () => {
 }
 
 
+
 // start iterative update for cells
 EventManager.setUpdateLoop(updateLoop);
 EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
+
+
+
+
 
 
 // FUNCTIONS for convenient break-up of code
