@@ -130,7 +130,7 @@ const cellPipeline = device.createRenderPipeline({
 
 // Create the compute shader that will process the game of life simulation.
 const simulationShaderModule = device.createShaderModule({
-    label: "Life simulation shader",
+    label: "neighbourhood shader",
     code: /*wgsl*/`
     @group(0) @binding(0) var<uniform> grid: vec2f;
 
@@ -146,23 +146,29 @@ const simulationShaderModule = device.createShaderModule({
       return cellStateIn[cellIndex(vec2(x, y))];
     }
 
-    /*
-    fn offset(num1: u32, num2: u32, grid_size) -> u32 {
-        let guess1 = abs(num1 - num2) ;
-        let guess2 = abs( abs(num1 - num2) - grid_size)
-
-        iff guess is pos, then num1 is bigger
-        iff guess is neg, then num2 is bigger
+    
+    fn offset(num1: u32, num2: u32, grid_size: u32) -> u32 {
+        let coord1 = abs(num1) % grid_size ; 
+        let coord2 = abs(num2) % grid_size ;
+        let guess = abs(coord1 - coord2);
+        
+        return guess; 
     }
-    */
+
+    /*
+    fn isClose(offset_x: u32, offset_y: u32, radius) -> bool {
+        let distance = offset_x + offset_y
+
+        return distance < max_dist ;
+    } */
+    
 
     @compute @workgroup_size(${WORKGROUP_SIZE}, ${WORKGROUP_SIZE})
     fn computeMain(@builtin(global_invocation_id) cell: vec3u) {
-        let radius = 12u ;
-        let max_dist = radius * radius ;
-        let distance = cell.x * cell.x + cell.y * cell.y ; 
+        let origin = vec2u(16, 16) ;
+        let distance = abs(origin.x - cell.x) + abs(origin.y - cell.y) ;
         let i = cellIndex(cell.xy);
-        if (distance < max_dist){ cellStateOut[i] = 1; } 
+        if (distance < 4){ cellStateOut[i] = 1; } 
         else { cellStateOut[i] = 0; }
         // problem. the wrap around doesn't work
         // solution. wrap around the distance as well
