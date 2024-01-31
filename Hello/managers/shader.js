@@ -9,6 +9,7 @@ export default class shaderManager {
             }
             `
     }
+
     static fragmentShader = {
         label: "fragment shader",
         code:
