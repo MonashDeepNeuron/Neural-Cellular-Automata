@@ -146,6 +146,16 @@ const simulationShaderModule = device.createShaderModule({
       return cellStateIn[cellIndex(vec2(x, y))];
     }
 
+    /*
+    fn offset(num1: u32, num2: u32, grid_size) -> u32 {
+        let guess1 = abs(num1 - num2) ;
+        let guess2 = abs( abs(num1 - num2) - grid_size)
+
+        iff guess is pos, then num1 is bigger
+        iff guess is neg, then num2 is bigger
+    }
+    */
+
     @compute @workgroup_size(${WORKGROUP_SIZE}, ${WORKGROUP_SIZE})
     fn computeMain(@builtin(global_invocation_id) cell: vec3u) {
         let radius = 12u ;
@@ -154,7 +164,8 @@ const simulationShaderModule = device.createShaderModule({
         let i = cellIndex(cell.xy);
         if (distance < max_dist){ cellStateOut[i] = 1; } 
         else { cellStateOut[i] = 0; }
-        //problem. the wrap around doesn't work
+        // problem. the wrap around doesn't work
+        // solution. wrap around the distance as well
     }
   `
 });
