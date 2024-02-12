@@ -54,7 +54,7 @@
 
       <!-- Input Box for Speed -->
       <br>
-      <label for="speedInputBox">Speed(1-100):</label><input type="text" id="speedInputBox" value="100">
+      <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="3" min="1" max="100">
       <button id="speedInput">Submit Speed </button>
 
         <!-- Selection options for templates -->
@@ -69,7 +69,13 @@
     </div>
 
     <!-- Canvas containing cellular automata -->
-    <div> <canvas id="canvas" width="1024" height="1024" /> </div>
+    <div> 
+      <canvas id="canvas" width="1024" height="1024" />
+    </div>
+    <div class="canvasFooter">
+      <p id="cycleCounter">Update Cycles: null</p>
+    </div>
+
     <script type="module" src="life.js"></script>
   </body>
 

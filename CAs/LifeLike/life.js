@@ -24,6 +24,7 @@ const GRID_SIZE = INITIAL_STATE.minGrid * 2;//document.getElementById("canvas").
 
 
 EventManager.ruleString = INITIAL_STATE.rule;
+EventManager.updateSpeed();
 displayRule(EventManager.ruleString);
 
 EventManager.getRule = () => {
@@ -135,6 +136,7 @@ renderPass(encoder);
 // Finish the command buffer and immediately submit it.
 device.queue.submit([encoder.finish()]);
 
+// Attatch actions to inputs (buttons, keys)
 EventManager.bindEvents();
 
 const updateLoop = () => {
@@ -165,6 +167,7 @@ const updateLoop = () => {
         EventManager.resetTemplate = false;
         EventManager.randomiseGrid = false;
         step = 0;
+        EventManager.resetCycleCount();
 
         displayRule(EventManager.ruleString);
 
@@ -188,6 +191,8 @@ const updateLoop = () => {
     // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
     step++;
     renderPass(encoder);
+    EventManager.incrementCycleCount();
+
 
     // Finish the command buffer and immediately submit it.
     device.queue.submit([encoder.finish()]);

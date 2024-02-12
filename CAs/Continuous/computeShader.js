@@ -1,4 +1,8 @@
-export const computeShader =
+
+const ACTIVATION_FUNCTION_FLAG = '//INSERT ACTIVATION BETWEEN FLAGS';
+
+
+const computeShader =
     /*wgsl*/`
     @group(0) @binding(0) var<uniform> grid: vec2f;
     @group(0) @binding(1) var<storage> cellStateIn: array<f32>;
@@ -15,6 +19,17 @@ export const computeShader =
     fn cellValue(x : u32, y: u32) -> f32 {
         return cellStateIn[cellIndex(vec2(x,y))];
     }
+
+    // This part of the shader is replacable
+    fn applyActivation(x : f32) -> f32 {
+        ${ACTIVATION_FUNCTION_FLAG}
+        // This part here is replaceable, please do not edit out 
+        // as this is a flag to find this section to replace easily
+        // See function insertActivation()
+        return -1./pow(2., (0.6*pow(x, 2.)))+1.;
+        ${ACTIVATION_FUNCTION_FLAG}
+    }
+
 
     @compute @workgroup_size(WORKGROUP_SIZE, WORKGROUP_SIZE)
     fn computeMain(@builtin(global_invocation_id) cell: vec3u) {
@@ -37,6 +52,96 @@ export const computeShader =
 
         let result = k1 + k2 + k3 + k4 + k5 + k6 + k7 + k8 + k9 ;
 
-        cellStateOut[i] = result;
+        cellStateOut[i] = applyActivation(result);
                 
     }`;
+
+
+
+
+
+    export class ComputeShaderManager {
+
+        static currentComputeShaderText = "";
+        static currentActivation = "return x;";
+        static simulationPipeline = null;
+        static simulationShaderModule = null;
+        static newActivation = false;
+        static workgroupSize = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
+        static pipelineLayout = {}
+
+
+        static setWorkgroupSize(newSize){
+            this.workgroupSize = newSize;
+        }
+
+        static setPipelineLayout(newLayout){
+            this.pipelineLayout = newLayout;
+        }
+
+        static getComputeShaderWithActivation (activationFunctionString){
+            let shaderTemplate = computeShader.split(ACTIVATION_FUNCTION_FLAG);
+    
+            console.log(shaderTemplate);
+    
+            let newShader = shaderTemplate[0] + '\n' 
+                + ACTIVATION_FUNCTION_FLAG + '\n'
+                + activationFunctionString + '\n'
+                + ACTIVATION_FUNCTION_FLAG + '\n'
+                + shaderTemplate[2] ;
+            console.log(`NEW SHADER \n ${newShader}`)
+            return newShader;
+        }
+
+        static updateActivationField(activationText){
+            document.getElementById("activationTextField").value = activationText;
+        }
+        
+        static getActivationFieldText(){
+            return document.getElementById("activationTextField").value;
+        }
+
+        static submitActivation(){
+            ComputeShaderManager.newActivation = true;
+            const newActivaiton = ComputeShaderManager.getActivationFieldText();
+            ComputeShaderManager.updateActivationField(newActivaiton);
+            const newComputeShader = ComputeShaderManager.getComputeShaderWithActivation(newActivaiton);
+            ComputeShaderManager.currentActivation = newActivaiton;
+            ComputeShaderManager.currentComputeShaderText = newComputeShader;
+            console.log(`CURRENT ACTIVATION: ${ComputeShaderManager.currentActivation}`);
+        }
+        
+
+        static compileNewSimulationPipeline(device){
+            // load shader module for running simulation
+            this.simulationShaderModule = device.createShaderModule({
+                label: 'shader that computes next state',
+                code: ComputeShaderManager.getComputeShaderWithActivation(this.currentActivation),
+                constants: { WORKGROUP_SIZE: this.workgroupSize }
+            }
+            );
+            // SIMULATION PIPELINE
+            this.simulationPipeline = device.createComputePipeline({
+                label: "Simulation pipeline",
+                layout: this.pipelineLayout,
+                compute: {
+                    module: this.simulationShaderModule,
+                    entryPoint: "computeMain",
+                }
+            });
+            
+            return { simulationModule:this.simulationShaderModule, simulationPipeline:this.simulationPipeline};
+
+        }
+
+        /**
+         * Initial setup for the compute shader including pipelines 
+         */
+        static initialSetup(device){
+            
+            document.getElementById("submitActivation").addEventListener("click", this.submitActivation);
+            this.submitActivation();
+            this.compileNewSimulationPipeline(device);
+            this.newActivaiton = false;
+        }
+    }

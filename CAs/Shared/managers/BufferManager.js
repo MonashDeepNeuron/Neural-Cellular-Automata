@@ -66,7 +66,7 @@ export default class BufferManager {
         ];
     
         // write to buffer A
-        if (initialState == null){
+        if (initialState == null || initialState.pattern == null){
             for (let i = 0; i < cellStateArray.length; i++) {
                 cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
             }

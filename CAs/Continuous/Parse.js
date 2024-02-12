@@ -27,7 +27,7 @@ export function parseRuleString(ruleString) {
 
 
 function isNumerical(c){ // Digits and "."
-    return (c >= '0' && c <= '9') || (c == '.');
+    return (c >= '0' && c <= '9') || (c == '.') || (c == '-');
 }
 
 

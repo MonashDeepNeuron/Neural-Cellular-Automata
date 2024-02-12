@@ -24,14 +24,26 @@ canvas {
     border: 5px solid #ffffff;
 }
 
-
-.controlPanel {
+/* Interactive elements styling*/
+.controlPanel, .canvasFooter {
     display: block;
     border: 1px solid #a08989;
-    margin: auto;
-    padding: 10px 10px;
     background-color: #e6e6e6;
+}
+
+/* Control panel sizing*/
+.controlPanel {
     width: 700px;
+    margin: auto;
+    padding: 2.5%;
+    justify-content:right;
+}
+
+.canvasFooter{
+    display: block;
+    margin:auto;
+    width:1024px;
+    padding:0px 10px;
 
 }
 
@@ -44,6 +56,7 @@ canvas {
 
 /* Button Styling */
 button {
+    display:inline-block;
     background-color: pink;
     color: white;
     border: none;
@@ -63,7 +76,8 @@ button:hover {
 }
 
 /* Input box styling*/
-input, select{
+input, select, textarea{
+    display: inline-block;
     font-family: Arial, sans-serif;
     font-size: 20px;
     background-color: #ffffff;
@@ -79,5 +93,13 @@ input, select{
 }
 
 .kernelRuleIn{
-    width:100px;
+    width:29.65%;
+}
+
+
+textarea {
+    display: inline-block;
+    width:96.65%;
+    height:100px;
+    margin: 0;
 }

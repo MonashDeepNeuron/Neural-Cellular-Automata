@@ -19,7 +19,7 @@ export const guiShader =
         VertexOutput {
 
         let i = f32(input.instance);
-        let state = f32(cellState[input.instance]);
+        let state = cellState[input.instance];
 
         let cell = vec2f(i % grid.x, floor(i/grid.x));
         let cellOffset = cell/grid *2;
@@ -45,8 +45,8 @@ export const guiShader =
     }
 
     @fragment
-    fn fragmentMain(@location(0) cell: vec2f, @location(1) @interpolate(flat) cellInstance: u32) -> @location(0) vec4f {
-        let state = f32(cellState[cellInstance]);
+    fn fragmentMain(vertexOut : VertexOutput) -> @location(0) vec4f {
+        let state = f32(cellState[vertexOut.cellInstance]);
         var intensity = f32(1);
         if (state >= 0 && state < 1){
             intensity = state;

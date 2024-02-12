@@ -1,49 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="utf-8" />
-  <title>WebGPU Life: LifeLike</title>
-  <link rel="stylesheet" href="../Shared/style.css"> <!-- Link to the CSS file -->
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <title>WebGPU Life: LifeLike</title>
+    <link rel="stylesheet" href="../Shared/style.css"> <!-- Link to the CSS file -->
+  </head>
 
-<div class="text-column">
-  <h1>LifeLike Cellular Automata</h1>
-</div>
-
-<body>
-  <div class="centre">
-    
+  <div class="text-column">
+    <h1>LifeLike Cellular Automata</h1>
   </div>
 
-  <div class="controlPanel">
-    <!-- Buttons corresponding to key clicks -->
-    <button id="play">Play/Pause</button>
-    <button id="next">Next Frame</button>
-    <button id="randomise">Randomise Grid</button>
-    <br>
+  <body>
+    <div class="controlPanel">
+      <!-- Input Box for Simulation Parameters -->
+      <label for="simulationInput">Rulestring:</label><input type="text" id="simulationInput" value="23/3" pattern="[0-8]*/[0-8]*">
+      <button id="submitInput">Submit Rule</button>
+      <br>
 
-    <!-- Input Box for Simulation Parameters -->
-    <label for="simulationInput">Rulestring:</label><input type="text" id="simulationInput" value="23/3" pattern="[0-8]*/[0-8]*">
-    <button id="submitInput">Submit Rule</button>
-    <br>
+      <!-- Input Box for Speed -->
+      <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="3" min="1" max="100">
+      <button id="speedInput">Submit Speed </button>
+      <br>
 
-    <!-- Input Box for Speed -->
-    <label for="speedInputBox">Speed(1-100):</label><input type="text" id="speedInputBox" value="100">
-    <button id="speedInput">Submit Speed </button>
-    <br>
+      <!-- Selection options for templates -->
+      <label for="templateSelect">Starting Template:</label>
+      <select id="templateSelect">
+        <!-- See javascript -->
+      </select>
+      <button id="reset">Reset</button>
+      <br>
+      
+      <!-- Buttons corresponding to key clicks -->
+      <button id="play">Play/Pause</button>
+      <button id="next">Next Frame</button>
+      <button id="randomise">Randomise Grid</button>
 
-    <!-- Selection options for templates -->
-    <label for="templateSelect">Starting Template:</label>
-    <select id="templateSelect">
-      <!-- See javascript -->
-    </select>
-    <button id="reset">Reset</button>
-  </div>
+    </div>
 
-  <!-- Canvas containing cellular automata -->
-  <div> <canvas id="canvas" width="1024" height="1024" /> </div>
-  <script type="module" src="life.js"></script>
-</body>
+    <!-- Canvas containing cellular automata -->
+    <div> 
+      <canvas id="canvas" width="1024" height="1024" />
+    </div>
+    <div class="canvasFooter">
+      <p id="cycleCounter">Update Cycles: null</p>
+    </div>
+
+    <script type="module" src="life.js"></script>
+  </body>
 
 </html>

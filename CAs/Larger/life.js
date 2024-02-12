@@ -22,6 +22,7 @@ const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = INITIAL_STATE.minGrid;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
+EventManager.updateSpeed();
 displayRule(EventManager.ruleString);
 
 const SQUARE_VERTICIES = new Float32Array([
@@ -143,6 +144,7 @@ renderPass(encoder);
 // Finish the command buffer and immediately submit it.
 device.queue.submit([encoder.finish()]);
 
+// Attatch actions to inputs (buttons, keys)
 EventManager.bindEvents();
 
 const updateLoop = () => {
@@ -174,6 +176,7 @@ const updateLoop = () => {
         EventManager.resetTemplate = false;
         EventManager.randomiseGrid = false;
         step = 0;
+        EventManager.resetCycleCount();
 
         displayRule(EventManager.ruleString);
 
@@ -197,6 +200,7 @@ const updateLoop = () => {
     // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
     step++;
     renderPass(encoder);
+    EventManager.incrementCycleCount();
 
     // Finish the command buffer and immediately submit it.
     device.queue.submit([encoder.finish()]);

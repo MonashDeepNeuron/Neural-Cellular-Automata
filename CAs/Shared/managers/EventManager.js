@@ -8,11 +8,13 @@ export default class EventManager {
     static resetTemplate = false;
     static randomiseGrid = false;
     static ruleString = ""; // Start with Conway's life // Temporarily removed C2 as second entry
-    static updateInterval = 50;
+    static updateInterval = 500;
     static templateNo = 0;
     static loopID = 0; // Update interval
     static updateLoop = () => { }; // Set in versions of life.js
     static getRule = () => { }; // Caters for different interface setups
+
+    static cycles = 0; // The current number of update cycles since reset
 
     // key bindings
     static PLAY_PAUSE_KEY = 'k';
@@ -75,7 +77,7 @@ export default class EventManager {
 
     static updateSpeed() {
         const inputSpeed = document.getElementById('speedInputBox').value;
-        const newUpdateInterval = 50 + (2 * (100 - inputSpeed));
+        const newUpdateInterval = 1000/inputSpeed; // update interval in ms, ends up as inputSpeed fps
         EventManager.updateInterval = newUpdateInterval;
     }
 
@@ -99,4 +101,16 @@ export default class EventManager {
             EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval)
         }); // change speed
     }
+
+    static incrementCycleCount(){
+        this.cycles = this.cycles +1;
+        document.getElementById('cycleCounter').innerText = "Update Cycles:" + this.cycles;
+    }
+
+    static resetCycleCount(){
+        this.cycles = 0;
+        document.getElementById('cycleCounter').innerText = "Update Cycles:" + this.cycles;
+    }
+
+
 }
