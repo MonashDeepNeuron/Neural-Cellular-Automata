@@ -19,7 +19,7 @@ const canvas = DeviceManager.canvas;
 // Set global variables
 const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
 const INITIAL_TEMPLATE_NO = 2;
-const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO-1];
+const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = 1024;//INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
@@ -39,9 +39,9 @@ const SQUARE_VERTICIES = new Float32Array([
 
 EventManager.getRule = () => {
     let ruleString = "";
-    for (let i = 1; i < 10; i++){
+    for (let i = 1; i < 10; i++) {
         let nextVal = document.getElementById(`kernel${i}`).value;
-        if (nextVal == null || nextVal == ""){
+        if (nextVal == null || nextVal == "") {
             nextVal = 0;
         }
         ruleString += (nextVal + ',');
@@ -144,7 +144,7 @@ const updateLoop = () => {
 
 
     if (EventManager.resetTemplate || EventManager.randomiseGrid) {
-        
+
         // Assume that reset template and radomise grid are mutually exclusive events
         // Prioritise resetTemplate
 
@@ -164,7 +164,7 @@ const updateLoop = () => {
         } else {
             newRuleStorage = ruleStorage;
         }
-     
+
         const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
@@ -179,7 +179,7 @@ const updateLoop = () => {
         displayRule(EventManager.ruleString);
     }
 
-    if (ComputeShaderManager.newActivation){
+    if (ComputeShaderManager.newActivation) {
         ComputeShaderManager.compileNewSimulationPipeline(device);
         ComputeShaderManager.newActivation = false;
     }
@@ -234,7 +234,7 @@ function renderPass(encoder) {
     // Draw the features
     renderPass.setPipeline(renderPipeline);
     renderPass.setVertexBuffer(0, vertexBuffer);
-    renderPass.setBindGroup(0, bindGroups[step % 2]);
+    renderPass.setBindGroup(0, bindGroups[0]);
     renderPass.draw(SQUARE_VERTICIES.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
     renderPass.end();
 }
