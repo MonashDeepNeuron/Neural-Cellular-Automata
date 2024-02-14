@@ -39,7 +39,7 @@ const worms = {
 
 const waves = {
     name: "Waves (experimental)",
-    pattern: [0, 1, 0],
+    pattern: null,
     width: 16,
     height: 16,
     minGrid: 1024,
