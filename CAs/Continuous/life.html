@@ -1,69 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="utf-8" />
-    <title>WebGPU Life</title>
-    <link rel="stylesheet" href="../Shared/style.css"> <!-- Link to the CSS file -->
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <title>WebGPU Life</title>
+  <link rel="stylesheet" href="../Shared/style.css"> <!-- Link to the CSS file -->
+</head>
 
-  <div class="text-column">
-    <h1>Continuous Automata</h1>
+<div class="text-column">
+  <h1>Continuous Automata</h1>
+</div>
+
+<body>
+  <div class="controlPanel">
+    <div class="grid">
+      <input class="kernelRuleIn" type="number" id="kernel1" placeholder="0.11">
+      <input class="kernelRuleIn" type="number" id="kernel2" placeholder="0.11">
+      <input class="kernelRuleIn" type="number" id="kernel3" placeholder="0.11">
+      <br>
+      <input class="kernelRuleIn" type="number" id="kernel4" placeholder="0.11">
+      <input class="kernelRuleIn" type="number" id="kernel5" placeholder="0.11">
+      <input class="kernelRuleIn" type="number" id="kernel6" placeholder="0.11">
+      <br>
+      <input class="kernelRuleIn" type="number" id="kernel7" placeholder="0.11">
+      <input class="kernelRuleIn" type="number" id="kernel8" placeholder="0.11">
+      <input class="kernelRuleIn" type="number" id="kernel9" placeholder="0.11">
+    </div>
+    <button id="submitInput">Submit Kernel</button>
+    <br>
+
+    <textarea id="activationTextField">Activation function...</textarea>
+    <button id="submitActivation">Submit Activation</button>
+
+    <br>
+
+    <!-- Input Box for Speed -->
+    <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="60" min="1" max="100">
+    <button id="speedInput">Submit Speed</button>
+    <br>
+
+    <!-- Selection options for templates -->
+    <label for="templateSelect">Starting Template:</label>
+    <select id="templateSelect">
+      <!-- See javascript -->
+    </select>
+    <button id="reset">Reset</button>
+    <br>
+
+    <!-- Buttons corresponding to key clicks -->
+    <button id="play">Play/Pause</button>
+    <button id="next">Next Frame</button>
+    <button id="randomise">Randomise Grid</button>
+
   </div>
 
-  <body>
-    <div class="controlPanel">
-      <div class="grid">
-        <input class="kernelRuleIn" type="number" id="kernel1" placeholder="0.11">
-        <input class="kernelRuleIn" type="number" id="kernel2" placeholder="0.11">
-        <input class="kernelRuleIn" type="number" id="kernel3" placeholder="0.11">
-        <br>
-        <input class="kernelRuleIn" type="number" id="kernel4" placeholder="0.11">
-        <input class="kernelRuleIn" type="number" id="kernel5" placeholder="0.11">
-        <input class="kernelRuleIn" type="number" id="kernel6" placeholder="0.11">
-        <br>
-        <input class="kernelRuleIn" type="number" id="kernel7" placeholder="0.11"> 
-        <input class="kernelRuleIn" type="number" id="kernel8" placeholder="0.11">
-        <input class="kernelRuleIn" type="number" id="kernel9" placeholder="0.11">
-      </div>
-      <button id="submitInput">Submit Kernel</button>
-      <br>
-      
-      <textarea id="activationTextField">Activation function...</textarea>
-      <button id="submitActivation">Submit Activation</button>
 
-      <br>
+  <!-- Canvas containing cellular automata -->
+  <div>
+    <canvas id="canvas" width="1024" height="1024" />
+  </div>
+  <div class="canvasFooter">
+    <p id="cycleCounter">Update Cycles: null</p>
+  </div>
 
-      <!-- Input Box for Speed -->
-      <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="3" min="1" max="100">
-      <button id="speedInput">Submit Speed</button>
-      <br>
-      
-      <!-- Selection options for templates -->
-      <label for="templateSelect">Starting Template:</label>
-      <select id="templateSelect">
-        <!-- See javascript -->
-      </select>
-      <button id="reset">Reset</button>
-      <br>
-        
-      <!-- Buttons corresponding to key clicks -->
-      <button id="play">Play/Pause</button>
-      <button id="next">Next Frame</button>
-      <button id="randomise">Randomise Grid</button>
-
-    </div>
-
-
-    <!-- Canvas containing cellular automata -->
-    <div> 
-      <canvas id="canvas" width="1024" height="1024" />
-    </div>
-    <div class="canvasFooter">
-      <p id="cycleCounter">Update Cycles: null</p>
-    </div>
-    
-    <script type="module" src="life.js"></script>
-  </body>
+  <script type="module" src="life.js"></script>
+</body>
 
 </html>
