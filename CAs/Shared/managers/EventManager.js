@@ -1,20 +1,29 @@
 // static class used to handle and process events
 // it uses the default constructor
 
+// NOTE: do not refer to this class as 'this' in this file
+// Many functions are used as event triggered functions and for some reason this
+// does not work well for these applications.
+// I have no idea why but switching to 'EventManager' on these functions solved the issue
+// Potentially a script language thing (as opposed to complied)
+
 export default class EventManager {
     // event related global variables
-    static running = true;
+    static running = false;
     static newRuleString = false;
     static resetTemplate = false;
     static randomiseGrid = false;
     static ruleString = ""; // Start with Conway's life // Temporarily removed C2 as second entry
-    static updateInterval = 500; // Ignore this preset number, should be reset immediately at the top of each script
     static templateNo = 1;
-    static loopID = 0; // Update interval
+    static loopID = null; // Update interval
     static updateLoop = () => { }; // Set in versions of life.js
     static getRule = () => { }; // Caters for different interface setups
     
+    
+    static updateInterval = 500; // Ignore EventManager preset number, should be reset immediately at the top of each script
+    static currentSpeed = 60; // Speed in fps
     static framesPerUpdateLoop = 1;
+    static skipEvenFrames = false;
     static cycles = 0; // The current number of update cycles since reset
     static MAX_FPS = 30;
 
@@ -70,20 +79,31 @@ export default class EventManager {
     static updateRuleString() {
         EventManager.newRuleString = true
         EventManager.ruleString = EventManager.getRule();
-        EventManager.updateLoop()
+        EventManager.updateLoop(EventManager.currentSpeed);
     };
 
+    static submitSpeed() {
+        EventManager.currentSpeed = document.getElementById('speedInputBox').value;
+        EventManager.updateSpeed(EventManager.currentSpeed);
+        if (EventManager.running){
+            clearInterval(EventManager.loopID);
+            EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval)
+        }
+    }
 
-    static updateSpeed() {
-        const inputSpeed = document.getElementById('speedInputBox').value;
+    static updateSpeed(inputSpeed) {
         if (inputSpeed > EventManager.MAX_FPS) {
             EventManager.framesPerUpdateLoop = Math.round(inputSpeed/EventManager.MAX_FPS);
-            EventManager.updateInterval = 1000/(inputSpeed/EventManager.framesPerUpdateLoop);
         } else {
             EventManager.framesPerUpdateLoop = 1;
-            EventManager.updateInterval = 1000/(inputSpeed);
         }
-        document.getElementById("framesDisplayed").innerHTML = `Displays every <b>${EventManager.framesPerUpdateLoop}</b> frames`;
+        EventManager.updateInterval = 1000/(inputSpeed/EventManager.framesPerUpdateLoop);
+        
+        if (EventManager.skipEvenFrames) {
+            EventManager.framesPerUpdateLoop = EventManager.framesPerUpdateLoop*2;
+        }
+        
+        document.getElementById("framesDisplayed").innerHTML = `Displays every <b>${EventManager.framesPerUpdateLoop}</b> updates (updates per sec: ${Math.round(1000*EventManager.framesPerUpdateLoop/EventManager.updateInterval)})`;
     }
 
     static resetCanvas() {
@@ -93,6 +113,13 @@ export default class EventManager {
         EventManager.updateLoop();
     }
 
+
+    static evenFramesCheckboxClicked() {
+        EventManager.skipEvenFrames = document.getElementById("skipEvenCheckbox").checked;
+        console.log(`Checkbox = ${EventManager.skipEvenFrames}`);
+        EventManager.updateSpeed(EventManager.currentSpeed);
+    }
+
     static bindEvents() {
         document.getElementById('play').addEventListener('click', EventManager.playPause);  // play pause button
         document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
@@ -100,24 +127,21 @@ export default class EventManager {
         document.getElementsByTagName("body")[0].addEventListener("keydown", EventManager.keyListener); // key presses
         document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
         document.getElementById('reset').addEventListener('click', EventManager.resetCanvas);
-        document.getElementById('speedInput').addEventListener('click', () => {
-            EventManager.updateSpeed();
-            clearInterval(EventManager.loopID);
-            EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval)
-        }); // change speed
+        document.getElementById('speedInput').addEventListener('click', EventManager.submitSpeed); // change speed
+        document.getElementById('skipEvenCheckbox').addEventListener('change', EventManager.evenFramesCheckboxClicked);
     }
 
     static incrementCycleCount(){
-        this.cycles = this.cycles +1;
+        EventManager.cycles = EventManager.cycles +1;
     }
 
     static updateCyclesDisplay(){
-        document.getElementById('cycleCounter').innerText = "Update Cycles:" + this.cycles;
+        document.getElementById('cycleCounter').innerText = "Update Cycles:" + EventManager.cycles;
     }
 
     static resetCycleCount(){
-        this.cycles = 0;
-        document.getElementById('cycleCounter').innerText = "Update Cycles:" + this.cycles;
+        EventManager.cycles = 0;
+        document.getElementById('cycleCounter').innerText = "Update Cycles:" + EventManager.cycles;
     }
 
 

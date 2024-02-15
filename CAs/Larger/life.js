@@ -22,7 +22,7 @@ const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = INITIAL_STATE.minGrid;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
-EventManager.updateSpeed();
+EventManager.submitSpeed();
 displayRule(EventManager.ruleString);
 
 const SQUARE_VERTICIES = new Float32Array([
@@ -209,6 +209,12 @@ const updateLoop = () => {
         // In this case the output of the compute pass will be used as input, thus the opposite of
         // what was used for the compute pass. Hence increment after compute pass but before rendering frame
         EventManager.incrementCycleCount();
+        
+        if (EventManager.skipEvenFrames){
+            computePass(encoder);
+            step++; 
+            EventManager.incrementCycleCount();
+        }
     }
     
     // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
@@ -223,8 +229,7 @@ const updateLoop = () => {
 
 // start iterative update for cells
 EventManager.setUpdateLoop(updateLoop);
-EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
-
+EventManager.playPause();
 
 
 

@@ -24,7 +24,7 @@ const GRID_SIZE = INITIAL_STATE.minGrid * 2;//document.getElementById("canvas").
 
 
 EventManager.ruleString = INITIAL_STATE.rule;
-EventManager.updateSpeed();
+EventManager.submitSpeed();
 displayRule(EventManager.ruleString);
 
 EventManager.getRule = () => {
@@ -200,6 +200,12 @@ const updateLoop = () => {
         // In this case the output of the compute pass will be used as input, thus the opposite of
         // what was used for the compute pass. Hence increment after compute pass but before rendering frame
         EventManager.incrementCycleCount();
+
+        if (EventManager.skipEvenFrames){
+            computePass(encoder);
+            step++; 
+            EventManager.incrementCycleCount();
+        }
     }
     
     // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
@@ -213,7 +219,7 @@ const updateLoop = () => {
 
 // start iterative update for cells
 EventManager.setUpdateLoop(updateLoop);
-EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
+EventManager.playPause();
 
 
 // FUNCTIONS for convenient break-up of code

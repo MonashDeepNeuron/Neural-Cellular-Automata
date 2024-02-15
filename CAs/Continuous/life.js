@@ -23,7 +23,7 @@ const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = 1024;//INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
-EventManager.updateSpeed();
+EventManager.submitSpeed();
 
 displayRule(EventManager.ruleString);
 console.log(INITIAL_STATE)
@@ -210,11 +210,18 @@ const updateLoop = () => {
         } 
 
     } else { // Someone pressed do one frame, so update once
+        
         computePass(encoder);
         step++; // Note this counter primarily indicates which cell state should be used
         // In this case the output of the compute pass will be used as input, thus the opposite of
         // what was used for the compute pass. Hence increment after compute pass but before rendering frame
         EventManager.incrementCycleCount();
+
+        if (EventManager.skipEvenFrames){
+            computePass(encoder);
+            step++; 
+            EventManager.incrementCycleCount();
+        }
     }
     
     // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
@@ -229,7 +236,7 @@ const updateLoop = () => {
 
 // start iterative update for cells
 EventManager.setUpdateLoop(updateLoop);
-EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
+EventManager.playPause();
 
 
 
