@@ -8,13 +8,15 @@ export default class EventManager {
     static resetTemplate = false;
     static randomiseGrid = false;
     static ruleString = ""; // Start with Conway's life // Temporarily removed C2 as second entry
-    static updateInterval = 500;
-    static templateNo = 0;
+    static updateInterval = 500; // Ignore this preset number, should be reset immediately at the top of each script
+    static templateNo = 1;
     static loopID = 0; // Update interval
     static updateLoop = () => { }; // Set in versions of life.js
     static getRule = () => { }; // Caters for different interface setups
-
+    
+    static framesPerUpdateLoop = 1;
     static cycles = 0; // The current number of update cycles since reset
+    static MAX_FPS = 30;
 
     // key bindings
     static PLAY_PAUSE_KEY = 'k';
@@ -59,9 +61,6 @@ export default class EventManager {
         }
     };
 
-
-
-
     static setUpdateLoop(newUpdateLoop) {
         EventManager.updateLoop = newUpdateLoop;
 
@@ -77,8 +76,14 @@ export default class EventManager {
 
     static updateSpeed() {
         const inputSpeed = document.getElementById('speedInputBox').value;
-        const newUpdateInterval = 1000/inputSpeed; // update interval in ms, ends up as inputSpeed fps
-        EventManager.updateInterval = newUpdateInterval;
+        if (inputSpeed > EventManager.MAX_FPS) {
+            EventManager.framesPerUpdateLoop = Math.round(inputSpeed/EventManager.MAX_FPS);
+            EventManager.updateInterval = 1000/(inputSpeed/EventManager.framesPerUpdateLoop);
+        } else {
+            EventManager.framesPerUpdateLoop = 1;
+            EventManager.updateInterval = 1000/(inputSpeed);
+        }
+        document.getElementById("framesDisplayed").innerHTML = `Displays every <b>${EventManager.framesPerUpdateLoop}</b> frames`;
     }
 
     static resetCanvas() {
@@ -104,6 +109,9 @@ export default class EventManager {
 
     static incrementCycleCount(){
         this.cycles = this.cycles +1;
+    }
+
+    static updateCyclesDisplay(){
         document.getElementById('cycleCounter').innerText = "Update Cycles:" + this.cycles;
     }
 

@@ -1,6 +1,6 @@
 /* General Body Styling */
-body{
-    font-family: Arial, sans-serif;
+body {
+    font-family: Arial , Helvetica, sans-serif;
     font-size: 20px;
     background-color: #f0f0f0;
     margin: 0;
@@ -33,17 +33,27 @@ canvas {
 
 /* Control panel sizing*/
 .controlPanel {
+    display: flex block;
+    flex-flow: column;
     width: 700px;
     margin: auto;
     padding: 2.5%;
     justify-content:right;
 }
 
+.controlGroup {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+}
+
 .canvasFooter{
-    display: block;
+    display: block flex;
     margin:auto;
     width:1024px;
     padding:0px 10px;
+    align-content: space-around;
+    flex-flow: row wrap;
 
 }
 
@@ -64,10 +74,10 @@ button {
     margin: 5px;
     cursor: pointer;
     font-size: 20px;
-    font-family: Arial, Helvetica, sans-serif;
     font-weight: 900;
     border-radius: 5px;
     transition: background-color 0.3s;
+    flex-grow: 1;
 }
 
 button:hover {
@@ -76,16 +86,23 @@ button:hover {
 }
 
 /* Input box styling*/
-input, select, textarea{
-    display: inline-block;
-    font-family: Arial, sans-serif;
+input, select, textarea, .footerElement{
+    flex-direction: row;
     font-size: 20px;
     background-color: #ffffff;
     border: 1px solid #a08989;
     margin: 5px 0px;
     padding: 5px 10px;
+    height:min-content;
+    border-radius: 5px;
+    flex-grow: 50;
 }
 
+/* Input box label styling*/
+label {
+    flex-direction: row;
+    padding: 0;
+}
 
 .ltlRuleIn{
     width:50px;
@@ -93,13 +110,12 @@ input, select, textarea{
 }
 
 .kernelRuleIn{
-    width:29.65%;
+    width:25%;
 }
 
 
 textarea {
-    display: inline-block;
     width:96.65%;
     height:100px;
-    margin: 0;
 }
+

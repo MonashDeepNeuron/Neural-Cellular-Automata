@@ -66,11 +66,23 @@ const B29 = {
     activation: 'if (x == 3. || x == 11. || x == 12.){\nreturn 1.;\n}\nreturn 0.;'
 };
 
+const slimeGrid = {
+    name: "Slime Grid",
+    pattern: null,
+    width: 0,
+    height: 0,
+    minGrid: 1024,
+    rule: "0.8,-0.85,0.8,-0.85,-0.2,-0.85,0.8,-0.85,0.8",
+    activation: 'return -1./(0.89*pow(x, 2.)+1.)+1.;'
+}
+
+
 
 
 export default [
     spaceship1,
     worms,
     B29,
-    waves
+    waves,
+    slimeGrid
 ];

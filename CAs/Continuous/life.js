@@ -24,6 +24,7 @@ const GRID_SIZE = 1024;//INITIAL_STATE.minGrid*2;//document.getElementById("canv
 
 EventManager.ruleString = INITIAL_STATE.rule;
 EventManager.updateSpeed();
+
 displayRule(EventManager.ruleString);
 console.log(INITIAL_STATE)
 const SQUARE_VERTICIES = new Float32Array([
@@ -126,7 +127,7 @@ const renderPipeline = device.createRenderPipeline({
     }
 });
 
-
+// SET BUFFERS
 let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString));
 
 
@@ -140,9 +141,10 @@ device.queue.submit([encoder.finish()]);
 // Attatch actions to inputs (buttons, keys)
 EventManager.bindEvents();
 
+// Animation rendering and calculation instructions
 const updateLoop = () => {
 
-
+    // The user has set a new tmeplate
     if (EventManager.resetTemplate || EventManager.randomiseGrid) {
 
         // Assume that reset template and radomise grid are mutually exclusive events
@@ -157,9 +159,9 @@ const updateLoop = () => {
             EventManager.ruleString = initialState.rule;
             newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
 
-            // Doin a sneaky here 
+            // Doin a sneaky here, this means the template reset has to go before the activation setup
             ComputeShaderManager.updateActivationField(initialState.activation);
-            ComputeShaderManager.submitActivation();
+            ComputeShaderManager.submitActivation(); // Equivalent of what happens when someone pressing submit activation button
 
         } else {
             newRuleStorage = ruleStorage;
@@ -179,6 +181,7 @@ const updateLoop = () => {
         displayRule(EventManager.ruleString);
     }
 
+    // Set new activation function and recompile shader if required
     if (ComputeShaderManager.newActivation) {
         ComputeShaderManager.compileNewSimulationPipeline(device);
         ComputeShaderManager.newActivation = false;
@@ -197,13 +200,27 @@ const updateLoop = () => {
     const encoder = device.createCommandEncoder();
 
     // CREATE COMPUTE TOOL & PERFORM COMPUTATION TASKS
-    computePass(encoder);
+    if (EventManager.running) { 
+        for (let i = 0; i < EventManager.framesPerUpdateLoop; i++){
+            computePass(encoder);
+            step++; // Note this counter primarily indicates which cell state should be used
+            // In this case the output of the compute pass will be used as input, thus the opposite of
+            // what was used for the compute pass. Hence increment after compute pass but before rendering frame
+            EventManager.incrementCycleCount();
+        } 
 
+    } else { // Someone pressed do one frame, so update once
+        computePass(encoder);
+        step++; // Note this counter primarily indicates which cell state should be used
+        // In this case the output of the compute pass will be used as input, thus the opposite of
+        // what was used for the compute pass. Hence increment after compute pass but before rendering frame
+        EventManager.incrementCycleCount();
+    }
+    
     // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
-    step++;
-    EventManager.incrementCycleCount();
     renderPass(encoder);
-
+    
+    EventManager.updateCyclesDisplay();
     // Finish the command buffer and immediately submit it.
     device.queue.submit([encoder.finish()]);
 }
@@ -234,7 +251,7 @@ function renderPass(encoder) {
     // Draw the features
     renderPass.setPipeline(renderPipeline);
     renderPass.setVertexBuffer(0, vertexBuffer);
-    renderPass.setBindGroup(0, bindGroups[0]);
+    renderPass.setBindGroup(0, bindGroups[step % 2]);
     renderPass.draw(SQUARE_VERTICIES.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
     renderPass.end();
 }
