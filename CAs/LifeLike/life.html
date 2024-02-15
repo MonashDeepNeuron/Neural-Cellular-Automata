@@ -16,29 +16,33 @@
 
 
       <!-- Input Box for Simulation Parameters -->
-      <div class="controlGroup">
+      <div class="panelRow controlGroup">
         <label for="simulationInput">Rulestring:</label><input type="text" id="simulationInput" value="23/3" pattern="[0-8]*/[0-8]*">
         <button id="submitInput">Submit Rule</button>
       </div>
 
       <!-- Input Box for Speed -->
-      <div class="controlGroup">
-        <label for="skipEvenCheckbox">Skip Even Frames: </label><input type="checkbox" id="skipEvenCheckbox" value="false">
-        <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="5" min="1" max="1500">
-        <button id="speedInput">Submit Speed </button>
+      <div class="panelRow">
+        <div class="controlGroup">
+          <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="5" min="1" max="1500">
+          <button id="speedInput">Submit Speed </button>
+        </div>
+        <div class="controlGroup">
+          <label for="skipEvenCheckbox">Skip Every Second Frame: </label><input type="checkbox" id="skipEvenCheckbox" value="false">
+        </div>
       </div>
 
       <!-- Selection options for templates -->
-      <div class="controlGroup">
-      <label for="templateSelect">Starting Template:</label>
-      <select id="templateSelect">
-        <!-- See javascript -->
-      </select>
-      <button id="reset">Reset</button>
+      <div class="panelRow controlGroup">
+        <label for="templateSelect">Starting Template:</label>
+        <select id="templateSelect">
+          <!-- See javascript -->
+        </select>
+        <button id="reset">Reset</button>
       </div>
       
       <!-- Buttons corresponding to key clicks -->
-      <div class="controlGroup">
+      <div class="panelRow controlGroup">
         <button id="play">Play/Pause</button>
         <button id="next">Next Frame</button>
         <button id="randomise">Randomise Grid</button>

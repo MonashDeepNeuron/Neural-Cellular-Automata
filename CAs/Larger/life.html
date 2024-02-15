@@ -40,7 +40,7 @@
         R[<input>], C[<input>], S[<input>], B[<input>], N[<input>]
         Input is restricted
       -->
-      <div class="controlGroup">
+      <div class="panelRow controlGroup">
         <label for="simulationInputR">R</label><input class="ltlRuleIn" type="number" id="simulationInputR" value="1" maxlength="3">,
         <label for="simulationInputC">C</label><input class="ltlRuleIn" type="number" id="simulationInputC" value="0">, 
         <label for="simulationInputS">S</label><input class="ltlRuleIn" type="text" id="simulationInputS" value="2-3" pattern="[0-9]|-|,">, 
@@ -50,14 +50,18 @@
       </div>
 
       <!-- Input Box for Speed -->
-      <div class="controlGroup">
-        <label for="skipEvenCheckbox">Skip Even Frames: </label><input type="checkbox" id="skipEvenCheckbox" value="false">
-        <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="40" min="1" max="500">
-        <button id="speedInput">Submit Speed </button>
+      <div class="panelRow">
+        <div class="controlGroup">
+          <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="40" min="1" max="500">
+          <button id="speedInput">Submit Speed </button>
+        </div>
+        <div class="controlGroup">
+          <label for="skipEvenCheckbox">Skip Every Second Frame: </label><input type="checkbox" id="skipEvenCheckbox" value="false">
+        </div>
       </div>
 
       <!-- Selection options for templates -->
-      <div class="controlGroup">
+      <div class="panelRow controlGroup">
         <label for="templateSelect">Starting Template:</label>
         <select id="templateSelect">
           <!-- See javascript -->
@@ -66,7 +70,7 @@
       </div> 
 
       <!-- Buttons corresponding to key clicks -->
-      <div class="controlGroup">
+      <div class="panelRow controlGroup">
         <button id="play">Play/Pause</button>
         <button id="next">Next Frame</button>
         <button id="randomise">Randomise Grid</button>

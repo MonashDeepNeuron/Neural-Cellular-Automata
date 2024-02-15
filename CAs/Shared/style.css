@@ -29,19 +29,32 @@ canvas {
     display: block;
     border: 1px solid #a08989;
     background-color: #e6e6e6;
+    border-radius: 3px;
 }
 
 /* Control panel sizing*/
 .controlPanel {
     display: flex block;
     flex-flow: column;
-    width: 700px;
+    width: 80%;
+    min-width: 750px;
+    max-width: 1200px;
     margin: auto;
-    padding: 2.5%;
-    justify-content:right;
+    padding: 1%;
 }
 
 .controlGroup {
+    display: flex;
+    align-items: center;
+    background-color: #f3e6e8;
+    border: 1px solid #a08989;
+    margin:0.5%;
+    padding: 0 1%;
+    flex-grow: 1;
+    border-radius: 4px;
+}
+
+.panelRow {
     display: flex;
     flex-flow: row;
     align-items: center;
@@ -67,7 +80,7 @@ canvas {
 /* Button Styling */
 button {
     display:inline-block;
-    background-color: pink;
+    background-color: #ffc0cb;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -96,6 +109,7 @@ input, select, textarea, .footerElement{
     height:min-content;
     border-radius: 5px;
     flex-grow: 50;
+    min-width: 3em;
 }
 
 /* Input box label styling*/
@@ -109,8 +123,8 @@ label {
     margin: 2px;
 }
 
-.kernelRuleIn{
-    width:25%;
+.fullRow{
+    width:100%;
 }
 
 
@@ -119,3 +133,14 @@ textarea {
     height:100px;
 }
 
+.grid {
+    flex-flow: row wrap;
+    padding-bottom: 1%;
+    padding-top: 1%;
+}
+
+
+h3 {
+    padding: 0px;
+    margin: 0px;
+}
