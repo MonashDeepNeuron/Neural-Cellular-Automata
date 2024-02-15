@@ -25,7 +25,7 @@ export default class EventManager {
     static framesPerUpdateLoop = 1;
     static skipEvenFrames = false;
     static cycles = 0; // The current number of update cycles since reset
-    static MAX_FPS = 30;
+    static MAX_FPS = 50;
 
     // key bindings
     static PLAY_PAUSE_KEY = 'k';
@@ -92,11 +92,7 @@ export default class EventManager {
     }
 
     static updateSpeed(inputSpeed) {
-        if (inputSpeed > EventManager.MAX_FPS) {
-            EventManager.framesPerUpdateLoop = Math.round(inputSpeed/EventManager.MAX_FPS);
-        } else {
-            EventManager.framesPerUpdateLoop = 1;
-        }
+        EventManager.framesPerUpdateLoop = Math.ceil(inputSpeed/EventManager.MAX_FPS);
         EventManager.updateInterval = 1000/(inputSpeed/EventManager.framesPerUpdateLoop);
         
         if (EventManager.skipEvenFrames) {
