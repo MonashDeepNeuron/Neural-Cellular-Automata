@@ -21,11 +21,18 @@ local id --> displacement. offset necessary
 
 one more storage thing --> array for active neighbours
 
+
 CS1
-clear active neighbor array
+
 each workgroup goes for one cell
 each thread is for one neighbour
 
 CS2
 map active neighbours to future state
+
+so then, two compute pipelines
+countComputePipeline
+updateComputePipeline
+
+
 */
