@@ -178,6 +178,7 @@ const updateLoop = () => {
         step = 0;
         EventManager.resetCycleCount();
 
+
         displayRule(EventManager.ruleString);
 
     }
@@ -230,6 +231,7 @@ const updateLoop = () => {
 // start iterative update for cells
 EventManager.setUpdateLoop(updateLoop);
 EventManager.playPause();
+
 
 
 

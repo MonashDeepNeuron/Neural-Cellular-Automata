@@ -27,6 +27,7 @@ export default class EventManager {
     static cycles = 0; // The current number of update cycles since reset
     static MAX_FPS = 50;
 
+
     // key bindings
     static PLAY_PAUSE_KEY = 'k';
     static NEXT_FRAME_KEY = '.';
@@ -80,6 +81,7 @@ export default class EventManager {
         EventManager.newRuleString = true
         EventManager.ruleString = EventManager.getRule();
         EventManager.updateLoop(EventManager.currentSpeed);
+
     };
 
     static submitSpeed() {
@@ -129,6 +131,7 @@ export default class EventManager {
 
     static incrementCycleCount(){
         EventManager.cycles = EventManager.cycles +1;
+
     }
 
     static updateCyclesDisplay(){

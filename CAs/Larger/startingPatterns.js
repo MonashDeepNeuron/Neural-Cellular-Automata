@@ -152,6 +152,7 @@ const squircles = {
 const kaboom = {
     name: "von Neumann w/ radius 4",
     pattern: null,
+
     width: 16,
     height: 16,
     minGrid: 128,
