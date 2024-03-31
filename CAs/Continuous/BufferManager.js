@@ -50,7 +50,7 @@ export default class BufferManager {
     static setInitialStateBuffer(device, gridSize, initialState){
         // If initial state = null, assign random
         // Cell state arrays
-        const cellStateArray = new Uint32Array(gridSize * gridSize);
+        const cellStateArray = new Float32Array(gridSize * gridSize);
         const cellStateStorage = [
             device.createBuffer({
                 label: "Cell State A",
@@ -68,7 +68,7 @@ export default class BufferManager {
         // write to buffer A
         if (initialState == null || initialState.pattern == null){
             for (let i = 0; i < cellStateArray.length; i++) {
-                cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
+                cellStateArray[i] = Math.random(); // random starting position
             }
             console.log("Randomising canvas ...");
         } else {

@@ -22,6 +22,7 @@ const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = INITIAL_STATE.minGrid;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
+EventManager.submitSpeed();
 displayRule(EventManager.ruleString);
 
 const SQUARE_VERTICIES = new Float32Array([
@@ -143,6 +144,7 @@ renderPass(encoder);
 // Finish the command buffer and immediately submit it.
 device.queue.submit([encoder.finish()]);
 
+// Attatch actions to inputs (buttons, keys)
 EventManager.bindEvents();
 
 const updateLoop = () => {
@@ -174,6 +176,8 @@ const updateLoop = () => {
         EventManager.resetTemplate = false;
         EventManager.randomiseGrid = false;
         step = 0;
+        EventManager.resetCycleCount();
+
 
         displayRule(EventManager.ruleString);
 
@@ -191,13 +195,33 @@ const updateLoop = () => {
 
     const encoder = device.createCommandEncoder();
 
-    // CREATE COMPUTE TOOL & PERFORM COMPUTATION TASKS
-    computePass(encoder);
+    if (EventManager.running) { 
+        for (let i = 0; i < EventManager.framesPerUpdateLoop; i++){
+            computePass(encoder);
+            step++; // Note this counter primarily indicates which cell state should be used
+            // In this case the output of the compute pass will be used as input, thus the opposite of
+            // what was used for the compute pass. Hence increment after compute pass but before rendering frame
+            EventManager.incrementCycleCount();
+        } 
 
+    } else { // Someone pressed do one frame, so update once
+        computePass(encoder);
+        step++; // Note this counter primarily indicates which cell state should be used
+        // In this case the output of the compute pass will be used as input, thus the opposite of
+        // what was used for the compute pass. Hence increment after compute pass but before rendering frame
+        EventManager.incrementCycleCount();
+        
+        if (EventManager.skipEvenFrames){
+            computePass(encoder);
+            step++; 
+            EventManager.incrementCycleCount();
+        }
+    }
+    
     // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
-    step++;
     renderPass(encoder);
-
+    
+    EventManager.updateCyclesDisplay();
     // Finish the command buffer and immediately submit it.
     device.queue.submit([encoder.finish()]);
 }
@@ -206,7 +230,7 @@ const updateLoop = () => {
 
 // start iterative update for cells
 EventManager.setUpdateLoop(updateLoop);
-EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
+EventManager.playPause();
 
 
 

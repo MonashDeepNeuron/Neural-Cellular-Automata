@@ -36,10 +36,10 @@ This project involves the creation of a cellular automata model trained using ne
   - [ ] Dynamic shaders, respond to user inputted rule-strings
   - [ ] Place into template
 - [ ] LTL CA
-  - [ ] Implement wider neighbourhoods:
+  - [x] Implement wider neighbourhoods:
         see line 22ish of
         [computeShader.js](My-App/src/routes/life/computeShader.js)
-  - [ ] Figure out what to do with rule strings
+  - [x] Figure out what to do with rule strings
   - [ ] Insert into template
 
 ---
