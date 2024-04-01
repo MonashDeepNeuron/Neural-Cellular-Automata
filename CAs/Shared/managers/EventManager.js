@@ -5,7 +5,6 @@
 // Many functions are used as event triggered functions and for some reason this
 // does not work well for these applications.
 // I have no idea why but switching to 'EventManager' on these functions solved the issue
-// Potentially a script language thing (as opposed to complied)
 
 export default class EventManager {
     // event related global variables
@@ -13,7 +12,17 @@ export default class EventManager {
     static newRuleString = false;
     static resetTemplate = false;
     static randomiseGrid = false;
-    static ruleString = ""; // Start with Conway's life // Temporarily removed C2 as second entry
+
+    /**
+     * The current rule string in string format.
+     * @todo make this a more sensible format. This used to be display/input
+     * format, however interface changes make this no-longer the case.
+     * This has not been changed as of yet because each CA has its own 
+     * rule storage types, so a string is a bit more universal.
+     * Can possibly be changed to an array?
+    */
+    static ruleString = ""; 
+
     static templateNo = 1;
     static loopID = null; // Update interval
     static updateLoop = () => { }; // Set in versions of life.js

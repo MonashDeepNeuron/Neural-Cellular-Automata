@@ -1,27 +1,35 @@
-// TODO: rulestring validation function.
 
 export const NEIGHBOURHOOD_MAP = {
-    M: 0,
-    N: 1,
-    C: 2,
+    M: 0, // Moore/square
+    N: 1, // Neumann/diamond/radius measured by Manhatten distance
+    C: 2, // Centre of cell within sqrt(dx^2 + dy^2)
 };
 
+/**
+ * Interprets the rulestring according to the following notation for Larger than Life CA.
+ * Rulestring is given as Rr, Cc, Ss Bb, Nn where:
+ *  - r is the radius in units
+ *  - c is how many cell states there are.
+ *  - s is ranges in the form a-b, c-d, e, ... conditions of survival
+ *  - b is ranges in the form a-b, c-d, e, ... conditions of birth
+ *  - n is the type of neighbourhood (eg. moore, neumann, cicular)
+ * 
+ * For cell states, all cells are born on maximum cell state, then decrease one point for
+ * each cycle they are not within the survival bounds (so they don't die instantly)
+ * Cell states greater than 0 are considered alive still.
+ * 
+ * See https://conwaylife.com/wiki/Larger_than_Life
+ * @param {String} ruleString 
+ * @returns {Uint32Array} rule array in format: [r, c, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
+ * @todo this function returns null with invalid input, needs to be accounted for in other code
+ * @todo BUG - When no given birth or survival cases given, results in error
+ * @todo rulestring validation function - pretty much accounted for in current interface setup though
+ */
 export function parseRuleString(ruleString) {
 
     ruleString = ruleString.replace(/\s/g, "").toUpperCase(); // Cut out white space and assert uppercase
 
     console.log("Getting RULE...");
-    // Larger than life rulestring
-    // Rulestring is given as Rr, Cc, Ss Bb, Nn where:
-    // r is the radius in units
-        // c is the number of possible states NOTE: Temporarily excluded bc i don't understand
-    // s is ranges in the form a-b, c-d, e, ... conditions of survival
-    // b is ranges in the form a-b, c-d, e, ... conditions of birth
-    // n is the type of neighbourhood (eg. square, cicular?)
-    // See https://conwaylife.com/wiki/Larger_than_Life
-
-  // TODO: this function returns null with invalid input, needs to be accounted for.
-
   // ruleString is given by the user. it is a string
   // Output format 
     // [r, c, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
@@ -30,7 +38,6 @@ export function parseRuleString(ruleString) {
     // is denoted through the use of negatives
         // eg. 2-5, 7, 11-13, ...,
         // push 2, 5, -7, 11, 13, ...,
-    // TODO: BUG - When no given birth or survival cases given, results in error
     if (ruleString.length < 8) {
         return null;
     }
@@ -179,6 +186,22 @@ export function parseRuleString(ruleString) {
     return RULE
 }
 
+
+
+
+/**
+ * Defines how to display the rulestring (which is formatted according to the 
+ * expected format for Larger than Life CA) in the Larger than Life specific interface.
+ * 
+ * Rulestring is given as Rr, Cc, Ss Bb, Nn where:
+ *  - r is the radius in units
+ *  - c is how many cell states there are.
+ *  - s is ranges in the form a-b, c-d, e, ... conditions of survival
+ *  - b is ranges in the form a-b, c-d, e, ... conditions of birth
+ *  - n is the type of neighbourhood (eg. moore, neumann, cicular)
+ * 
+ * @param {String} ruleString 
+ */
 export function displayRule(ruleString){
     console.log(`Displaying ${ruleString}`);
     
@@ -260,7 +283,7 @@ export function displayRule(ruleString){
 }
 
 
-
+/** Convenience function, probably exists in a library*/
 function isDigit(c){
     return c >= '0' && c <= '9';
 }

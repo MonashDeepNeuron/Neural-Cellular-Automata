@@ -1,3 +1,5 @@
+// TODO: Probably could be modified such that all versions use the same GUI shaders.
+// Especially the vertex shader.
 export const guiShader =
     /*wgsl*/`
     @group(0) @binding(0) var<uniform> grid: vec2f;

@@ -1,4 +1,10 @@
+//This file provides 
 
+/**
+ * Interprets the rulestring according to S/B notation for LifeLike CA
+ * @param {String} ruleString 
+ * @returns {Uint32Array}
+ */
 export function parseRuleString(ruleString) {
   // ruleString is given by the user. it is a string
   let RULE = new Uint32Array(1)
@@ -21,7 +27,11 @@ export function parseRuleString(ruleString) {
   return RULE
 }
 
-
+/**
+ * Defines how to display the rulestring (which is formatted according to the 
+ * expected format for LifeLike CA) in the LifeLife specific interface.
+ * @param {String} ruleString 
+ */
 export function displayRule(ruleString){
     document.getElementById("simulationInput").value = ruleString;
 }
