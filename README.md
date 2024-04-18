@@ -61,8 +61,8 @@ The models from here down are trainable
 ### Model Training
 
 - Waiting for:
-  - [ ] continuity
-  - [ ] convolutions
+  - [x] continuity
+  - [x] convolutions
 - [ ] ?? Create a training method that allows us to find interesting behaviours on the simple implementation as seen [here](https://neuralpatterns.io)
 
 ## Resources

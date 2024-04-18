@@ -44,7 +44,7 @@ export default class BufferManager {
      * Define where and what information can be accessed by the GPU code
      * Set and make all required information available to the GPU (for the first time)
      * @param {GPUDevice} device the GPU device object 
-     * @param {*} renderPipeline
+     * @param {GPURenderPipeline} renderPipeline
      * @param {Number} gridSize sidelength of grid, where the grid is a square array of cells
      * @param {Array} initialState the initial state of the grid, filled with floating point values
      *      NOTE: This may be null, where null represents a randomised grid. If the pattern 
@@ -181,7 +181,7 @@ export default class BufferManager {
      * This function ensures that consistent binding numbers are used throughout
      * This must be kept consistent with the bindgroup layout
      * @param {GPUDevice} device 
-     * @param {*} renderPipeline 
+     * @param {GPURenderPipeline} renderPipeline 
      * @param {String} label 
      * @param {GPUBuffer} uniformBuffer 
      * @param {GPUBuffer} inputStateBuffer 
