@@ -2,12 +2,18 @@
 
 This project involves the creation of a cellular automata model trained using neural networks, which will be hosted online.
 
+## Progress so Far
+
+Initial project setup is complete
+- Initial versions of the following models of cell perception have been developed (work will be done to make them more efficient) 
+  - Conway's game of Life
+  - LifeLike CA
+  - Larger than Life
+  - Continuous CA
+
 ## To Do List
 
 ### General
-
-- [x] Project setup
-- [x] Modularise shaders
 - [ ] Modularise .js code
 - [ ] Bigger frame with more cells
 - [ ] Update template
@@ -18,7 +24,7 @@ This project involves the creation of a cellular automata model trained using ne
   - [ ] Convolving CA
   - [ ] Vec4, Vec16
 
-### Model Development
+### Model Development (Cell Perception)
 
 - [ ] Life
   - [x] Get Running
@@ -41,16 +47,13 @@ This project involves the creation of a cellular automata model trained using ne
         [computeShader.js](My-App/src/routes/life/computeShader.js)
   - [x] Figure out what to do with rule strings
   - [ ] Insert into template
-
----
-
-The models from here down are trainable
-
-- [ ] Convolving CA
+- [ ] Continuous CA
+  - [x] Implement 3x3 weighted kernel
   - [ ] Implement discrete convolution as shader function
   - [ ] Make convolution shader function dynamic
         (respond to input convolution)
   - [ ] Insert into template
+- [ ] Ltl/Contunuous CA hybridisation
 - [ ] Vec4 based CA
   - [ ] Understand vector convolutions
   - [ ] Implement efficient way to pull info from the picture
@@ -58,11 +61,11 @@ The models from here down are trainable
 - [ ] vec16 based CA (haven't written this out yet)
   - [ ] insert into template
 
-### Model Training
-
+### Model Training (Cell behaviours)
+- [ ] WebGPU compatibility with python training code
 - Waiting for:
-  - [ ] continuity
-  - [ ] convolutions
+  - [x] continuity
+  - [x] convolutions
 - [ ] ?? Create a training method that allows us to find interesting behaviours on the simple implementation as seen [here](https://neuralpatterns.io)
 
 ## Resources

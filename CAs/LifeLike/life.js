@@ -16,24 +16,39 @@ const device = DeviceManager.device
 const canvas = DeviceManager.canvas
 
 // Set global variables
-const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
-const INITIAL_TEMPLATE_NO = 2;
 
+// Workgroup size sets number of concurrent threads on GPU
+// Largest workgroup size that will work on most GPUs is 64 (16x16)
+// There is a limitation though to some pcs/graphics cards
+const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. 
+
+const INITIAL_TEMPLATE_NO = 2; // See startingPatterns.js
+
+// Initial grid state
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
+
+// @todo This needs to be changed. 
+// All starting patterns have a minimum grid size that they work on
+// New functionality:
+    // Ability to change grid size (user)
+    // Disable default patterns that have minimum grid sizes greater than current grid size
 const GRID_SIZE = INITIAL_STATE.minGrid * 2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 
-
+// The rulestring in S/B notation
 EventManager.ruleString = INITIAL_STATE.rule;
-EventManager.submitSpeed();
+// Synchonise html interface 
 displayRule(EventManager.ruleString);
+// A speed is in the html interface already, make sure everything is synchronized
+EventManager.submitSpeed();
 
+// Ensure consistency of rule in EventManager and display
 EventManager.getRule = () => {
     return document.getElementById('simulationInput').value;
 }
 
 
-// Set up template selector based on pre-defined template list
+// Set up html template selector based on pre-defined template list
 let select = document.getElementById("templateSelect");
 
 for (let i = 0; i < startingPatterns.length; i++) {
@@ -44,7 +59,8 @@ for (let i = 0; i < startingPatterns.length; i++) {
 }
 document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO - 1;
 
-
+// Square, as drawn in a 1x1x1 square.
+// The vertex buffer only deals in triangles
 const SQUARE_VERTICIES = new Float32Array([
     // X,    Y,
     -0.8, -0.8, // Triangle 1

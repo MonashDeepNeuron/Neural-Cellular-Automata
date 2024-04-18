@@ -1,7 +1,13 @@
 
-const ACTIVATION_FUNCTION_FLAG = '//INSERT ACTIVATION BETWEEN FLAGS';
+const ACTIVATION_FUNCTION_FLAG = '//INSERT ACTIVATION BETWEEN FLAGS$$$$$';
 
 
+/** Compute shader run every time the update loop runs
+ * Computes grid updates  
+ * (DO NOT REMOVE wgsl comment. This is for the WGSL Literal extension)
+ * @todo Replace this and ComputeShaderManager.getComputeShaderWithActivation with one function. 
+ * This would de-necessitate the flag thing
+ */ 
 const computeShader =
     /*wgsl*/`
     @group(0) @binding(0) var<uniform> grid: vec2f;

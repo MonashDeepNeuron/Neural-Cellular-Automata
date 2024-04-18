@@ -1,3 +1,9 @@
+/**
+ * This version has a continuous colour range
+ * @todo Probably could be modified such that all versions use the same GUI shaders.
+ * Especially the vertex shader.
+ * @todo re-evaluate current formula for negative cell values (may be possible?)
+ */
 export const guiShader =
     /*wgsl*/`
     @group(0) @binding(0) var<uniform> grid: vec2f;
@@ -25,8 +31,9 @@ export const guiShader =
         let cellOffset = cell/grid *2;
         var gridPos : vec2f;
 
-        // In earlier versions, black squares were defined as squares with size 0
-        // This probably enhanced efficiency.
+        // In earlier versions, dead squares were defined as squares with size 0
+        // This might have enhanced efficiency in terms of what had to be updated 
+        // on the screen in each cycle (a guess, not verified)
         
         // Note this verison defines multiple levels of colouration and
         // thus colour is now defined through the fragment shader
@@ -51,6 +58,6 @@ export const guiShader =
         if (state >= 0 && state < 1){
             intensity = state;
         }
-
+s
         return vec4f(pow(0.9, 1/intensity), pow(0.98, 1/(pow(intensity,3))), pow(intensity, 0.8),  1);//vec4f(1, 1, 1, 1);
     }`

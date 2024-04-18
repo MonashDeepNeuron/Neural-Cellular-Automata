@@ -76,7 +76,22 @@ const slimeGrid = {
     activation: 'return -1./(0.89*pow(x, 2.)+1.)+1.;'
 }
 
-
+// Should create a lattice-like structure but for some reason isn't...
+const crisscross = {
+    name: "Criss Cross",
+    pattern: [
+        1,1,1,1,1,
+        1,1,1,1,1,
+        1,1,1,1,1,
+        1,1,1,1,1,
+        1,1,1,1,1,
+    ],
+    width: 5,
+    height: 5,
+    minGrid: 1024,
+    rule: "-0.688,0.306,-0.688,0.306,0.74,0.306,-0.688,0.306,-0.688",
+    activation: 'return sin(x);'
+}
 
 
 export default [
@@ -84,5 +99,6 @@ export default [
     worms,
     B29,
     waves,
-    slimeGrid
+    slimeGrid,
+    crisscross
 ];

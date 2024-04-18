@@ -1,15 +1,29 @@
 
 
 export default class BufferManager {
+
+    // Notes for vertex buffer
+    // A square that will be drawn on each cell. Vertexs loaded correspond to 
+    // if the cell were a 1x1 square. This will be scaled and positioned by 
+    // guiShader code (specifically vertexShader)
+
+    /**
+     * Load the verticies to be drawn
+     * @param {GPUDevice} device 
+     * @param {Float32Array} shapeVerticies Verticies of triangles that form the  
+     *          shape.
+     * @returns {GPUBuffer, GPUBuffer} vertexBuffer, vertexBufferLayout
+     */
     static loadShapeVertexBuffer(device, shapeVerticies){
     
         // load verticies into buffer
+        // This is currently used only for a square
         const vertexBuffer = device.createBuffer({
             label: "Cell vertices", // Error message label
             size: shapeVerticies.byteLength,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
-        device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, shapeVerticies);
+        device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/ 0, shapeVerticies);
         
         // define layout of loaded binary data
         const vertexBufferLayout = {
@@ -25,6 +39,19 @@ export default class BufferManager {
     }
 
 
+
+    /**
+     * Define where and what information can be accessed by the GPU code
+     * Set and make all required information available to the GPU (for the first time)
+     * @param {GPUDevice} device the GPU device object 
+     * @param {GPURenderPipeline} renderPipeline
+     * @param {Number} gridSize sidelength of grid, where the grid is a square array of cells
+     * @param {Array} initialState the initial state of the grid, filled with floating point values
+     *      NOTE: This may be null, where null represents a randomised grid. If the pattern 
+     *      is null, this also constitutes a randomised grid.
+     * @param {Float32Array} rule The numbers from the current rule (kernel)
+     * @returns bindGroups, uniformBuffer, cellStateStorage, ruleStorage
+    **/
     static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, rule){
         // Uniform grid
         const uniformArray = new Float32Array([gridSize, gridSize]);
@@ -47,6 +74,19 @@ export default class BufferManager {
         return {bindGroups, uniformBuffer, cellStateStorage, ruleStorage}  ;
     }
 
+
+
+    /**
+     * Defines the buffer sizes and sets up the buffers for the cell storages 
+     * Randomises the canvas when the initialState is null
+     * @param {GPUDevice} device 
+     * @param {Number} gridSize sidelength of grid, where the grid is a square array of cells
+     * @param {Array} initialState the initial state of the grid
+     *      NOTE: This may be null, where null represents a randomised grid. If the pattern 
+     *      is null, this also constitutes a randomised grid.
+     * @returns GPUBuffer[2] cellStateStorage with two buffers. 
+     *      cellStateStorage[0] contains the initial state, cellStateStorage[1] is blank
+     */
     static setInitialStateBuffer(device, gridSize, initialState){
         // If initial state = null, assign random
         // Cell state arrays
@@ -95,6 +135,14 @@ export default class BufferManager {
     }
 
 
+
+     /**
+     * Convenience function, creates the bindings and sets the accessibility of 
+     * GPU-available resources. Bindgroup layout defines the data visibility and 
+     * permissions
+     * @param {GPUDevice} device 
+     * @returns bindgroup layout with 4 entries (0-3)
+     */
     static createBindGroupLayout(device){
         return device.createBindGroupLayout({
             label: "Cell Bind Group Layout",
@@ -126,6 +174,21 @@ export default class BufferManager {
         });
     }
 
+
+
+    /**
+     * Defines the way that each resource is referenced/accessed from WGSL code
+     * This function ensures that consistent binding numbers are used throughout
+     * This must be kept consistent with the bindgroup layout
+     * @param {GPUDevice} device 
+     * @param {GPURenderPipeline} renderPipeline 
+     * @param {String} label 
+     * @param {GPUBuffer} uniformBuffer 
+     * @param {GPUBuffer} inputStateBuffer 
+     * @param {GPUBuffer} outputStateBuffer 
+     * @param {GPUBuffer} ruleStorage 
+     * @returns GPUBindGroupLayout
+     */
     static createBindGroup(device, renderPipeline, label, uniformBuffer, cellStateA, cellStateB, ruleStorage) {
         return device.createBindGroup({
             label: label,
@@ -139,6 +202,15 @@ export default class BufferManager {
         });
     }
 
+    
+
+    /**
+     * Convenience function for code organisation.
+     * Writes out the rule buffer such that it is consistent with expected settings
+     * @param {GPUDevice} device 
+     * @param {Float32Array} rule The numbers from the current rule (kernel)
+     * @returns rulestorage as GPUBuffer object
+     */
     static setRuleBuffer(device, rule) {
         const ruleArray = rule;
         const ruleStorage = device.createBuffer({
