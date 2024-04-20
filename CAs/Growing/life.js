@@ -137,7 +137,6 @@ let weights = loadBinaryFileAsIntegers('../../model_weights_pls_god.bin');
 let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, weights);
 
 
-
 // INITIAL CANVAS SETUP, 1st render pass
 const encoder = device.createCommandEncoder();
 renderPass(encoder);
