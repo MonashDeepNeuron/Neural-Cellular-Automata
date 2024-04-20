@@ -1,8 +1,9 @@
 
 
 export default class BufferManager {
-    static loadShapeVertexBuffer(device, shapeVerticies){
-    
+    NUM_CHANNELS = 16;
+    static loadShapeVertexBuffer(device, shapeVerticies) {
+
         // load verticies into buffer
         const vertexBuffer = device.createBuffer({
             label: "Cell vertices", // Error message label
@@ -10,7 +11,7 @@ export default class BufferManager {
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
         device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, shapeVerticies);
-        
+
         // define layout of loaded binary data
         const vertexBufferLayout = {
             arrayStride: 8, // 32bit = 4 bytes, 4x2 = 8 bytes to skip to find next vertex
@@ -20,12 +21,12 @@ export default class BufferManager {
                 shaderLocation: 0, // Position, see vertex shader
             }]
         }
-    
-        return {vertexBuffer, vertexBufferLayout};
+
+        return { vertexBuffer, vertexBufferLayout };
     }
 
 
-    static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, rule){
+    static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, rule) {
         // Uniform grid
         const uniformArray = new Float32Array([gridSize, gridSize]);
         const uniformBuffer = device.createBuffer({
@@ -34,39 +35,39 @@ export default class BufferManager {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
         device.queue.writeBuffer(uniformBuffer, 0, uniformArray);
-    
+
         let cellStateStorage = BufferManager.setInitialStateBuffer(device, gridSize, initialState);
 
         const ruleStorage = BufferManager.setRuleBuffer(device, rule);
-    
+
         // setup bind groups
         const bindGroups = [
             BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
             BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
-        ];    
-        return {bindGroups, uniformBuffer, cellStateStorage, ruleStorage}  ;
+        ];
+        return { bindGroups, uniformBuffer, cellStateStorage, ruleStorage };
     }
 
-    static setInitialStateBuffer(device, gridSize, initialState){
+    static setInitialStateBuffer(device, gridSize, initialState) {
         // If initial state = null, assign random
         // Cell state arrays
-        const cellStateArray = new Float32Array(gridSize * gridSize);
+        const cellStateArray = new Float32Array(gridSize * gridSize * NUM_CHANNELS);
         const cellStateStorage = [
             device.createBuffer({
                 label: "Cell State A",
                 size: cellStateArray.byteLength,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             }),
-    
+
             device.createBuffer({
                 label: "Cell State B",
                 size: cellStateArray.byteLength,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             })
         ];
-    
+
         // write to buffer A
-        if (initialState == null || initialState.pattern == null){
+        if (initialState == null || initialState.pattern == null) {
             for (let i = 0; i < cellStateArray.length; i++) {
                 cellStateArray[i] = Math.random(); // random starting position
             }
@@ -75,16 +76,16 @@ export default class BufferManager {
             for (let i = 0; i < cellStateArray.length; i++) {
                 cellStateArray[i] = 0;
             }
-            const centreOffset = Math.floor((gridSize-initialState.width)/2);
+            const centreOffset = Math.floor((gridSize - initialState.width) / 2);
             for (let i = 0; i < initialState.width; i++) {
-                for (let j = 0; j < initialState.height; j++){
-                    cellStateArray[i+centreOffset+(j+centreOffset)*gridSize] = initialState.pattern[i+j*initialState.width];
+                for (let j = 0; j < initialState.height; j++) {
+                    cellStateArray[i + centreOffset + (j + centreOffset) * gridSize] = initialState.pattern[i + j * initialState.width];
                 }
             }
             console.log(`Implementing ${initialState.name}`);
         }
         device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
-    
+
         // write to buffer B
         for (let i = 0; i < cellStateArray.length; i++) {
             cellStateArray[i] = 0;
@@ -95,7 +96,7 @@ export default class BufferManager {
     }
 
 
-    static createBindGroupLayout(device){
+    static createBindGroupLayout(device) {
         return device.createBindGroupLayout({
             label: "Cell Bind Group Layout",
             entries: [
@@ -104,19 +105,19 @@ export default class BufferManager {
                     visibility: GPUShaderStage.VERTEX | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
                     buffer: {} // Grid uniform buffer
                 },
-        
+
                 {
                     binding: 1,
                     visibility: GPUShaderStage.VERTEX | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
                     buffer: { type: "read-only-storage" } // Cell state input buffer
                 },
-        
+
                 {
                     binding: 2,
                     visibility: GPUShaderStage.COMPUTE,
                     buffer: { type: "storage" } // Cell state output buffer
                 },
-        
+
                 {
                     binding: 3,
                     visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
