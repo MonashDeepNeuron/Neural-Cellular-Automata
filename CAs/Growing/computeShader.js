@@ -4,16 +4,19 @@ const ACTIVATION_FUNCTION_FLAG = '//INSERT ACTIVATION BETWEEN FLAGS';
 
 const computeShader =
     /*wgsl*/`
-    @group(0) @binding(0) var<uniform> grid: vec2f;
+    @group(0) @binding(0) var<uniform> grid: vec2f; 
     @group(0) @binding(1) var<storage> cellStateIn: array<f32>;
     @group(0) @binding(2) var<storage, read_write> cellStateOut: array<f32>;
-    @group(0) @binding(3) var<storage> rule: array<i32>;
+    @group(0) @binding(3) var<storage> weights: array<i32>;
+
     override WORKGROUP_SIZE: u32 = 16;
+
+
     
     fn cellIndex(cell: vec2u) -> u32 {
         // Supports grid wrap-around
         // grid.x and grid.y 
-        return (cell.y % u32(grid.y))*u32(grid.x)+(cell.x % u32(grid.x));
+        return ((cell.y % u32(grid.y))*u32(grid.x)+(cell.x % u32(grid.x))) * 16; // Multiplied :) 
     }
 
     fn cellValue(x : u32, y: u32) -> f32 {
@@ -31,6 +34,9 @@ const computeShader =
     }
 
 
+    fn calculateSobelX(x : u32, y: u32) -> 
+
+
     @compute @workgroup_size(WORKGROUP_SIZE, WORKGROUP_SIZE)
     fn computeMain(@builtin(global_invocation_id) cell: vec3u) {
 
@@ -40,6 +46,9 @@ const computeShader =
         // k1 | k2 | k3
         // k4 | k5 | k6
         // k7 | k8 | k9
+
+
+        // return cell*(corresponding_weihgt) + corresponding_bias
         let k1 = cellValue(cell.x-1, cell.y-1) * rule[0];
         let k2 = cellValue(cell.x, cell.y-1) * rule[1] ;
         let k3 = cellValue(cell.x+1, cell.y-1) * rule[2] ;
@@ -50,7 +59,7 @@ const computeShader =
         let k8 = cellValue(cell.x, cell.y+1) * rule[7] ;
         let k9 = cellValue(cell.x+1, cell.y+1) * rule[8] ;
 
-        let result = k1 + k2 + k3 + k4 + k5 + k6 + k7 + k8 + k9 ;
+        // let result = k1 + k2 + k3 + k4 + k5 + k6 + k7 + k8 + k9 ;
 
         cellStateOut[i] = applyActivation(result);
                 
