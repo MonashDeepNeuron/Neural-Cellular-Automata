@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>WebGPU Life</title>
+  <link rel="stylesheet" href="../Shared/style.css"> <!-- Link to the CSS file -->
+</head>
+
+<div class="text-column">
+  <h1>Continuous Automata</h1>
+</div>
+
+<body>
+  <div class="controlPanel">
+    <!-- Kernel Grid: divided into 3 control groups for aesthetic grid purposes-->
+    <div class="controlGroup grid">
+      <div class="panelRow"><h3>Kernel</h3></div>
+      <div class="panelRow fullRow">
+        <input type="number" id="kernel1" placeholder="0.11">
+        <input type="number" id="kernel2" placeholder="0.11">
+        <input type="number" id="kernel3" placeholder="0.11">
+      </div>
+      
+      <div class="panelRow fullRow">
+        <input type="number" id="kernel4" placeholder="0.11">
+        <input type="number" id="kernel5" placeholder="0.11">
+        <input type="number" id="kernel6" placeholder="0.11">
+      </div>
+      
+      <div class="panelRow fullRow">
+        <input type="number" id="kernel7" placeholder="0.11">
+        <input type="number" id="kernel8" placeholder="0.11">
+        <input type="number" id="kernel9" placeholder="0.11">
+      </div>
+      <div class="panelRow fullRow"><button id="submitInput">Submit Kernel</button></div>
+    </div>
+    <div class="controlGroup grid">
+      <div class="panelRow fullRow"><h3>Activation Function</h3></div>
+      <div class="panelRow fullRow"><textarea id="activationTextField">Activation function...</textarea></div>
+      <div class="panelRow fullRow"><button id="submitActivation">Submit Activation</button></div>
+    </div>
+
+    <!-- Input Box for Speed -->
+    <div class="panelRow">
+      <div class="controlGroup">
+        <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="60" min="1" max="900">
+        <button id="speedInput">Submit Speed</button>
+      </div>
+      <div class="controlGroup">
+        <label for="skipEvenCheckbox">Skip Every Second Frame: </label><input type="checkbox" id="skipEvenCheckbox" value="false">
+      </div>
+    </div>
+
+    <!-- Selection options for templates -->
+    <div class="panelRow controlGroup">
+      <label for="templateSelect">Starting Template:</label>
+      <select id="templateSelect">
+        <!-- See javascript -->
+      </select>
+      <button id="reset">Reset</button>
+    </div>
+
+    <!-- Buttons corresponding to key clicks -->
+    <div class="panelRow controlGroup">
+      <button id="play">Play/Pause</button>
+      <button id="next">Next Frame</button>
+      <button id="randomise">Randomise Grid</button>
+    </div>
+
+  </div>
+
+
+  <!-- Canvas containing cellular automata -->
+  <div>
+    <canvas id="canvas" width="1024" height="1024" />
+  </div>
+  <div class="canvasFooter">
+    <div class="footerElement" id="cycleCounter">Update Cycles: null</div>
+    <div class="footerElement" id="framesDisplayed">Displays every Nth frame</div>
+  </div>
+
+  <script type="module" src="life.js"></script>
+</body>
+
+</html>
