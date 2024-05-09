@@ -665,51 +665,51 @@ header {
   opacity: 0.5;
 }
 
-/* continousCA Style */
+/* continuousCA Style */
 
-#continousCA {
+#continuousCA {
   padding-left: 60px;
   padding-right: 60px;
   padding-bottom: 50px;
 }
 
-#continousCA .masonry {
+#continuousCA .masonry {
   position: relative;
   width: 100%;
 }
 
-#continousCA .masonry .item img {
+#continuousCA .masonry .item img {
   transition: all 1s;
   width: 100%;
   overflow: hidden;
   margin-bottom: 30px;
 }
 
-#continousCA .masonry .item img:hover {
+#continuousCA .masonry .item img:hover {
   opacity: 0.5;
 }
 
-/* vBasedcontinousCA Style */
+/* vBasedContinuousCA Style */
 
-#vBasedcontinousCA {
+#vBasedContinuousCA {
   padding-left: 60px;
   padding-right: 60px;
   padding-bottom: 50px;
 }
 
-#vBasedcontinousCA .masonry {
+#vBasedContinuousCA .masonry {
   position: relative;
   width: 100%;
 }
 
-#vBasedcontinousCA .masonry .item img {
+#vBasedContinuousCA .masonry .item img {
   transition: all 1s;
   width: 100%;
   overflow: hidden;
   margin-bottom: 30px;
 }
 
-#vBasedcontinousCA .masonry .item img:hover {
+#vBasedContinuousCA .masonry .item img:hover {
   opacity: 0.5;
 }
 
