@@ -1,3 +1,9 @@
+/** 
+ * Shader code for rendering the canvas 
+ * Colours the grid squares based on cell state.
+ * @todo Probably could be modified such that all versions use the same GUI shaders.
+ * Especially the vertex shader.
+ */
 export const guiShader =
     /*wgsl*/`
     @group(0) @binding(0) var<uniform> grid: vec2f;
@@ -22,7 +28,8 @@ export const guiShader =
 
         let cell = vec2f(i % grid.x, floor(i/grid.x));
         let cellOffset = cell/grid *2;
-        let gridPos = (input.pos*state+1)/grid -1 + cellOffset;
+        // Put as a 0 size square if state = 0;
+        let gridPos = (input.pos*state+1)/grid -1 + cellOffset; 
 
         var output: VertexOutput;
         output.pos = vec4f(gridPos, 0, 1); // ( (X,Y), Z, W)

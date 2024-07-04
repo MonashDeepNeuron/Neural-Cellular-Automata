@@ -1,5 +1,5 @@
 const spaceship1 = {
-    name:"Conway's life glider",
+    name: "Conway's life glider",
     pattern: [
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -21,22 +21,44 @@ const spaceship1 = {
     width: 16,
     height: 16,
     minGrid: 16,
-    rule:'23/3' 
+    rule: '1,1,1,1,9,1,1,1,1,',
+    activation: 'if (x == 3. || x == 11. || x == 12.){\nreturn 1.;\n}\nreturn 0.;'
 };
 
 
 
-const life = {
-    name: "Conway's Life",
+const worms = {
+    name: "Worms",
     pattern: null,
-    width: 64,
-    height: 64,
-    minGrid: 64,
-    rule:'23/3' 
+    width: 16,
+    height: 16,
+    minGrid: 1024,
+    rule: '0.68,-0.9,0.68,-0.9,-0.66,-0.9,0.68,-0.9,0.68,',
+    activation: 'return -1./pow(2., (0.6*pow(x, 2.)))+1.;',
+};
+
+const waves = {
+    name: "Waves (experimental)",
+    pattern: null,
+    width: 16,
+    height: 16,
+    minGrid: 1024,
+    rule: '0.565, -0.716, 0.565, -0.716, 0.627 , -0.716, 0.565, -0.716, 0.565,',
+    activation: "var val = abs(1.2*x);\nif (val > 1) { // Cap to 1 to prevent explosion\n\tval = 1;\n}\nreturn -val;// Negative here not necessary, but negative values are represented blue to it looks cooler",
+};
+
+const mitosis = {
+    name: "Mitosis",
+    pattern: null,
+    width: 16,
+    height: 16,
+    minGrid: 1024,
+    rule: '-0.941,0.877,-0.941,0.877,0.425,0.877,-0.941,0.877,-0.941,',
+    activation: 'return -1./(0.9*pow(x, 2.)+1.)+1.;',
 };
 
 const B29 = {
-    name:"Conway's life B29 Glider",
+    name: "Conway's life B29 Glider",
     pattern: [
         0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -46,47 +68,29 @@ const B29 = {
         0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ],
+    ],
     width: 32,
     height: 8,
     minGrid: 32,
-    rule:'23/3' 
+    rule: '1,1,1,1,9,1,1,1,1,',
+    activation: 'if (x == 3. || x == 11. || x == 12.){\nreturn 1.;\n}\nreturn 0.;'
 };
 
-
-const spinnyThings = {
-    name:"24/3 Spinny things",
-    pattern: [
-        1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ],
-    width: 32,
-    height: 8,
-    minGrid: 32,
-    rule:'24/3' 
-};
-
-const unstillStableLife = {
-    name:"34/3",
+const slimeGrid = {
+    name: "Slime Grid",
     pattern: null,
-    width: 128,
-    height: 128,
-    rule:'34/3'
-
-
+    width: 0,
+    height: 0,
+    minGrid: 1024,
+    rule: "0.8,-0.85,0.8,-0.85,-0.2,-0.85,0.8,-0.85,0.8",
+    activation: 'return -1./(0.89*pow(x, 2.)+1.)+1.;'
 }
-
 
 export default [
     spaceship1,
-    life,
+    worms,
     B29,
-    spinnyThings,
-    unstillStableLife,
+    waves,
+    slimeGrid,
+    mitosis
 ];

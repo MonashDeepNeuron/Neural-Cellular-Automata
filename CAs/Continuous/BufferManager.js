@@ -2,6 +2,7 @@
 
 export default class BufferManager {
 
+
     // Notes for vertex buffer
     // A square that will be drawn on each cell. Vertexs loaded correspond to 
     // if the cell were a 1x1 square. This will be scaled and positioned by 
@@ -12,18 +13,17 @@ export default class BufferManager {
      * @param {GPUDevice} device 
      * @param {Float32Array} shapeVerticies Verticies of triangles that form the  
      *          shape.
-     * @returns {GPUBuffer, GPUBuffer} vertexBuffer, vertexBufferLayout
+     * @returns GPUBuffer vertexBuffer, object vertexBufferLayout
      */
     static loadShapeVertexBuffer(device, shapeVerticies){
     
         // load verticies into buffer
-        // This is currently used only for a square
         const vertexBuffer = device.createBuffer({
             label: "Cell vertices", // Error message label
             size: shapeVerticies.byteLength,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
-        device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/ 0, shapeVerticies);
+        device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, shapeVerticies);
         
         // define layout of loaded binary data
         const vertexBufferLayout = {
@@ -67,9 +67,23 @@ export default class BufferManager {
         const ruleStorage = BufferManager.setRuleBuffer(device, rule);
     
         // setup bind groups
+            // NOTE: Cell updates flip flop between cell storage 0 and cell storage 1.
+            // There are two bindgroup layouts available in the code, one where the 
+            // input storage is storage 0, and outputs to storage 1, and one where 1 is the input
+            // and 0 is the output. This means there is no need for sophisticated 
+            // synchronisation.
+
         const bindGroups = [
-            BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
-            BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
+            BufferManager.createBindGroup(
+                    device, renderPipeline, "Cell renderer bind group A",
+                    uniformBuffer, cellStateStorage[0], cellStateStorage[1],
+                    ruleStorage
+                ),
+            BufferManager.createBindGroup(
+                    device, renderPipeline, "Cell render bind group B",
+                    uniformBuffer, cellStateStorage[1], cellStateStorage[0],
+                    ruleStorage
+                )
         ];    
         return {bindGroups, uniformBuffer, cellStateStorage, ruleStorage}  ;
     }
@@ -90,7 +104,11 @@ export default class BufferManager {
     static setInitialStateBuffer(device, gridSize, initialState){
         // If initial state = null, assign random
         // Cell state arrays
-        const cellStateArray = new Uint32Array(gridSize * gridSize);
+
+        // This cell state array obj. is discarded, it's just used to instruct the 
+        // device.writeBuffer command what values to write into the GPU resource buffers.
+        const cellStateArray = new Float32Array(gridSize * gridSize);
+        
         const cellStateStorage = [
             device.createBuffer({
                 label: "Cell State A",
@@ -105,12 +123,16 @@ export default class BufferManager {
             })
         ];
     
-        // write to buffer A
+        // write to buffer A (input buffer first)
+        // If no state is provided, create randomised state
+        // otherwise fill with the provided template centered in the 
+        // middle of the grid, (grid is a square with sidelength gridsize)
+
+        // TODO: This NEEDS TO BE MOVED OUT OF HERE 
         if (initialState == null || initialState.pattern == null){
-            for (let i = 0; i < cellStateArray.length; i++) {
-                cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
+            for (let i = 0; i < cellStateArray.length; i++) { // Pretty sure this is the only difference between the shared BufferManager.js and this one 
+                cellStateArray[i] = (Math.random()*Math.random())*2 -1; // random starting position from 1 to -1
             }
-            console.log("Randomising canvas ...");
         } else {
             for (let i = 0; i < cellStateArray.length; i++) {
                 cellStateArray[i] = 0;
@@ -121,11 +143,11 @@ export default class BufferManager {
                     cellStateArray[i+centreOffset+(j+centreOffset)*gridSize] = initialState.pattern[i+j*initialState.width];
                 }
             }
-            console.log(`Implementing ${initialState.name}`);
         }
         device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
     
         // write to buffer B
+        // Empty buffer B, this will be used as an output buffer first
         for (let i = 0; i < cellStateArray.length; i++) {
             cellStateArray[i] = 0;
         }
@@ -136,7 +158,7 @@ export default class BufferManager {
 
 
 
-     /**
+    /**
      * Convenience function, creates the bindings and sets the accessibility of 
      * GPU-available resources. Bindgroup layout defines the data visibility and 
      * permissions
@@ -158,7 +180,7 @@ export default class BufferManager {
                     visibility: GPUShaderStage.VERTEX | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
                     buffer: { type: "read-only-storage" } // Cell state input buffer
                 },
-        
+
                 {
                     binding: 2,
                     visibility: GPUShaderStage.COMPUTE,
@@ -189,20 +211,20 @@ export default class BufferManager {
      * @param {GPUBuffer} ruleStorage 
      * @returns GPUBindGroupLayout
      */
-    static createBindGroup(device, renderPipeline, label, uniformBuffer, cellStateA, cellStateB, ruleStorage) {
+    static createBindGroup(device, renderPipeline, label, uniformBuffer, inputStateBuffer, outputStateBuffer, ruleStorage) {
         return device.createBindGroup({
             label: label,
-            layout: renderPipeline.getBindGroupLayout(0), // NOTE: renderpipelne and simulation pipeline use same layout
+            layout: renderPipeline.getBindGroupLayout(0), // NOTE: renderpipeline and simulation pipeline use same layout
             entries: [
                 { binding: 0, resource: { buffer: uniformBuffer } },
-                { binding: 1, resource: { buffer: cellStateA } },
-                { binding: 2, resource: { buffer: cellStateB } },
+                { binding: 1, resource: { buffer: inputStateBuffer } },
+                { binding: 2, resource: { buffer: outputStateBuffer } },
                 { binding: 3, resource: { buffer: ruleStorage } },
             ],
         });
     }
 
-    
+
 
     /**
      * Convenience function for code organisation.

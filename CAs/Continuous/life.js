@@ -1,66 +1,32 @@
 // import shaders
 import { guiShader } from "./guiShader.js";
-import { computeShader } from "./computeShader.js";
+import { ComputeShaderManager } from "./computeShader.js";
 
 // import static manager classes
 import EventManager from "../Shared/managers/EventManager.js";
 import DeviceManager from "../Shared/managers/DeviceManager.js";
 
-import BufferManager from "../Shared/managers/BufferManager.js";
+import BufferManager from "./BufferManager.js";
 import { parseRuleString, displayRule } from "./Parse.js";
+
 import startingPatterns from "./startingPatterns.js";
 // import PipelineManager from "./managers/PipelineManager.js";
 // construct static classes lol
 await DeviceManager.staticConstructor();
-const device = DeviceManager.device
-const canvas = DeviceManager.canvas
+const device = DeviceManager.device;
+const canvas = DeviceManager.canvas;
 
 // Set global variables
-
-// Workgroup size sets number of concurrent threads on GPU
-// Largest workgroup size that will work on most GPUs is 64 (16x16)
-// There is a limitation though to some pcs/graphics cards
-const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. 
-
-const INITIAL_TEMPLATE_NO = 2; // See startingPatterns.js
-
-// Initial grid state
+const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
+const INITIAL_TEMPLATE_NO = 2;
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
+const GRID_SIZE = 1024;//INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
-// @todo This needs to be changed. 
-// All starting patterns have a minimum grid size that they work on
-// New functionality:
-    // Ability to change grid size (user)
-    // Disable default patterns that have minimum grid sizes greater than current grid size
-const GRID_SIZE = INITIAL_STATE.minGrid * 2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
-
-
-// The rulestring in S/B notation
 EventManager.ruleString = INITIAL_STATE.rule;
-// Synchonise html interface 
-displayRule(EventManager.ruleString);
-// A speed is in the html interface already, make sure everything is synchronized
 EventManager.submitSpeed();
 
-// Ensure consistency of rule in EventManager and display
-EventManager.getRule = () => {
-    return document.getElementById('simulationInput').value;
-}
-
-
-// Set up html template selector based on pre-defined template list
-let select = document.getElementById("templateSelect");
-
-for (let i = 0; i < startingPatterns.length; i++) {
-    let template = document.createElement("option");
-    template.text = startingPatterns[i].name;
-    template.value = i;
-    select.add(template);
-}
-document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO - 1;
-
-// Square, as drawn in a 1x1x1 square.
-// The vertex buffer only deals in triangles
+displayRule(EventManager.ruleString);
+console.log(INITIAL_STATE)
 const SQUARE_VERTICIES = new Float32Array([
     // X,    Y,
     -0.8, -0.8, // Triangle 1
@@ -72,6 +38,32 @@ const SQUARE_VERTICIES = new Float32Array([
     -0.8, -0.8,
 ]);
 
+EventManager.getRule = () => {
+    let ruleString = "";
+    for (let i = 1; i < 10; i++) {
+        let nextVal = document.getElementById(`kernel${i}`).value;
+        if (nextVal == null || nextVal == "") {
+            nextVal = 0;
+        }
+        ruleString += (nextVal + ',');
+
+    }
+    console.log(`The rule string is ${ruleString}`);
+    return ruleString;
+}
+
+let select = document.getElementById("templateSelect");
+
+for (let i = 0; i < startingPatterns.length; i++) {
+    let template = document.createElement("option");
+    template.text = startingPatterns[i].name;
+    template.value = i;
+    template.id = startingPatterns[i].name;
+    select.add(template);
+}
+document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO - 1;
+
+ComputeShaderManager.updateActivationField(INITIAL_STATE.activation);
 
 let step = 0; // How many compute passes have been made
 
@@ -96,24 +88,26 @@ const cellShaderModule = device.createShaderModule({
 });
 
 
-// COMPUTE SHADER setup code
-// 1. load grid data into buffers etc. relevant to the simulation inc. parse rulestring 
+// GPU setup code
+// 1. load grid data into buffers etc. relevant to the simulation inc. parsed rulestring 
 // 2. define the layout of loaded binary data 
 const bindGroupLayout = BufferManager.createBindGroupLayout(device);
 
-// load shader module for running simulation
-const simulationShaderModule = device.createShaderModule({
-    label: 'shader that computes next state',
-    code: computeShader,
-    constants: { WORKGROUP_SIZE: WORKGROUP_SIZE }
-}
-);
 
 // PIPE LAYOUT
 const pipelineLayout = device.createPipelineLayout({
     label: "Cell Pipeline Layout",
     bindGroupLayouts: [bindGroupLayout],
 });
+
+
+//COMPUTE SHADER SETUP AND PIPELINE
+// Set up compute shader with custom activation function
+ComputeShaderManager.setWorkgroupSize(WORKGROUP_SIZE);
+ComputeShaderManager.setPipelineLayout(pipelineLayout);
+ComputeShaderManager.updateActivationField(INITIAL_STATE.activation);
+ComputeShaderManager.initialSetup(device);
+ComputeShaderManager.compileNewSimulationPipeline(device);
 
 //RENDER PIPELINE            
 const renderPipeline = device.createRenderPipeline({
@@ -133,16 +127,7 @@ const renderPipeline = device.createRenderPipeline({
     }
 });
 
-// SIMULATION PIPELINE
-const simulationPipeline = device.createComputePipeline({
-    label: "Simulation pipeline",
-    layout: pipelineLayout,
-    compute: {
-        module: simulationShaderModule,
-        entryPoint: "computeMain",
-    }
-});
-
+// SET BUFFERS
 let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, parseRuleString(EventManager.ruleString));
 
 
@@ -156,8 +141,10 @@ device.queue.submit([encoder.finish()]);
 // Attatch actions to inputs (buttons, keys)
 EventManager.bindEvents();
 
+// Animation rendering and calculation instructions
 const updateLoop = () => {
 
+    // The user has set a new tmeplate
     if (EventManager.resetTemplate || EventManager.randomiseGrid) {
 
         // Assume that reset template and radomise grid are mutually exclusive events
@@ -171,10 +158,15 @@ const updateLoop = () => {
             initialState = startingPatterns[EventManager.templateNo];
             EventManager.ruleString = initialState.rule;
             newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+
+            // Doin a sneaky here, this means the template reset has to go before the activation setup
+            ComputeShaderManager.updateActivationField(initialState.activation);
+            ComputeShaderManager.submitActivation(); // Equivalent of what happens when someone pressing submit activation button
+
         } else {
             newRuleStorage = ruleStorage;
         }
-     
+
         const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
@@ -187,21 +179,27 @@ const updateLoop = () => {
         EventManager.resetCycleCount();
 
         displayRule(EventManager.ruleString);
+    }
 
+    // Set new activation function and recompile shader if required
+    if (ComputeShaderManager.newActivation) {
+        ComputeShaderManager.compileNewSimulationPipeline(device);
+        ComputeShaderManager.newActivation = false;
     }
 
     // check for new rule string
     if (EventManager.newRuleString) {
-        ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
+        const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+        ruleStorage = newRuleStorage;
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], newRuleStorage);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], newRuleStorage);
 
         EventManager.newRuleString = false // toggle off
-
     }
 
     const encoder = device.createCommandEncoder();
 
+    // CREATE COMPUTE TOOL & PERFORM COMPUTATION TASKS
     if (EventManager.running) { 
         for (let i = 0; i < EventManager.framesPerUpdateLoop; i++){
             computePass(encoder);
@@ -212,6 +210,7 @@ const updateLoop = () => {
         } 
 
     } else { // Someone pressed do one frame, so update once
+        
         computePass(encoder);
         step++; // Note this counter primarily indicates which cell state should be used
         // In this case the output of the compute pass will be used as input, thus the opposite of
@@ -234,9 +233,12 @@ const updateLoop = () => {
 }
 
 
+
 // start iterative update for cells
 EventManager.setUpdateLoop(updateLoop);
 EventManager.playPause();
+
+
 
 
 // FUNCTIONS for convenient break-up of code
@@ -265,7 +267,7 @@ function renderPass(encoder) {
 function computePass(encoder) {
     const computePass = encoder.beginComputePass();
 
-    computePass.setPipeline(simulationPipeline);
+    computePass.setPipeline(ComputeShaderManager.simulationPipeline);
     computePass.setBindGroup(0, bindGroups[step % 2]);
 
     const workgroupCount = Math.ceil(GRID_SIZE / WORKGROUP_SIZE);
