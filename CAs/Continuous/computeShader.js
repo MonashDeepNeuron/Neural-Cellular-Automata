@@ -39,10 +39,11 @@ const computeShader =
 
     @compute @workgroup_size(WORKGROUP_SIZE, WORKGROUP_SIZE)
     fn computeMain(@builtin(global_invocation_id) cell: vec3u) {
+        // The activation function is applied after the filter.
 
         let i = cellIndex(cell.xy);
 
-        // Perform Convolution. We will use step function as activation function for now
+        // Perform Convolution of the filter. We will use step function as activation function for now
         // k1 | k2 | k3
         // k4 | k5 | k6
         // k7 | k8 | k9
@@ -57,6 +58,7 @@ const computeShader =
         let k9 = cellValue(cell.x+1, cell.y+1) * rule[8] ;
 
         let result = k1 + k2 + k3 + k4 + k5 + k6 + k7 + k8 + k9 ;
+        // We have not capped result to +-1. Variations between this and neuralpatterns.io are due to this.
 
         cellStateOut[i] = applyActivation(result);
                 

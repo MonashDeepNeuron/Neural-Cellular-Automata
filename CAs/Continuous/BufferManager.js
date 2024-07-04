@@ -127,10 +127,11 @@ export default class BufferManager {
         // If no state is provided, create randomised state
         // otherwise fill with the provided template centered in the 
         // middle of the grid, (grid is a square with sidelength gridsize)
-        // This NEEDS TO BE MOVED OUT OF HERE 
+
+        // TODO: This NEEDS TO BE MOVED OUT OF HERE 
         if (initialState == null || initialState.pattern == null){
             for (let i = 0; i < cellStateArray.length; i++) { // Pretty sure this is the only difference between the shared BufferManager.js and this one 
-                cellStateArray[i] = Math.random()*2 -1; // random starting position from 1 to -1
+                cellStateArray[i] = (Math.random()*Math.random())*2 -1; // random starting position from 1 to -1
             }
         } else {
             for (let i = 0; i < cellStateArray.length; i++) {

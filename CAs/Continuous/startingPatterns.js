@@ -44,7 +44,17 @@ const waves = {
     height: 16,
     minGrid: 1024,
     rule: '0.565, -0.716, 0.565, -0.716, 0.627 , -0.716, 0.565, -0.716, 0.565,',
-    activation: 'return abs(1.2*x);',
+    activation: "var val = abs(1.2*x);\nif (val > 1) { // Cap to 1 to prevent explosion\n\tval = 1;\n}\nreturn -val;// Negative here not necessary, but negative values are represented blue to it looks cooler",
+};
+
+const mitosis = {
+    name: "Mitosis",
+    pattern: null,
+    width: 16,
+    height: 16,
+    minGrid: 1024,
+    rule: '-0.941,0.877,-0.941,0.877,0.425,0.877,-0.941,0.877,-0.941,',
+    activation: 'return -1./(0.9*pow(x, 2.)+1.)+1.;',
 };
 
 const B29 = {
@@ -76,29 +86,11 @@ const slimeGrid = {
     activation: 'return -1./(0.89*pow(x, 2.)+1.)+1.;'
 }
 
-// Should create a lattice-like structure but for some reason isn't...
-const crisscross = {
-    name: "Criss Cross",
-    pattern: [
-        1,1,1,1,1,
-        1,1,1,1,1,
-        1,1,1,1,1,
-        1,1,1,1,1,
-        1,1,1,1,1,
-    ],
-    width: 5,
-    height: 5,
-    minGrid: 1024,
-    rule: "-0.688,0.306,-0.688,0.306,0.74,0.306,-0.688,0.306,-0.688",
-    activation: 'return sin(x);'
-}
-
-
 export default [
     spaceship1,
     worms,
     B29,
     waves,
     slimeGrid,
-    crisscross
+    mitosis
 ];
