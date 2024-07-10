@@ -22,7 +22,6 @@ const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = INITIAL_STATE.minGrid;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.ruleString = INITIAL_STATE.rule;
-EventManager.submitSpeed();
 displayRule(EventManager.ruleString);
 
 const SQUARE_VERTICIES = new Float32Array([
@@ -53,6 +52,11 @@ EventManager.getRule = () => {
 
 
 let select = document.getElementById("templateSelect");
+
+let template = document.createElement("option");
+template.text = "Random";
+template.value = -1;
+select.add(template);
 
 for (let i = 0; i < startingPatterns.length; i++) {
     let template = document.createElement("option");
@@ -144,49 +148,38 @@ renderPass(encoder);
 // Finish the command buffer and immediately submit it.
 device.queue.submit([encoder.finish()]);
 
-// Attatch actions to inputs (buttons, keys)
 EventManager.bindEvents();
 
-const updateLoop = () => {
+EventManager.updateLoop = () => {
 
 
-    if (EventManager.resetTemplate || EventManager.randomiseGrid) {
-
-        // Assume that reset template and radomise grid are mutually exclusive events
-        // Prioritise resetTemplate
-
+    if (EventManager.resetTemplate) {
         console.log(`Resetting canvas bump`)
-        let newRuleStorage = null;
         let initialState = null;
-
-        if (EventManager.resetTemplate) {
+        if (EventManager.templateNo >= 0) {
             initialState = startingPatterns[EventManager.templateNo];
-            EventManager.ruleString = initialState.rule;
-            newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        } else {
-            newRuleStorage = ruleStorage;
         }
-     
+
+        if (initialState != null) {
+            EventManager.ruleString = initialState.rule;
+        }
+
+        const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+
         const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
 
         cellStateStorage = newCellStateStorage;
-        ruleStorage = newRuleStorage;
         EventManager.resetTemplate = false;
-        EventManager.randomiseGrid = false;
         step = 0;
-        EventManager.resetCycleCount();
-
 
         displayRule(EventManager.ruleString);
-
     }
 
     // check for new rule string
     if (EventManager.newRuleString) {
         const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        ruleStorage = newRuleStorage;
         bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], newRuleStorage);
         bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], newRuleStorage);
 
@@ -195,33 +188,13 @@ const updateLoop = () => {
 
     const encoder = device.createCommandEncoder();
 
-    if (EventManager.running) { 
-        for (let i = 0; i < EventManager.framesPerUpdateLoop; i++){
-            computePass(encoder);
-            step++; // Note this counter primarily indicates which cell state should be used
-            // In this case the output of the compute pass will be used as input, thus the opposite of
-            // what was used for the compute pass. Hence increment after compute pass but before rendering frame
-            EventManager.incrementCycleCount();
-        } 
+    // CREATE COMPUTE TOOL & PERFORM COMPUTATION TASKS
+    computePass(encoder);
 
-    } else { // Someone pressed do one frame, so update once
-        computePass(encoder);
-        step++; // Note this counter primarily indicates which cell state should be used
-        // In this case the output of the compute pass will be used as input, thus the opposite of
-        // what was used for the compute pass. Hence increment after compute pass but before rendering frame
-        EventManager.incrementCycleCount();
-        
-        if (EventManager.skipEvenFrames){
-            computePass(encoder);
-            step++; 
-            EventManager.incrementCycleCount();
-        }
-    }
-    
     // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
+    step++;
     renderPass(encoder);
-    
-    EventManager.updateCyclesDisplay();
+
     // Finish the command buffer and immediately submit it.
     device.queue.submit([encoder.finish()]);
 }
@@ -230,7 +203,7 @@ const updateLoop = () => {
 
 // start iterative update for cells
 EventManager.setUpdateLoop(updateLoop);
-EventManager.playPause();
+EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
 
 
 

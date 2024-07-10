@@ -1,8 +1,3 @@
-
-/** Compute shader run every time the update loop runs
- * Computes grid updates  
- * (DO NOT REMOVE wgsl comment. This is for the WGSL Literal extension)
- */ 
 export const computeShader =
     /*wgsl*/`
     @group(0) @binding(0) var<uniform> grid: vec2f;

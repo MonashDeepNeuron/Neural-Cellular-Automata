@@ -2,18 +2,12 @@
 
 This project involves the creation of a cellular automata model trained using neural networks, which will be hosted online.
 
-## Progress so Far
-
-Initial project setup is complete
-- Initial versions of the following models of cell perception have been developed (work will be done to make them more efficient) 
-  - Conway's game of Life
-  - LifeLike CA
-  - Larger than Life
-  - Continuous CA
-
 ## To Do List
 
 ### General
+
+- [x] Project setup
+- [x] Modularise shaders
 - [ ] Modularise .js code
 - [ ] Bigger frame with more cells
 - [ ] Update template
@@ -24,7 +18,7 @@ Initial project setup is complete
   - [ ] Convolving CA
   - [ ] Vec4, Vec16
 
-### Model Development (Cell Perception)
+### Model Development
 
 - [ ] Life
   - [x] Get Running
@@ -42,18 +36,21 @@ Initial project setup is complete
   - [ ] Dynamic shaders, respond to user inputted rule-strings
   - [ ] Place into template
 - [ ] LTL CA
-  - [x] Implement wider neighbourhoods:
+  - [ ] Implement wider neighbourhoods:
         see line 22ish of
         [computeShader.js](My-App/src/routes/life/computeShader.js)
-  - [x] Figure out what to do with rule strings
+  - [ ] Figure out what to do with rule strings
   - [ ] Insert into template
-- [ ] Continuous CA
-  - [x] Implement 3x3 weighted kernel
+
+---
+
+The models from here down are trainable
+
+- [ ] Convolving CA
   - [ ] Implement discrete convolution as shader function
   - [ ] Make convolution shader function dynamic
         (respond to input convolution)
   - [ ] Insert into template
-- [ ] Ltl/Contunuous CA hybridisation
 - [ ] Vec4 based CA
   - [ ] Understand vector convolutions
   - [ ] Implement efficient way to pull info from the picture
@@ -61,11 +58,11 @@ Initial project setup is complete
 - [ ] vec16 based CA (haven't written this out yet)
   - [ ] insert into template
 
-### Model Training (Cell behaviours)
-- [ ] WebGPU compatibility with python training code
+### Model Training
+
 - Waiting for:
-  - [x] continuity
-  - [x] convolutions
+  - [ ] continuity
+  - [ ] convolutions
 - [ ] ?? Create a training method that allows us to find interesting behaviours on the simple implementation as seen [here](https://neuralpatterns.io)
 
 ## Resources
