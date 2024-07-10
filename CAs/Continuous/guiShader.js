@@ -37,11 +37,7 @@ export const guiShader =
         
         // Note this verison defines multiple levels of colouration and
         // thus colour is now defined through the fragment shader
-        if (state <= 0){
-            gridPos = vec2f(0,0);
-        } else {
-            gridPos = (input.pos +1)/grid -1 + cellOffset;
-        }
+        gridPos = (input.pos +1)/grid -1 + cellOffset;
 
         var output: VertexOutput;
         output.pos = vec4f(gridPos, 0, 1); // ( (X,Y), Z, W)
@@ -54,10 +50,9 @@ export const guiShader =
     @fragment
     fn fragmentMain(vertexOut : VertexOutput) -> @location(0) vec4f {
         let state = f32(cellState[vertexOut.cellInstance]);
-        var intensity = f32(1);
-        if (state >= 0 && state < 1){
-            intensity = state;
+        if (state < 0.0) {
+            return vec4f(0, pow(0.9, 1/-state), pow(0.98, 1/(pow(-state,3))), 1); // BE blue/purple scale
         }
-s
-        return vec4f(pow(0.9, 1/intensity), pow(0.98, 1/(pow(intensity,3))), pow(intensity, 0.8),  1);//vec4f(1, 1, 1, 1);
+        // return vec4f(pow(0.98, 1/(pow(state,3))), pow(state, 0.8),pow(0.9, 1/state),  1);//vec4f(1, 1, 1, 1);
+        return vec4f(pow(0.9, 1/state), pow(0.98, 1/(pow(state,3))), 0,  1);// BE Red/yellow scale
     }`
