@@ -16,40 +16,27 @@ const device = DeviceManager.device
 const canvas = DeviceManager.canvas
 
 // Set global variables
-
-// Workgroup size sets number of concurrent threads on GPU
-// Largest workgroup size that will work on most GPUs is 64 (16x16)
-// There is a limitation though to some pcs/graphics cards
-const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. 
-
-const INITIAL_TEMPLATE_NO = 2; // See startingPatterns.js
-
-// Initial grid state
+const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
+const INITIAL_TEMPLATE_NO = 4;
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
-
-// @todo This needs to be changed. 
-// All starting patterns have a minimum grid size that they work on
-// New functionality:
-    // Ability to change grid size (user)
-    // Disable default patterns that have minimum grid sizes greater than current grid size
 const GRID_SIZE = INITIAL_STATE.minGrid * 2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 
-// The rulestring in S/B notation
 EventManager.ruleString = INITIAL_STATE.rule;
-// Synchonise html interface 
 displayRule(EventManager.ruleString);
-// A speed is in the html interface already, make sure everything is synchronized
-EventManager.submitSpeed();
 
-// Ensure consistency of rule in EventManager and display
 EventManager.getRule = () => {
     return document.getElementById('simulationInput').value;
 }
 
 
-// Set up html template selector based on pre-defined template list
+
 let select = document.getElementById("templateSelect");
+
+let template = document.createElement("option");
+template.text = "Random";
+template.value = -1;
+select.add(template);
 
 for (let i = 0; i < startingPatterns.length; i++) {
     let template = document.createElement("option");
@@ -59,8 +46,7 @@ for (let i = 0; i < startingPatterns.length; i++) {
 }
 document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO - 1;
 
-// Square, as drawn in a 1x1x1 square.
-// The vertex buffer only deals in triangles
+
 const SQUARE_VERTICIES = new Float32Array([
     // X,    Y,
     -0.8, -0.8, // Triangle 1
@@ -153,41 +139,31 @@ renderPass(encoder);
 // Finish the command buffer and immediately submit it.
 device.queue.submit([encoder.finish()]);
 
-// Attatch actions to inputs (buttons, keys)
 EventManager.bindEvents();
 
-const updateLoop = () => {
+EventManager.updateLoop = () => {
 
-    if (EventManager.resetTemplate || EventManager.randomiseGrid) {
-
-        // Assume that reset template and radomise grid are mutually exclusive events
-        // Prioritise resetTemplate
-
+    if (EventManager.resetTemplate) {
         console.log(`Resetting canvas bump`)
-        let newRuleStorage = null;
         let initialState = null;
-
-        if (EventManager.resetTemplate) {
+        if (EventManager.templateNo >= 0) {
             initialState = startingPatterns[EventManager.templateNo];
-            EventManager.ruleString = initialState.rule;
-            newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        } else {
-            newRuleStorage = ruleStorage;
         }
-     
-        const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
 
-        cellStateStorage = newCellStateStorage;
-        ruleStorage = newRuleStorage;
+        if (initialState != null) {
+            EventManager.ruleString = initialState.rule;
+        }
+
+        ruleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
+        cellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
+
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage);
+
         EventManager.resetTemplate = false;
-        EventManager.randomiseGrid = false;
         step = 0;
-        EventManager.resetCycleCount();
 
         displayRule(EventManager.ruleString);
-
     }
 
     // check for new rule string
@@ -202,41 +178,26 @@ const updateLoop = () => {
 
     const encoder = device.createCommandEncoder();
 
-    if (EventManager.running) { 
-        for (let i = 0; i < EventManager.framesPerUpdateLoop; i++){
-            computePass(encoder);
-            step++; // Note this counter primarily indicates which cell state should be used
-            // In this case the output of the compute pass will be used as input, thus the opposite of
-            // what was used for the compute pass. Hence increment after compute pass but before rendering frame
-            EventManager.incrementCycleCount();
-        } 
+    // CREATE COMPUTE TOOL & PERFORM COMPUTATION TASKS
+    computePass(encoder);
 
-    } else { // Someone pressed do one frame, so update once
-        computePass(encoder);
-        step++; // Note this counter primarily indicates which cell state should be used
-        // In this case the output of the compute pass will be used as input, thus the opposite of
-        // what was used for the compute pass. Hence increment after compute pass but before rendering frame
-        EventManager.incrementCycleCount();
-
-        if (EventManager.skipEvenFrames){
-            computePass(encoder);
-            step++; 
-            EventManager.incrementCycleCount();
-        }
-    }
-    
     // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
+    step++;
     renderPass(encoder);
-    
-    EventManager.updateCyclesDisplay();
+
     // Finish the command buffer and immediately submit it.
     device.queue.submit([encoder.finish()]);
 }
 
 
+
 // start iterative update for cells
 EventManager.setUpdateLoop(updateLoop);
-EventManager.playPause();
+EventManager.loopID = setInterval(EventManager.updateLoop, EventManager.updateInterval); // Interval is accessed from an externally called function
+
+
+
+
 
 
 // FUNCTIONS for convenient break-up of code

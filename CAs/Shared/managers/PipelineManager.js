@@ -1,5 +1,3 @@
-// This class has not been implemented anywhere yet
-/** @todo Finish writing this Manager */
 export default class PipelineManager {
     // SIMULATION PIPELINE
     static simulationPipeline = device.createComputePipeline({

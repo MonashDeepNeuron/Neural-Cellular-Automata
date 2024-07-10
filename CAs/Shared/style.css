@@ -1,8 +1,6 @@
 /* General Body Styling */
 body {
-    font-family: Arial , Helvetica, sans-serif;
-
-    font-size: 20px;
+    font-family: Arial, sans-serif;
     background-color: #f0f0f0;
     margin: 0;
     padding: 0;
@@ -22,77 +20,26 @@ body {
 canvas {
     display: block;
     margin: 20px auto;
-    border: 5px solid #ffffff;
-}
-
-/* Interactive elements styling*/
-.controlPanel, .canvasFooter {
-    display: block;
-    border: 1px solid #a08989;
-    background-color: #e6e6e6;
-    border-radius: 3px;
-}
-
-/* Control panel sizing*/
-.controlPanel {
-    display: flex block;
-    flex-flow: column;
-    width: 80%;
-    min-width: 750px;
-    max-width: 1200px;
-    margin: auto;
-    padding: 1%;
-}
-
-.controlGroup {
-    display: flex;
-    align-items: center;
-    background-color: #f3e6e8;
-    border: 1px solid #a08989;
-    margin:0.5%;
-    padding: 0 1%;
-    flex-grow: 1;
-    border-radius: 4px;
-}
-
-.panelRow {
-    display: flex;
-    flex-flow: row;
-    align-items: center;
-}
-
-.canvasFooter{
-    display: block flex;
-    margin:auto;
-    width:1024px;
-    padding:0px 10px;
-    align-content: space-around;
-    flex-flow: row wrap;
-
+    border: 1px solid #ddd;
 }
 
 .centre {
     margin: auto;
+    width: 50%;
     padding: 10px;
-    display: block;
-    width:fit-content;
 }
 
 /* Button Styling */
 button {
-    display:inline-block;
-    background-color: #ffc0cb;
+    background-color: pink;
     color: white;
     border: none;
     padding: 10px 20px;
-    margin: 5px;
+    margin: 10px;
     cursor: pointer;
-    font-size: 20px;
-
-    font-weight: 900;
+    font-size: 16px;
     border-radius: 5px;
     transition: background-color 0.3s;
-    flex-grow: 1;
 }
 
 button:hover {
@@ -100,52 +47,6 @@ button:hover {
     /* A darker shade of pink for hover effect */
 }
 
-/* Input box styling*/
-input, select, textarea, .footerElement{
-    flex-direction: row;
-
-    font-size: 20px;
-    background-color: #ffffff;
-    border: 1px solid #a08989;
-    margin: 5px 0px;
-    padding: 5px 10px;
-    height:min-content;
-    border-radius: 5px;
-    flex-grow: 50;
-    min-width: 3em;
-}
-
-/* Input box label styling*/
-label {
-    flex-direction: row;
-    padding: 0;
-}
-
-
 .ltlRuleIn{
     width:50px;
-    margin: 2px;
 }
-
-.fullRow{
-    width:100%;
-}
-
-
-textarea {
-    width:96.65%;
-    height:100px;
-}
-
-.grid {
-    flex-flow: row wrap;
-    padding-bottom: 1%;
-    padding-top: 1%;
-}
-
-
-h3 {
-    padding: 0px;
-    margin: 0px;
-}
-
