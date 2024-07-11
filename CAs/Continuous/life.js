@@ -238,9 +238,6 @@ const updateLoop = () => {
 EventManager.setUpdateLoop(updateLoop);
 EventManager.playPause();
 
-
-
-
 // FUNCTIONS for convenient break-up of code
 // Can't be removed because relies on a ton of 
 // definitions from this chunk of code.
@@ -262,7 +259,6 @@ function renderPass(encoder) {
     renderPass.draw(SQUARE_VERTICIES.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
     renderPass.end();
 }
-
 
 function computePass(encoder) {
     const computePass = encoder.beginComputePass();
