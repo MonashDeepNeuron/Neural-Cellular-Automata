@@ -1,96 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>WebGPU Life</title>
-    <link rel="stylesheet" href="../Shared/style.css"> <!-- Link to the CSS file -->
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <title>WebGPU Life</title>
+  <link rel="stylesheet" href="../Shared/style.css"> <!-- Link to the CSS file -->
+</head>
+
+<body>
+  <div class="navbar">
+    <a href="https://www.deepneuron.org/">
+      <img src="../Shared/mdn_logo.png" alt="Logo" style="height: 20px; vertical-align: middle;">
+    </a>
+    <a href="/">Home</a>
+    <a href="/about.html">About</a>
+    <a href="https://www.deepneuron.org/contact-us">Contact Us</a>
+  </div>
 
   <div class="text-column">
     <h1>Larger Than Life</h1>
   </div>
+    
+  <!-- Instructions for rulestring input -->
+  <div class="centre">
+    <h3>Larger than life rulestring</h3>
+    <p>Rulestring is given as Rr, Cc, Ss, Bb, Nn where:</p>
+    <p> r is the radius in units<br>
+        c is the number of cycles before cell death<br>
+        s is ranges in the form a-b, c-d, e, ... giving the conditions of survival<br>
+        b is ranges in the form a-b, c-d, e, ... giving the conditions of birth<br>
+        n is the type of neighbourhood (eg. square, cicular) <br>
+        Rulestring based on that used by Golly LifeVier and MCell: <a href=https://golly.sourceforge.io/Help/Algorithms/Larger_than_Life.html>Ltl Rulestring</a><br>
 
-  <body>
-      
-    <!-- Instructions for rulestring input -->
-    <div class="centre">
-      <h3>Larger than life rulestring</h3>
-      <p>Rulestring is given as Rr, Cc, Ss, Bb, Nn where:</p>
-      <p> r is the radius in units<br>
-          c is the number of cycles before cell death<br>
-          s is ranges in the form a-b, c-d, e, ... giving the conditions of survival<br>
-          b is ranges in the form a-b, c-d, e, ... giving the conditions of birth<br>
-          n is the type of neighbourhood (eg. square, cicular) <br>
-          Rulestring based on that used by Golly LifeVier and MCell: <a href=https://golly.sourceforge.io/Help/Algorithms/Larger_than_Life.html>Ltl Rulestring</a><br>
-
-      </p>
-      <p>
-        Supported neighbourhood types: <br>
-      </p>
-      
-      <ul>
-        <li>(M) <i>Moore Neighbourhood</i>: the square neighbourhood</li>
-        <li>(N) <i>von Neumann Neighbourhood</i>: all cells within the <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Manhatten distance</a> specified by the given radius</li>
-        <li>(C) <i>Circular</i>: all cells within the actual (circular) radius, measured in cell lengths</li>
-      </ul>
+    </p>
+    <p>
+      Supported neighbourhood types: <br>
+    </p>
+    
+    <ul>
+      <li>(M) <i>Moore Neighbourhood</i>: the square neighbourhood</li>
+      <li>(N) <i>von Neumann Neighbourhood</i>: all cells within the <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Manhatten distance</a> specified by the given radius</li>
+      <li>(C) <i>Circular</i>: all cells within the actual (circular) radius, measured in cell lengths</li>
+    </ul>
+  </div>
+  <div class="controlPanel">
+    
+    <!-- Input Box for Simulation Parameters -->
+    <!-- 
+      Boxes arranged as follows for user conveniance: 
+      R[<input>], C[<input>], S[<input>], B[<input>], N[<input>]
+      Input is restricted
+    -->
+    <div class="panelRow controlGroup">
+      <label for="simulationInputR">R</label><input class="ltlRuleIn" type="number" id="simulationInputR" value="1" maxlength="3">,
+      <label for="simulationInputC">C</label><input class="ltlRuleIn" type="number" id="simulationInputC" value="0">, 
+      <label for="simulationInputS">S</label><input class="ltlRuleIn" type="text" id="simulationInputS" value="2-3" pattern="[0-9]|-|,">, 
+      <label for="simulationInputB">B</label><input class="ltlRuleIn" type="text" id="simulationInputB" value="3">, 
+      <label for="simulationInputN">N</label><input class="ltlRuleIn" type="text" id="simulationInputN" value="M">
+      <button id="submitInput">Submit Rule</button>
     </div>
-    <div class="controlPanel">
-      
-      <!-- Input Box for Simulation Parameters -->
-      <!-- 
-        Boxes arranged as follows for user conveniance: 
-        R[<input>], C[<input>], S[<input>], B[<input>], N[<input>]
-        Input is restricted
-      -->
-      <div class="panelRow controlGroup">
-        <label for="simulationInputR">R</label><input class="ltlRuleIn" type="number" id="simulationInputR" value="1" maxlength="3">,
-        <label for="simulationInputC">C</label><input class="ltlRuleIn" type="number" id="simulationInputC" value="0">, 
-        <label for="simulationInputS">S</label><input class="ltlRuleIn" type="text" id="simulationInputS" value="2-3" pattern="[0-9]|-|,">, 
-        <label for="simulationInputB">B</label><input class="ltlRuleIn" type="text" id="simulationInputB" value="3">, 
-        <label for="simulationInputN">N</label><input class="ltlRuleIn" type="text" id="simulationInputN" value="M">
-        <button id="submitInput">Submit Rule</button>
+
+    <!-- Input Box for Speed -->
+    <div class="panelRow">
+      <div class="controlGroup">
+        <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="40" min="1" max="500">
+        <button id="speedInput">Submit Speed </button>
       </div>
-
-      <!-- Input Box for Speed -->
-      <div class="panelRow">
-        <div class="controlGroup">
-          <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="40" min="1" max="500">
-          <button id="speedInput">Submit Speed </button>
-        </div>
-        <div class="controlGroup">
-          <label for="skipEvenCheckbox">Skip Every Second Frame: </label><input type="checkbox" id="skipEvenCheckbox" value="false">
-        </div>
+      <div class="controlGroup">
+        <label for="skipEvenCheckbox">Skip Every Second Frame: </label><input type="checkbox" id="skipEvenCheckbox" value="false">
       </div>
-
-      <!-- Selection options for templates -->
-      <div class="panelRow controlGroup">
-        <label for="templateSelect">Starting Template:</label>
-        <select id="templateSelect">
-          <!-- See javascript -->
-        </select>
-        <button id="reset">Reset</button>
-      </div> 
-
-      <!-- Buttons corresponding to key clicks -->
-      <div class="panelRow controlGroup">
-        <button id="play">Play/Pause</button>
-        <button id="next">Next Frame</button>
-        <button id="randomise">Randomise Grid</button>
-      </div>  
-
-
     </div>
 
-    <!-- Canvas containing cellular automata -->
-    <div> 
-      <canvas id="canvas" width="1024" height="1024" />
-    </div>
-    <div class="canvasFooter">
-      <div class="footerElement" id="cycleCounter">Update Cycles: null</div>
-      <div class="footerElement" id="framesDisplayed">Displays every Nth frame</div>
-    </div>
+    <!-- Selection options for templates -->
+    <div class="panelRow controlGroup">
+      <label for="templateSelect">Starting Template:</label>
+      <select id="templateSelect">
+        <!-- See javascript -->
+      </select>
+      <button id="reset">Reset</button>
+    </div> 
 
-    <script type="module" src="life.js"></script>
-  </body>
+    <!-- Buttons corresponding to key clicks -->
+    <div class="panelRow controlGroup">
+      <button id="play">Play/Pause</button>
+      <button id="next">Next Frame</button>
+      <button id="randomise">Randomise Grid</button>
+    </div>  
+
+
+  </div>
+
+  <!-- Canvas containing cellular automata -->
+  <div> 
+    <canvas id="canvas" width="1024" height="1024" />
+  </div>
+  <div class="canvasFooter">
+    <div class="footerElement" id="cycleCounter">Update Cycles: null</div>
+    <div class="footerElement" id="framesDisplayed">Displays every Nth frame</div>
+  </div>
+
+  <script type="module" src="life.js"></script>
+</body>
 
 </html>

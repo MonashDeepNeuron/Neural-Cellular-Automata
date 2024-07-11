@@ -148,3 +148,28 @@ h3 {
     padding: 0px;
     margin: 0px;
 }
+
+/* BEGIN: Mai's CSS */
+
+a {
+  text-decoration: none;
+}
+.navbar {
+  background-color: #7065f9;
+  overflow: hidden;
+  padding: 0 10px;
+}
+.navbar a {
+  float: left;
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+.navbar a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* END: Mai's CSS */
