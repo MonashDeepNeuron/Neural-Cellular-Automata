@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Neural Cellular Automata</title>
+  <link rel="stylesheet" href="./CAs/Shared/style.css"> <!-- Link to the CSS file -->
+  <style>
+    a {
+      text-decoration: none;
+    }
+    .navbar {
+      background-color: #696969;
+      overflow: hidden;
+      padding: 0 10px;
+    }
+    .navbar a {
+      float: left;
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="/">Home</a>
+    <a href="./about.html">About</a>
+    <a href="https://www.deepneuron.org/contact-us">Contact Us</a>
+  </div>
+
+  <div class="text-column">
+    <h1>Neural Cellular Automata Simulator</h1>
+  </div>
+
+  <div class="controlPanel">
+    <h3>Select a model:</h3>
+    <div class="panelRow controlGroup">
+      <a href="./CAs/Conways_Life/life.html" class="button" id="classic_conway">Classic Conway</a>
+      <a href="./CAs/Continuous/life.html" class="button" id="continuous">Continuous</a>
+      <a href="./CAs/Larger/life.html" class="button" id="larger">Larger</a>
+      <a href="./CAs/LifeLike/life.html" class="button" id="life_like">Life Like</a>
+    </div>
+  </div>
+</body>
+</html>

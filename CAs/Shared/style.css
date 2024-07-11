@@ -79,7 +79,7 @@ canvas {
 }
 
 /* Button Styling */
-button {
+.button, button {
     display:inline-block;
     background-color: #ffc0cb;
     color: white;
@@ -95,7 +95,7 @@ button {
     flex-grow: 1;
 }
 
-button:hover {
+.button:hover, button:hover {
     background-color: #ff69b4;
     /* A darker shade of pink for hover effect */
 }
@@ -148,4 +148,3 @@ h3 {
     padding: 0px;
     margin: 0px;
 }
-
