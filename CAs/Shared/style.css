@@ -1,7 +1,6 @@
 /* General Body Styling */
 body {
     font-family: Arial , Helvetica, sans-serif;
-
     font-size: 20px;
     background-color: #f0f0f0;
     margin: 0;
@@ -72,10 +71,13 @@ canvas {
 }
 
 .centre {
-    margin: auto;
-    padding: 10px;
+    padding: 20px;
     display: block;
     width:fit-content;
+    max-width: 95%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Button Styling */
@@ -88,7 +90,6 @@ canvas {
     margin: 5px;
     cursor: pointer;
     font-size: 20px;
-
     font-weight: 900;
     border-radius: 5px;
     transition: background-color 0.3s;
@@ -103,7 +104,6 @@ canvas {
 /* Input box styling*/
 input, select, textarea, .footerElement{
     flex-direction: row;
-
     font-size: 20px;
     background-color: #ffffff;
     border: 1px solid #a08989;
@@ -143,6 +143,54 @@ textarea {
     padding-top: 1%;
 }
 
+.warning {
+    font-weight: 800;
+    color: red;
+    background-color: lightgoldenrodyellow;
+    border-color: #333;
+    border-width: 3px;
+    border-style:solid;
+    border-radius: 1em;
+    margin-bottom: 1em;
+}
+
+.centreDiagram{
+    width:85%;
+    max-width:50em;  
+    border: 20px solid white; 
+    border-radius: 0.5em;
+    padding:0;
+    display: block;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.sideDiagramContainer {
+    min-width:12em;
+    min-height: fit-content;
+    margin: 1em;
+}
+
+.sideDiagram {
+    border: 5px solid white;
+    border-radius:5px;
+    width:95%;
+}
+
+.sideBySide {
+    display: flex;
+    align-items:stretch;
+    width:100%;
+}
+
+.figureCaption {
+    font-family: Arial , Helvetica, sans-serif;
+    font-size: 15px;
+    width:100%;
+    text-align:center;
+}
 
 h3 {
     padding: 0px;

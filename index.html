@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport">
   <title>Neural Cellular Automata</title>
   <link rel="stylesheet" href="./CAs/Shared/style.css"> <!-- Link to the CSS file -->
 </head>
@@ -19,6 +20,15 @@
     <h1>Neural Cellular Automata Simulator</h1>
   </div>
 
+  <div class="warning centre"> <!-- TODO: Would be great if this was dismissable -->
+    <p>
+      Warning: This website contains content that may 
+      <u>flash at high frequencies</u>. If you or someone viewing this with 
+      you is sensitive to this type of content, please use discretion when 
+      choosing frame-rates.
+    </p>
+  </div>
+
   <div class="controlPanel">
     <h3>Select a model:</h3>
     <div class="panelRow controlGroup">
@@ -27,6 +37,138 @@
       <a href="./CAs/Larger/life.html" class="button" id="larger">Larger</a>
       <a href="./CAs/LifeLike/life.html" class="button" id="life_like">Life Like</a>
     </div>
+  </div>
+
+  <div class="centre">
+    <h1>
+      What are Cellular Automata?
+    </h1>
+    <p>
+      Cellular automata are a generalisation of John Conway’s Game of Life. Cells existing in a grid each have a state. Observing only the states of the cells immediately around it, each cell updates its value based on a given rule. The same rule is applied to all cells in the grid. 
+    </p>
+    <p>
+      Different forms of cellular automata arise by changing the rule format, resulting in drastically different (and complex) behaviours. We’ve implemented some famous examples here along with some of our own creation (coming soon!!). You can find a more detailed explanation of each on their respective pages.
+    </p>
+      Using a neural network and more complex states, the cells can be trained to exhibit specific organism-like behaviour, like in this simulation or this paper.
+    </p>
+
+    
+    <h2>
+      Terminology 
+    </h2>
+    <p>
+      <i>Cell</i>: Cellular automata exist on a grid of cells. Each square of the grid represents is termed a cell, and each cell has its own value representing its state.
+    </p>
+    <p>
+      <i>Neighbourhood</i>: These are the cells immediately surrounding the target cell that this cell can ‘see’ and use the values from in its decision making. What is included in the neighbourhood can vary from CA to CA (see Larger than Life) however in most models this is usually the cells that are ‘touching’ the cell.
+    </p>
+    <p>
+      <i>Update cycle</i>: This is when we go through an update all the values of all the cells based on their previous values. 
+    </p>
+    <p>
+      <i>Update rule</i>: This is the rule/decision making process that each cell uses to determine its new value in the next update cycle. Every cell in the grid uses the same rule.
+    </p>
+    <h2>Neural Cellular Automata (Coming Soon)</h2>
+    <p>
+      Neural Cellular Automata (NCA) are a category of cellular automata that 
+      involves using a neural network as the cell’s update rule. The neural 
+      network can be trained to figure out how to update the cell’s value in 
+      co-ordination with other cells operating on the same rule to produce a 
+      target behaviour.
+    </p>
+    <p>
+      One of the best examples of NCA is 
+      <i><a href="https://distill.pub/2020/growing-ca/">Growing Neural Cellular Automata</a></i> 
+      (A. Mordvintsev et. al, 2020) where they trained a Neural Cellular Automata to ‘grow’ into 
+      a target image from a single seed cell. (Highly recommend looking at the 
+      paper, they have an interactive version of the result that’s really cool!). 
+    </p>
+    <p>
+      Neural Cellular Automata is displays properties that can be likened to how cells 
+      communicate and co-ordinate within living organisms. The model from Growing 
+      Neural Cellular Automata also naturally showed regenerative properties, i.e. 
+      when the pattern was disturbed during development, so long as the disturbance 
+      was not too drastic, the model was able to recover. 
+    </p>
+    
+    <h1>Models</h1>
+
+    <h2>John Conway’s Game of Life / THE Game of Life</h2>
+    <div class="sideBySide">
+      <div>
+        <p>
+          This is probably the most famous example of cellular automata there is.
+        </p> 
+        <p>
+          The Game of Life operates on these very simple rules:
+        </p>
+        <ul>
+          <li>All cells are either alive or dead (1 or 0).</li>
+          <li>When a cell that is living has 2 or 3 neighbours, it gets to live (the cell survives). </li>
+          <li>When a cell that is dead has 3 neighbours, it comes to life (a cell is born). </li>
+          <li>In all other circumstances, the cell dies/remains dead.</li>
+        </ul>
+        <p>
+          Even this simple rule can produce some very complex and interesting 
+          behaviours, and many patterns have been discovered that are 
+          self-sustaining. A more sophisticated version of the Game of Life 
+          can be found <a href="https://playgameoflife.com/">here</a>.
+        </p>
+      
+        <h2>Life Like Cellular Automata</h2>
+        <p>
+          Life like CA operate very similarly to the Game of Life in that all cells
+          are either alive or dead. However, Life Like gives you the freedom to 
+          choose how many cells must be alive in the neighbourhood to either 
+          survive or be born. This is specified by a <b>rule string</b>. 
+        </p>
+        <p>
+          The rule string format we have used is <b>survival/birth notation.</b> In
+          this notation, the original Game of Life would be expressed as <b>23/3</b> (we 
+          don’t worry about spacing between numbers because they can only be the 
+          numbers 0-8), where 2 or 3 cells in the neighbourhood are required for 
+          survival of a living cell, and 3 cells in the neighbourhood are required 
+          for a dead cell to come to life/be born.
+        </p>
+
+        <h2>Larger than Life</h2>
+        <p>
+          Larger than Life builds on Life Like CA by introducing even more flexibility. 
+          This means the following are now specifieable in the rule string:
+        </p>
+        <ul>
+          <li>The neighbourhood radius to encompass cells that are further than one
+            cell away.</li>
+          <li>Neighbourhood shape.</li>
+          <li>Minimum lifespan of living cells (basically living cells have HP that
+            is deducted from every time it’s exposed to death conditions)</li>
+        </ul>
+      </div>
+      <div class="sideDiagramContainer">
+         <img src="./Images/GoL neighbourhood.png" class="sideDiagram" 
+              alt="The neighbourhood of each cell consists of the cells in contact with it.">
+         <p class="figureCaption">The neighbourhood of each cell consists of the cells in contact with it.</p>
+         <img src="./Images/LargerRadius2.png" class="sideDiagram"
+              alt="The neighbourhood in larger than life also contains all the 
+              cells within a specified distance from the target cell">
+          <p class="figureCaption">Neighbourhood of a target cell when the neighbourhood radius is set to 2 cells</p>
+          <img src="./Images/LargerNeighbourhoodTypes.png" class="sideDiagram">
+          <p class="figureCaption">Different neighbourhood shapes/different ways of determining a 
+            cell's distance from the target cell</p>
+      </div>
+    </div>
+    
+
+    <h2>Continuous Cellular Automata</h2>
+    <p>
+      Continuous CA also builds on Life Like CA. Continuous CA can display 
+      behaviours similar to basic organisms and population level behaviours of 
+      bacteria etc. that have simple behavioural patterns. The main difference 
+      is that instead of using the binary dead or alive as states, we use a 
+      continuous range of values. The new cell state value is calculated in 
+      the following way:
+    </p>
+    <img src="./Images/Continuous.png" class="centreDiagram"  alt="Calculating continuous CA"  >
   </div>
 </body>
 </html>
