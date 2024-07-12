@@ -9,7 +9,7 @@
  * float/integer arrays instead of strings. This would be much more direct
  */
 export function parseRuleString(ruleString) {
-    console.log(ruleString);
+    // console.log(ruleString);
 
 
     let RULE = new Float32Array(9)

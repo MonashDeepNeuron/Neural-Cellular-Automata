@@ -90,14 +90,14 @@ const computeShader =
         static getComputeShaderWithActivation (activationFunctionString){
             let shaderTemplate = computeShader.split(ACTIVATION_FUNCTION_FLAG);
     
-            console.log(shaderTemplate);
+            // console.log(shaderTemplate);
     
             let newShader = shaderTemplate[0] + '\n' 
                 + ACTIVATION_FUNCTION_FLAG + '\n'
                 + activationFunctionString + '\n'
                 + ACTIVATION_FUNCTION_FLAG + '\n'
                 + shaderTemplate[2] ;
-            console.log(`NEW SHADER \n ${newShader}`)
+            // console.log(`NEW SHADER \n ${newShader}`)
             return newShader;
         }
 
@@ -116,7 +116,7 @@ const computeShader =
             const newComputeShader = ComputeShaderManager.getComputeShaderWithActivation(newActivaiton);
             ComputeShaderManager.currentActivation = newActivaiton;
             ComputeShaderManager.currentComputeShaderText = newComputeShader;
-            console.log(`CURRENT ACTIVATION: ${ComputeShaderManager.currentActivation}`);
+            // console.log(`CURRENT ACTIVATION: ${ComputeShaderManager.currentActivation}`);
         }
         
 
