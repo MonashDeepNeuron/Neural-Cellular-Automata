@@ -21,7 +21,7 @@ const device = DeviceManager.device;
 const canvas = DeviceManager.canvas;
 
 // Set global variables
-const WORKGROUP_SIZE = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
+const WORKGROUP_SIZE = 2; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
 const INITIAL_TEMPLATE_NO = 2;
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = 1024;//INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
@@ -42,6 +42,7 @@ const SQUARE_VERTICIES = new Float32Array([
     -0.8, -0.8,
 ]);
 
+// Website inputs : interpret rule string
 EventManager.getRule = () => {
     let ruleString = "";
     for (let i = 1; i < 10; i++) {
@@ -56,6 +57,7 @@ EventManager.getRule = () => {
     return ruleString;
 }
 
+// Website inputs : obtain initial canvas
 let select = document.getElementById("templateSelect");
 
 for (let i = 0; i < startingPatterns.length; i++) {
@@ -130,7 +132,10 @@ const renderPipeline = device.createRenderPipeline({
         }],
     }
 });
-// LOAD BINARY WEIGHTS INTO BUFFER 
+// LOAD BINARY WEIGHTS INTO BUFFER TODO: CHANGE WEIGHTS TO 32F FROM 32I
+// TODO: CHANGE FROM INT FORM TO FLOAT
+// TODO: SPLIT INTO W1, B1, W2: [128*48, 128*1, 16*128]
+// TODO: LOAD INTO BUFFER
 let weights = loadBinaryFileAsIntegers('../../model_weights_pls_god.bin');
 
 // SET BUFFERS

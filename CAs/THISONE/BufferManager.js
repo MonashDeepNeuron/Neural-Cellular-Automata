@@ -3,6 +3,15 @@
 export default class BufferManager {
     NUM_CHANNELS = 16;
     static loadShapeVertexBuffer(device, shapeVerticies) {
+        /*
+        Loads vertex data into GPU buffer
+
+        Parameters:
+            device: The WebGPU device used to create buffers.
+            shapeVertices: A typed array of vertex data.
+        Returns:
+            An object containing the vertex buffer and its layout configuration.
+        */
 
         // load verticies into buffer
         const vertexBuffer = device.createBuffer({
@@ -27,6 +36,8 @@ export default class BufferManager {
 
 
     static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, rule) {
+
+
         // Uniform grid
         const uniformArray = new Float32Array([gridSize, gridSize]);
         const uniformBuffer = device.createBuffer({
@@ -51,6 +62,11 @@ export default class BufferManager {
     static setInitialStateBuffer(device, gridSize, initialState) {
         // If initial state = null, assign random
         // Cell state arrays
+
+        /*
+        Implements double buffering - to improve simulation quality? 
+        */
+
         const cellStateArray = new Float32Array(gridSize * gridSize * NUM_CHANNELS);
         const cellStateStorage = [
             device.createBuffer({
