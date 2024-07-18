@@ -1,6 +1,8 @@
 export { loadBinaryFileAsIntegers };
 const fs = require('fs').promises;
-
+/*
+Need to change this to 32 floats 
+*/
 async function loadBinaryFileAsIntegers(filePath) {
     try {
         const fileBuffer = await fs.readFile(filePath);

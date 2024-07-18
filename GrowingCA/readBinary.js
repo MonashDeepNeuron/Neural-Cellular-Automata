@@ -1,5 +1,10 @@
 const fs = require('fs').promises;
+/*
+Takes in binary encoding of model's weights in the form :
+128 
 
+# TODO: EXPORT AS FLOAT NOT INTEGERS
+*/
 async function loadBinaryFileAsIntegers(filePath) {
     try {
         const fileBuffer = await fs.readFile(filePath);
