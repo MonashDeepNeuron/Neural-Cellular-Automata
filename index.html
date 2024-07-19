@@ -44,12 +44,21 @@
       What are Cellular Automata?
     </h1>
     <p>
-      Cellular automata are a generalisation of John Conway’s Game of Life. Cells existing in a grid each have a state. Observing only the states of the cells immediately around it, each cell updates its value based on a given rule. The same rule is applied to all cells in the grid. 
+      Cellular automata are a generalisation of John Conway’s Game of Life. 
+      Cells existing in a grid each have a state. Observing only the states of 
+      the cells immediately around it, each cell updates its value based on a 
+      given rule. The same rule is applied to all cells in the grid. 
     </p>
     <p>
-      Different forms of cellular automata arise by changing the rule format, resulting in drastically different (and complex) behaviours. We’ve implemented some famous examples here along with some of our own creation (coming soon!!). You can find a more detailed explanation of each on their respective pages.
+      Different forms of cellular automata arise by changing the rule format, 
+      resulting in drastically different (and complex) behaviours. We’ve 
+      implemented some famous examples here. 
     </p>
-      Using a neural network and more complex states, the cells can be trained to exhibit specific organism-like behaviour, like in this simulation or this paper.
+    <p>
+      Using a neural network and more complex states, the cells can be trained 
+      to exhibit specific behaviours, and this when it becomes <i>Neural Cellular Automata</i> (NCA). 
+      Our project is interested in investigating how we can leverage NCA to make CAs 
+      that exhibit organism-like behaviour.
     </p>
 
     
@@ -57,16 +66,25 @@
       Terminology 
     </h2>
     <p>
-      <i>Cell</i>: Cellular automata exist on a grid of cells. Each square of the grid represents is termed a cell, and each cell has its own value representing its state.
+      <i>Cell</i>: Cellular automata exist on a grid of cells. Each square of 
+      the grid represents is termed a cell, and each cell has its own value 
+      representing its state.
     </p>
     <p>
-      <i>Neighbourhood</i>: These are the cells immediately surrounding the target cell that this cell can ‘see’ and use the values from in its decision making. What is included in the neighbourhood can vary from CA to CA (see Larger than Life) however in most models this is usually the cells that are ‘touching’ the cell.
+      <i>Neighbourhood</i>: These are the cells immediately surrounding the 
+      target cell that this cell can ‘see’ and use the values from in its 
+      decision making. What is included in the neighbourhood can vary from CA 
+      to CA (see Larger than Life) however in most models this is usually the 
+      cells that are ‘touching’ the cell.
     </p>
     <p>
-      <i>Update cycle</i>: This is when we go through an update all the values of all the cells based on their previous values. 
+      <i>Update cycle</i>: This is when we go through an update all the values 
+      of all the cells based on their previous values. 
     </p>
     <p>
-      <i>Update rule</i>: This is the rule/decision making process that each cell uses to determine its new value in the next update cycle. Every cell in the grid uses the same rule.
+      <i>Update rule</i>: This is the rule/decision making process that each 
+      cell uses to determine its new value in the next update cycle. Every 
+      cell in the grid uses the same rule.
     </p>
     <h2>Neural Cellular Automata (Coming Soon)</h2>
     <p>
@@ -147,14 +165,16 @@
       <div class="sideDiagramContainer">
          <img src="./Images/GoL neighbourhood.png" class="sideDiagram" 
               alt="The neighbourhood of each cell consists of the cells in contact with it.">
-         <p class="figureCaption">The neighbourhood of each cell consists of the cells in contact with it.</p>
+         <p class="figureCaption">The neighbourhood of each cell consists of 
+          the cells in contact with it.</p>
          <img src="./Images/LargerRadius2.png" class="sideDiagram"
               alt="The neighbourhood in larger than life also contains all the 
               cells within a specified distance from the target cell">
-          <p class="figureCaption">Neighbourhood of a target cell when the neighbourhood radius is set to 2 cells</p>
+          <p class="figureCaption">Neighbourhood of a target cell in Larger 
+            than Life when the neighbourhood radius is set to 2 cells</p>
           <img src="./Images/LargerNeighbourhoodTypes.png" class="sideDiagram">
-          <p class="figureCaption">Different neighbourhood shapes/different ways of determining a 
-            cell's distance from the target cell</p>
+          <p class="figureCaption">Different neighbourhood shapes/different 
+            ways of determining a cell's distance from the target cell</p>
       </div>
     </div>
     
