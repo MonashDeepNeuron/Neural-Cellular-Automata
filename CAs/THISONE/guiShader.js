@@ -3,7 +3,7 @@ export const guiShader =
     @group(0) @binding(0) var<uniform> grid: vec2f;
     @group(0) @binding(1) var<storage> cellState: array<f32>;
     // THIS NEEDS TO BE MADE EXTERNAL
-    let NUM_CHANNELS = 16;
+    const NUM_CHANNELS = 16;
 
     struct VertexInput {
         @location(0) pos:vec2f,
@@ -44,10 +44,18 @@ export const guiShader =
     @fragment
     fn fragmentMain(vertexOut : VertexOutput) -> @location(0) vec4f {
         let index = vertexOut.cellInstance * NUM_CHANNELS;
-        let colour: array<f32, 4>;
-        for (int i = 0u; i < 4; i++){
-            colour[i] = cellState[index];
+        var colour: array<f32, 4> = array<f32, 4>(0.0, 0.0, 0.0, 0.0);
+        if (cellState[index + 3] == 0) {
+            for (var i: u32 = 0u; i < 4u; i = i + 1u) {
+                colour[i] = 0.0;
+            }
+        } else {
+            for (var i: u32 = 0u; i < 4u; i = i + 1u) {
+                colour[i] = cellState[index + i];
+            }
         }
 
-        return colour;//vec4f(1, 1, 1, 1);
+        // cast to correct return type
+        return vec4<f32>(colour[0], colour[1], colour[2], colour[3]);
+        //return colour;//vec4f(1, 1, 1, 1);
     }`
