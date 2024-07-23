@@ -1,7 +1,7 @@
 
 
 export default class BufferManager {
-    NUM_CHANNELS = 16;
+    static NUM_CHANNELS = 16;
     static loadShapeVertexBuffer(device, shapeVerticies) {
         /*
         Loads vertex data into GPU buffer
@@ -35,7 +35,7 @@ export default class BufferManager {
     }
 
 
-    static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, rule) {
+    static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, weights) {
 
 
         // Uniform grid
@@ -49,14 +49,17 @@ export default class BufferManager {
 
         let cellStateStorage = BufferManager.setInitialStateBuffer(device, gridSize, initialState);
 
-        const ruleStorage = BufferManager.setRuleBuffer(device, rule);
+        // const { w1, b1, w2 } = BufferManager.setRuleBuffer(device, weights);
+        const { w1Storage: w1, b1Storage: b1, w2Storage: w2 } = BufferManager.setRuleBuffer(device, weights);
+
+
 
         // setup bind groups
         const bindGroups = [
-            BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], ruleStorage),
-            BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
+            BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], w1, b1, w2),
+            BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], w1, b1, w2)
         ];
-        return { bindGroups, uniformBuffer, cellStateStorage, ruleStorage };
+        return { bindGroups, uniformBuffer, cellStateStorage, w1, b1, w2 };
     }
 
     static setInitialStateBuffer(device, gridSize, initialState) {
@@ -67,7 +70,7 @@ export default class BufferManager {
         Implements double buffering - to improve simulation quality? 
         */
 
-        const cellStateArray = new Float32Array(gridSize * gridSize * NUM_CHANNELS);
+        const cellStateArray = new Float32Array(gridSize * gridSize * BufferManager.NUM_CHANNELS);
         const cellStateStorage = [
             device.createBuffer({
                 label: "Cell State A",
@@ -137,13 +140,23 @@ export default class BufferManager {
                 {
                     binding: 3,
                     visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
-                    buffer: { type: "read-only-storage" } // Ruleset
+                    buffer: { type: "read-only-storage" } // w1
+                },
+                {
+                    binding: 4,
+                    visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
+                    buffer: { type: "read-only-storage" } // b1
+                },
+                {
+                    binding: 5,
+                    visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
+                    buffer: { type: "read-only-storage" } // w2
                 }
             ]
         });
     }
 
-    static createBindGroup(device, renderPipeline, label, uniformBuffer, cellStateA, cellStateB, ruleStorage) {
+    static createBindGroup(device, renderPipeline, label, uniformBuffer, cellStateA, cellStateB, w1, b1, w2) {
         return device.createBindGroup({
             label: label,
             layout: renderPipeline.getBindGroupLayout(0), // NOTE: renderpipelne and simulation pipeline use same layout
@@ -151,19 +164,41 @@ export default class BufferManager {
                 { binding: 0, resource: { buffer: uniformBuffer } },
                 { binding: 1, resource: { buffer: cellStateA } },
                 { binding: 2, resource: { buffer: cellStateB } },
-                { binding: 3, resource: { buffer: ruleStorage } },
+                { binding: 3, resource: { buffer: w1 } },
+                { binding: 4, resource: { buffer: b1 } },
+                { binding: 5, resource: { buffer: w2 } }
             ],
         });
     }
 
-    static setRuleBuffer(device, rule) {
-        const ruleArray = rule;
-        const ruleStorage = device.createBuffer({
-            label: "Rule Storage",
-            size: ruleArray.byteLength,
+    static setRuleBuffer(device, modelWeights) {
+
+        const w1 = modelWeights.slice(0, (128 * 48));
+        const b1 = modelWeights.slice(0, (128 * 1));
+        const w2 = modelWeights.slice(0, (128 * 16));
+
+        const w1Storage = device.createBuffer({
+            label: "W1 Storage",
+            size: w1.byteLength,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
-        device.queue.writeBuffer(ruleStorage, 0, ruleArray);
-        return ruleStorage;
+
+        const b1Storage = device.createBuffer({
+            label: "B1 Storage",
+            size: b1.byteLength,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
+
+        const w2Storage = device.createBuffer({
+            label: "W2 Storage",
+            size: w2.byteLength,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
+
+        device.queue.writeBuffer(w1Storage, 0, w1);
+        device.queue.writeBuffer(b1Storage, 0, b1);
+        device.queue.writeBuffer(w2Storage, 0, w2);
+
+        return { w1Storage, b1Storage, w2Storage };
     }
 }

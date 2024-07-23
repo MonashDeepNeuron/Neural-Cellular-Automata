@@ -1,18 +1,15 @@
-export { loadBinaryFileAsIntegers };
-const fs = require('fs').promises;
-/*
-Need to change this to 32 floats 
-*/
-async function loadBinaryFileAsIntegers(filePath) {
-    try {
-        const fileBuffer = await fs.readFile(filePath);
-        const intArray = new Int32Array(fileBuffer.buffer, fileBuffer.byteOffset, fileBuffer.byteLength / Int32Array.BYTES_PER_ELEMENT);
+export { loadWeights };
 
-        return intArray;
+async function loadWeights(url) {
+    try {
+        const response = await fetch(url);
+        const buffer = await response.arrayBuffer();
+        const float32Array = new Float32Array(buffer);
+        // console.log('Float32Array:', float32Array);
+        // console.log(float32Array.slice(0, (128 * 48)))
+        return float32Array;
     } catch (error) {
-        console.error('Failed to load file:', error);
+        // console.error('Error fetching the file:', error);
         throw error;
     }
 }
-
-

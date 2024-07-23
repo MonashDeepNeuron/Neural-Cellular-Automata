@@ -1,19 +1,17 @@
 // Import model weights
-import { loadBinaryFileAsIntegers } from "./readBinary.js";
+import { loadWeights } from "./readBinary.js";
 
 // import shaders
 import { guiShader } from "./guiShader.js";
-import { ComputeShaderManager } from "./computeShader.js";
+import { ComputeShaderManager } from "./ComputeManager.js";
 
 // import static manager classes
 import EventManager from "../Shared/managers/EventManager.js";
 import DeviceManager from "../Shared/managers/DeviceManager.js";
 
 import BufferManager from "./BufferManager.js";
-import { parseRuleString, displayRule } from "./Parse.js";
 
 import startingPatterns from "./startingPatterns.js";
-import { loadBinaryFileAsIntegers } from "./readBinary.js";
 // import PipelineManager from "./managers/PipelineManager.js";
 // construct static classes lol
 await DeviceManager.staticConstructor();
@@ -26,11 +24,8 @@ const INITIAL_TEMPLATE_NO = 2;
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
 const GRID_SIZE = 1024;//INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
-EventManager.ruleString = INITIAL_STATE.rule;
 EventManager.submitSpeed();
 
-displayRule(EventManager.ruleString);
-console.log(INITIAL_STATE)
 const SQUARE_VERTICIES = new Float32Array([
     // X,    Y,
     -0.8, -0.8, // Triangle 1
@@ -42,20 +37,6 @@ const SQUARE_VERTICIES = new Float32Array([
     -0.8, -0.8,
 ]);
 
-// Website inputs : interpret rule string
-EventManager.getRule = () => {
-    let ruleString = "";
-    for (let i = 1; i < 10; i++) {
-        let nextVal = document.getElementById(`kernel${i}`).value;
-        if (nextVal == null || nextVal == "") {
-            nextVal = 0;
-        }
-        ruleString += (nextVal + ',');
-
-    }
-    console.log(`The rule string is ${ruleString}`);
-    return ruleString;
-}
 
 // Website inputs : obtain initial canvas
 let select = document.getElementById("templateSelect");
@@ -68,8 +49,6 @@ for (let i = 0; i < startingPatterns.length; i++) {
     select.add(template);
 }
 document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO - 1;
-
-ComputeShaderManager.updateActivationField(INITIAL_STATE.activation);
 
 let step = 0; // How many compute passes have been made
 
@@ -95,7 +74,7 @@ const cellShaderModule = device.createShaderModule({
 
 
 // GPU setup code
-// 1. load grid data into buffers etc. relevant to the simulation inc. parsed rulestring 
+// 1. load grid data into buffers etc. relevant to the simulation inc. 
 // 2. define the layout of loaded binary data 
 const bindGroupLayout = BufferManager.createBindGroupLayout(device);
 
@@ -111,7 +90,6 @@ const pipelineLayout = device.createPipelineLayout({
 // Set up compute shader with custom activation function
 ComputeShaderManager.setWorkgroupSize(WORKGROUP_SIZE);
 ComputeShaderManager.setPipelineLayout(pipelineLayout);
-ComputeShaderManager.updateActivationField(INITIAL_STATE.activation);
 ComputeShaderManager.initialSetup(device);
 ComputeShaderManager.compileNewSimulationPipeline(device);
 
@@ -132,14 +110,11 @@ const renderPipeline = device.createRenderPipeline({
         }],
     }
 });
-// LOAD BINARY WEIGHTS INTO BUFFER TODO: CHANGE WEIGHTS TO 32F FROM 32I
-// TODO: CHANGE FROM INT FORM TO FLOAT
-// TODO: SPLIT INTO W1, B1, W2: [128*48, 128*1, 16*128]
-// TODO: LOAD INTO BUFFER
-let weights = loadBinaryFileAsIntegers('../../model_weights_pls_god.bin');
+
+let weights = await loadWeights('/model_weights_biases.bin');
 
 // SET BUFFERS
-let { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, weights);
+let { bindGroups, uniformBuffer, cellStateStorage, w1, b1, w2 } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, weights);
 
 
 // INITIAL CANVAS SETUP, 1st render pass
@@ -162,50 +137,30 @@ const updateLoop = () => {
         // Prioritise resetTemplate
 
         console.log(`Resetting canvas bump`)
-        let newRuleStorage = null;
+
         let initialState = null;
 
         if (EventManager.resetTemplate) {
             initialState = startingPatterns[EventManager.templateNo];
-            EventManager.ruleString = initialState.rule;
-            newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-
             // Doin a sneaky here, this means the template reset has to go before the activation setup
-            ComputeShaderManager.updateActivationField(initialState.activation);
-            ComputeShaderManager.submitActivation(); // Equivalent of what happens when someone pressing submit activation button
 
-        } else {
-            newRuleStorage = ruleStorage;
         }
 
         const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], newRuleStorage);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], newRuleStorage);
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], weights);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], weights);
 
         cellStateStorage = newCellStateStorage;
-        ruleStorage = newRuleStorage;
         EventManager.resetTemplate = false;
         EventManager.randomiseGrid = false;
         step = 0;
         EventManager.resetCycleCount();
-
-        displayRule(EventManager.ruleString);
     }
 
     // Set new activation function and recompile shader if required
     if (ComputeShaderManager.newActivation) {
         ComputeShaderManager.compileNewSimulationPipeline(device);
         ComputeShaderManager.newActivation = false;
-    }
-
-    // check for new rule string
-    if (EventManager.newRuleString) {
-        const newRuleStorage = BufferManager.setRuleBuffer(device, parseRuleString(EventManager.ruleString));
-        ruleStorage = newRuleStorage;
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], newRuleStorage);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], newRuleStorage);
-
-        EventManager.newRuleString = false // toggle off
     }
 
     const encoder = device.createCommandEncoder();
