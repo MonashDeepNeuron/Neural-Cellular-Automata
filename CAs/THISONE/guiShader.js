@@ -44,7 +44,7 @@ export const guiShader =
     @fragment
     fn fragmentMain(vertexOut : VertexOutput) -> @location(0) vec4f {
         let index = vertexOut.cellInstance * NUM_CHANNELS;
-        var colour: array<f32, 4> = array<f32, 4>(0.0, 0.0, 0.0, 0.0);
+        var colour: vec4f = vec4f(0.0, 0.0, 0.0, 0.0);
         if (cellState[index + 3] == 0) {
             for (var i: u32 = 0u; i < 4u; i = i + 1u) {
                 colour[i] = 0.0;
@@ -56,6 +56,6 @@ export const guiShader =
         }
 
         // cast to correct return type
-        return vec4<f32>(colour[0], colour[1], colour[2], colour[3]);
-        //return colour;//vec4f(1, 1, 1, 1);
+        // return vec4<f32>(colour[0], colour[1], colour[2], colour[3]);
+        return colour;//vec4f(1, 1, 1, 1);
     }`

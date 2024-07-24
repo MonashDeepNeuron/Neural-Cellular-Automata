@@ -96,11 +96,16 @@ export default class BufferManager {
                 cellStateArray[i] = 0;
             }
             const centreOffset = Math.floor((gridSize - initialState.width) / 2);
+            
             for (let i = 0; i < initialState.width; i++) {
                 for (let j = 0; j < initialState.height; j++) {
-                    cellStateArray[i + centreOffset + (j + centreOffset) * gridSize] = initialState.pattern[i + j * initialState.width];
+                    console.log(i + centreOffset + (j + centreOffset) * gridSize)
+                    for (let k = 0; k < 16; k++){ // TODO: Not hardcode number of channels
+                        cellStateArray[(i + centreOffset + (j + centreOffset) * gridSize)*16+k] = initialState.pattern[(i + j * initialState.width)*16+k];
+                    }
                 }
             }
+            console.log(cellStateArray);
             console.log(`Implementing ${initialState.name}`);
         }
         device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
