@@ -6,7 +6,7 @@ import { guiShader } from "./guiShader.js";
 import { ComputeShaderManager } from "./ComputeManager.js";
 
 // import static manager classes
-import EventManager from "../Shared/managers/EventManager.js";
+import EventManager from "./EventManager.js";
 import DeviceManager from "../Shared/managers/DeviceManager.js";
 
 import BufferManager from "./BufferManager.js";
@@ -20,9 +20,9 @@ const canvas = DeviceManager.canvas;
 
 // Set global variables
 const WORKGROUP_SIZE = 2; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
-const INITIAL_TEMPLATE_NO = 2;
+const INITIAL_TEMPLATE_NO = 1;
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
-const GRID_SIZE = 1024;//INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
+const GRID_SIZE = 32;//INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
 
 EventManager.submitSpeed();
 
@@ -129,7 +129,7 @@ EventManager.bindEvents();
 
 // Animation rendering and calculation instructions
 const updateLoop = () => {
-
+    console.log(step)
     // The user has set a new tmeplate
     if (EventManager.resetTemplate || EventManager.randomiseGrid) {
 
@@ -164,6 +164,10 @@ const updateLoop = () => {
     }
 
     const encoder = device.createCommandEncoder();
+    
+    // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
+    renderPass(encoder);
+    console.log(cellStateStorage)
 
     // CREATE COMPUTE TOOL & PERFORM COMPUTATION TASKS
     if (EventManager.running) {
@@ -190,8 +194,7 @@ const updateLoop = () => {
         }
     }
 
-    // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
-    renderPass(encoder);
+    
 
     EventManager.updateCyclesDisplay();
     // Finish the command buffer and immediately submit it.

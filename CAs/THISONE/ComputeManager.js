@@ -7,7 +7,7 @@ import { computeShaderCode } from "./computeShaderCode.js";
 export class ComputeShaderManager {
     static simulationPipeline = null;
     static simulationShaderModule = null;
-    static workgroupSize = 16; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
+    static workgroupSize = 2; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards // TOD: set to 16 and centralise definition
     static pipelineLayout = {}
 
 
