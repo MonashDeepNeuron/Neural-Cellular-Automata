@@ -29,7 +29,7 @@ export function parseRuleString(ruleString) {
 
     ruleString = ruleString.replace(/\s/g, "").toUpperCase(); // Cut out white space and assert uppercase
 
-    console.log("Getting RULE...");
+    // console.log("Getting RULE...");
   // ruleString is given by the user. it is a string
   // Output format 
     // [r, c, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
@@ -46,7 +46,7 @@ export function parseRuleString(ruleString) {
 
     let i = 0;
     if (ruleString[i] != 'R'){
-        console.log("ERROR");
+        // console.log("ERROR");
         return null;
     }
 
@@ -97,7 +97,7 @@ export function parseRuleString(ruleString) {
         lastS--;
     }
     
-    console.log(`Last S range at index ${lastS}, current index at ${i}`);
+    // console.log(`Last S range at index ${lastS}, current index at ${i}`);
 
     // eg. 2-5, 7, 11-13, ...,
     // push 2, 5, 7, 7, 11, 13, ...,
@@ -181,8 +181,8 @@ export function parseRuleString(ruleString) {
         RULE[i] = ruleList[i];
     }
 
-        console.log(ruleString);
-        console.log(ruleList);
+        // console.log(ruleString);
+        // console.log(ruleList);
     return RULE
 }
 
@@ -203,7 +203,7 @@ export function parseRuleString(ruleString) {
  * @param {String} ruleString 
  */
 export function displayRule(ruleString){
-    console.log(`Displaying ${ruleString}`);
+    // console.log(`Displaying ${ruleString}`);
     
     let i = 0;
     while (ruleString[i] != 'R'){

@@ -116,14 +116,14 @@ export default class EventManager {
     static resetCanvas() {
         EventManager.templateNo = document.getElementById('templateSelect').value
         EventManager.resetTemplate = true;
-        console.log(`Resetting canvas... Template:${EventManager.templateNo}`);
+        // console.log(`Resetting canvas... Template:${EventManager.templateNo}`);
         EventManager.updateLoop();
     }
 
 
     static evenFramesCheckboxClicked() {
         EventManager.skipEvenFrames = document.getElementById("skipEvenCheckbox").checked;
-        console.log(`Checkbox = ${EventManager.skipEvenFrames}`);
+        // console.log(`Checkbox = ${EventManager.skipEvenFrames}`);
         EventManager.updateSpeed(EventManager.currentSpeed);
     }
 

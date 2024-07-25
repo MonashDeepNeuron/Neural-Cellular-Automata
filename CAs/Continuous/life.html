@@ -19,9 +19,9 @@
 
   <div class="text-column">
     <h1>Continuous Automata</h1>
+    <p><i>Having issues? See our troubleshooting <a href="/troubleshooting.html">page</a></i></p>
   </div>
 
-  <div class="centre"><p> Key: green->blue = negative, darkred->yellow = positive</p></div>
   
   <div class="controlPanel">
     <!-- Kernel Grid: divided into 3 control groups for aesthetic grid purposes-->
@@ -55,7 +55,7 @@
     <!-- Input Box for Speed -->
     <div class="panelRow">
       <div class="controlGroup">
-        <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="60" min="1" max="900">
+        <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="10" min="1" max="900">
         <button id="speedInput">Submit Speed</button>
       </div>
       <div class="controlGroup">
@@ -91,6 +91,9 @@
     <div class="footerElement" id="framesDisplayed">Displays every Nth frame</div>
   </div>
 
+  <div class="centre">
+    <p> Key: green->blue = negative, darkred->yellow = positive</p>
+  </div>
   <script type="module" src="life.js"></script>
 </body>
 

@@ -110,7 +110,7 @@ export default class BufferManager {
             for (let i = 0; i < cellStateArray.length; i++) {
                 cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
             }
-            console.log("Randomising canvas ...");
+            // console.log("Randomising canvas ...");
         } else {
             for (let i = 0; i < cellStateArray.length; i++) {
                 cellStateArray[i] = 0;
@@ -121,7 +121,7 @@ export default class BufferManager {
                     cellStateArray[i+centreOffset+(j+centreOffset)*gridSize] = initialState.pattern[i+j*initialState.width];
                 }
             }
-            console.log(`Implementing ${initialState.name}`);
+            // console.log(`Implementing ${initialState.name}`);
         }
         device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
     

@@ -26,7 +26,7 @@ EventManager.ruleString = INITIAL_STATE.rule;
 EventManager.submitSpeed();
 
 displayRule(EventManager.ruleString);
-console.log(INITIAL_STATE)
+// console.log(INITIAL_STATE)
 const SQUARE_VERTICIES = new Float32Array([
     // X,    Y,
     -0.8, -0.8, // Triangle 1
@@ -48,7 +48,7 @@ EventManager.getRule = () => {
         ruleString += (nextVal + ',');
 
     }
-    console.log(`The rule string is ${ruleString}`);
+    // console.log(`The rule string is ${ruleString}`);
     return ruleString;
 }
 
@@ -150,7 +150,7 @@ const updateLoop = () => {
         // Assume that reset template and radomise grid are mutually exclusive events
         // Prioritise resetTemplate
 
-        console.log(`Resetting canvas bump`)
+        // console.log(`Resetting canvas bump`)
         let newRuleStorage = null;
         let initialState = null;
 

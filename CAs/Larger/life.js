@@ -155,7 +155,7 @@ const updateLoop = () => {
         // Assume that reset template and radomise grid are mutually exclusive events
         // Prioritise resetTemplate
 
-        console.log(`Resetting canvas bump`)
+        // console.log(`Resetting canvas bump`)
         let newRuleStorage = null;
         let initialState = null;
 
