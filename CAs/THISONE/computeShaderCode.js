@@ -69,8 +69,8 @@ fn computeLinearLayers(perceptionVector: array<f32, 48>) -> array<f32, 16> {
         w2 = second linear layer weight vector 16
     */
     
-    var h1 = array<f32, 128> // output first layer
-    var h2 = array<f32, 16> // output first layer
+    var h1 = array<f32, 128>(); // output first layer
+    var h2 = array<f32, 16>(); // output first layer
     
     // var x = array<f32, 16>();
 
