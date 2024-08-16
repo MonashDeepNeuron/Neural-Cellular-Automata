@@ -147,8 +147,8 @@ const updateLoop = () => {
         }
 
         const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], weights);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], weights);
+        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], w1, b1, w2);
+        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], w1, b1, w2);
 
         cellStateStorage = newCellStateStorage;
         EventManager.resetTemplate = false;

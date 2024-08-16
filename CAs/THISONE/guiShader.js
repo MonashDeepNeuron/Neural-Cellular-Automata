@@ -47,7 +47,7 @@ export const guiShader =
         var colour: vec4f = vec4f(0.0, 0.0, 0.0, 0.0);
         if (cellState[index + 3] == 0) {
             for (var i: u32 = 0u; i < 4u; i = i + 1u) {
-                colour[i] = 0.0;
+                colour[i] = 1.0;
             }
         } else {
             for (var i: u32 = 0u; i < 4u; i = i + 1u) {
