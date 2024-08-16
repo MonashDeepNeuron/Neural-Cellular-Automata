@@ -147,11 +147,13 @@ export default class BufferManager {
                     visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
                     buffer: { type: "read-only-storage" } // w1
                 },
+
                 {
                     binding: 4,
                     visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
                     buffer: { type: "read-only-storage" } // b1
                 },
+                
                 {
                     binding: 5,
                     visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
