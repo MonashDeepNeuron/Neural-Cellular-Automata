@@ -7,7 +7,7 @@ import json
 
 from PIL import Image
 
-from GrowingCADebug.model import GrowingCA
+from model import GrowingCA
 
 
 def load_target(path, im_size=32):
@@ -104,8 +104,8 @@ def train():
     seed = nn.functional.pad(seed, (p, p, p, p), "constant", 0)
     pool = seed.clone().repeat(pool_size, 1, 1, 1)
 
-    epochs = 2  # 5000
-    eval_frequency = 500
+    epochs = 50  # 5000
+    eval_frequency = 1
     eval_iterations = 300
 
     for epoch in tqdm(range(epochs)):
@@ -145,6 +145,7 @@ def train():
             eval_video[0, it_eval] = x_eval_out
 
         tensorboard_writer.add_video("eval", eval_video, epoch, fps=60)
+        print("Hell0")
 
     return model
 

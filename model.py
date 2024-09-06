@@ -132,15 +132,15 @@ class GrowingCA(nn.Module):
             - Updated grid (batch_size, n_channels, width, height)
 
         '''
-        # pre_mask = self.is_alive_mask(x)
+        pre_mask = self.is_alive_mask(x)
 
         p_out = self.perceive(x)
         dx = self.update(p_out)
 
         x = x + dx # updated grid is equal to previous grid + change
 
-        # post_mask = self.is_alive_mask(x)
-        # is_alive = (pre_mask & post_mask).to(torch.float32)
+        post_mask = self.is_alive_mask(x)
+        is_alive = (pre_mask & post_mask).to(torch.float32)
 
-        return x # abs(x) #s* is_alive
+        return x * is_alive
 
