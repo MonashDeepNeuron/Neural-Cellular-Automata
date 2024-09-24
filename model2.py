@@ -45,14 +45,25 @@ class GCA(nn.Module):
         return output_filtered_grid
 
     def calculate_perception_grid(self, state_grid):
-        """Calculates 1x48 perception vector for each cell in grid, returns as grid of perception vectors.
-        Perception vectors are 4 dimensional. Unsqueeze used to add dimension of size 1 at index
         """
-        grad_x = f.conv2d(state_grid, self.SOBEL_X.unsqueeze(0).unsqueeze(0), padding=1)
-        grad_y = f.conv2d(state_grid, self.SOBEL_Y.unsqueeze(0).unsqueeze(0), padding=1)
+        Calculates 1x48 perception vector for each cell in grid, returns as grid of perception vectors.
+        Perception vectors are 4 dimensional. Unsqueeze used to add dimension of size 1 at index
+        
+        INPUTS: 
+            stategrid: Tensor wiith dims (batch, in_channels, height, width)
+
+            self (relevant components): 
+                SOBEL_X 
+        """
+        # print(state_grid.size())
+        # print(self.SOBEL_X.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1).size())
+        grad_x = f.conv2d(state_grid, self.SOBEL_X.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1), stride=1, padding=1, groups = state_grid.size(1)) # TODO Replace padding with logic to make a grid that wraps around on itself.
+        grad_y = f.conv2d(state_grid, self.SOBEL_X.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1), stride=1, padding=1, groups = state_grid.size(1)) # TODO Replace 16 with a dynamic channels variable?
+
+        # print(grad_x.size())
 
         perception_grid = torch.cat([state_grid, grad_x, grad_y], dim=1)
-
+        # print(perception_grid.size())
         return perception_grid
 
     def calculate_ds_grid(self, perception_grid):
@@ -76,6 +87,11 @@ class GCA(nn.Module):
         alive_mask = (
             f.max_pool2d(state_grid[:, 3:4, :, :], kernel_size=3, stride=1, padding=1)
             > 0.1
-        )
+        ) ## [:, 3:4, :, :] originally
+
+        ## a cell is considered empty (set rgba : 0) 
+        # if there is no mature (alpha > 0.1) cell in its 3x3 neighbourhood
+
+        # print(f"alive mask: {alive_mask.size()}")
 
         return alive_mask * state_grid
