@@ -243,7 +243,7 @@ if __name__ == "__main__":
 
     targetImg = load_image("cat.png")
     # visualise(targetImg)
-    # seed = new_seed(1)
+    seed = new_seed(1)
     # print(seed.shape)
     # visualise(seed[0])
     
