@@ -22,6 +22,11 @@ class GCA(nn.Module):
             )
         )
 
+        torch.nn.init.zeros_(self.update_network[0].weight)
+        torch.nn.init.zeros_(self.update_network[0].bias)
+        torch.nn.init.zeros_(self.update_network[2].weight)
+        
+
     def to(self, device):
         """Move the model and constant tensors to the device (GPU)"""
         self.SOBEL_X = self.SOBEL_X.to(device)

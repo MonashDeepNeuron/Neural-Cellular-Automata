@@ -1,4 +1,4 @@
-#### ABOUT :)) ####
+#### ABOUT : ####
 
 
 
@@ -21,31 +21,29 @@ import matplotlib.cm as cm
 import matplotlib.animation as animation
 
 
-#### DEFINE TRAINING PARAMETERS ####
+def loss_fn(pred, target):
+    '''
+    pred: (Batch, channels, height, width)
+    target: (he)
+    '''
+    print(f"pred: {pred.sum()}, target: {target.sum()}")
+    pixel_per_channel_loss = torch.square(pred-target)
+    # print(f"pixel_per_channel_loss {pixel_per_channel_loss}")
+    loss = torch.sum(pixel_per_channel_loss, dim=(0,1,2))
+    # print(f"loss_fn loss")
+    return loss
 
-GRID_SIZE = 32
-CHANNELS = 16
 
-MODEL = GCA()
-
-EPOCHS = 50
-BATCH_SIZE = 32
-UPDATES_RANGE = [64, 96] # The model is compared to the target image after this many updates, and loss is calculated
-
-LR = 0.001
-LOSS_FN = torch.nn.MSELoss(size_average=None , reduce=None , reduction="sum" ) # TODO change to L2
-OPTIM = torch.optim.Adam(MODEL.parameters(), lr=LR)
-
-VISUALS = []
 
 
 #### VISUALISATION ####
 
-def snapshot(currentGrid: torch.Tensor, save = VISUALS): # TODO
+def snapshot(currentGrid: torch.Tensor, save = []): # TODO
     """
         Add snapshot of the grid to the visuals list.
     """
     save.append(currentGrid.detach())
+    return save
 
 # End snapshot
 
@@ -104,12 +102,12 @@ def new_seed(batch_size = 1):
 
 def load_image(imagePath: str):
     """
-        Output image as 3D Tensor
+        Output image as 3D Tensor, with floating point values between 0 and 1
         Dimensions should be (colour channels, height, width)
     """
     img = read_image(imagePath)
     img = torchvision.transforms.functional.resize(img, (GRID_SIZE, GRID_SIZE))
-    img = img.to(dtype=torch.float32)/255
+    img = img.to(dtype=torch.float32)/255 
     
     return img
 
@@ -142,14 +140,37 @@ def forward_pass(model: nn.Module, input, updates, record=False): # TODO
 
 
 #### BACKWARD UPDATE PASS ####
-def update_pass(losses): # TODO
+def update_pass(model, batch, target, optimiser): # TODO
     """
         Back calculate gradient and update model paramaters
     """
-    loss = torch.mean(losses)
-    OPTIM.zero_grad()
-    loss.backward()
-    OPTIM.step()
+    
+    
+    
+    batch_losses = Tensor(BATCH_SIZE)
+    for batch_idx in range(BATCH_SIZE):
+        optimiser.zero_grad()
+        updates = random.randrange(UPDATES_RANGE[0], UPDATES_RANGE[1])
+        output = forward_pass(model, batch[batch_idx].unsqueeze(0), updates)
+
+        '''
+        At the last step we apply pixel-wise L2 loss between RGBA channels in the grid and the target pattern. 
+        This loss can be differentiably optimized 4 with respect to update rule parameters by 
+        backpropagation-through-time
+        '''
+        # batch_losses[batch_idx] = LOSS_FN(output[0, 0:4], target)
+        # loss = LOSS_FN(output[0, 0:4], target)
+        loss = LOSS_FN(output[0, 0:4], target)
+        batch_losses[batch_idx] = loss
+        loss.backward()
+        optimiser.step()
+    # End for
+    # loss = torch.mean(batch_losses)
+    # loss.backward()
+    # optimiser.step()
+    print([param for param in MODEL.parameters()])
+    
+    print(f"batch loss = {batch_losses}")
     
 
 
@@ -169,47 +190,30 @@ def train(model: nn.Module, target: torch.Tensor, record=False): # TODO
                 - Save model if this is the best model TODO
             - Return the trained model
     """
+    
+    optimiser = torch.optim.Adam(params = MODEL.parameters(), maximize = False, lr=LR)
+    print(optimiser.param_groups)
     try:
         # Record training data
         training_losses = []
+
         for epoch in range(EPOCHS):
+            model.train()
             if (record):
                 outputs = torch.zeros_like(batch)
 
             batch = new_seed(BATCH_SIZE)## TODO duplicate seed
-            batch_losses = Tensor(BATCH_SIZE)
 
-            # For epochs TODO
-            # Forwards
+            # Optimisation step
+            update_pass(model, batch, target, optimiser)
             
-
-
-            # TODO Cut down to 4 channels
-            for batch_idx in range(BATCH_SIZE):
-                updates = random.randrange(UPDATES_RANGE[0], UPDATES_RANGE[1])
-                output = forward_pass(model, batch[batch_idx].unsqueeze(0), updates)
-
-                if (record):
-                    snapshot(outputs, batch)
-                '''
-                At the last step we apply pixel-wise L2 loss between RGBA channels in the grid and the target pattern. 
-                This loss can be differentiably optimized 4 with respect to update rule parameters by 
-                backpropagation-through-time
-                '''
-                batch_losses[batch_idx] = LOSS_FN(output[0, 0:4], target)
-            # End for
-
-            # Backwards pass 
-            update_pass(batch_losses)
-
             # Assess accuracy TODO
             test_seed = new_seed(1)
-            test_run = forward_pass(MODEL.train(False), new_seed(1), 64)
-            MODEL.train(True)
-            training_losses.append(float(LOSS_FN(test_run[0, 0:4], target).detach().numpy()))
+            MODEL.eval()
+            test_run = forward_pass(MODEL, test_seed, 64)
+            training_losses.append(LOSS_FN(test_run[0, 0:4], target).detach().numpy())
             print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
-            
-            print(f"batch loss = {batch_losses}")
+        
             
             max_val= torch.max(test_run)
             min_val = torch.min(test_run)
@@ -237,6 +241,23 @@ def train(model: nn.Module, target: torch.Tensor, record=False): # TODO
 
 
 if __name__ == "__main__":
+
+    #### DEFINE TRAINING PARAMETERS ####
+
+    GRID_SIZE = 32
+    CHANNELS = 16
+
+    MODEL = GCA()
+
+    EPOCHS = 5
+    BATCH_SIZE = 32
+    UPDATES_RANGE = [1, 10]#[64, 96] # The model is compared to the target image after this many updates, and loss is calculated
+
+    LR = 1e-3
+    LOSS_FN = loss_fn # torch.nn.MSELoss(size_average=None , reduce=None , reduction="mean" ) # TODO change to L2
+    print([param for param in MODEL.parameters()])
+
+    VISUALS = []
     
     # random.seed(0)
     # # TODO torch device gpu
@@ -249,6 +270,7 @@ if __name__ == "__main__":
     
     MODEL, loss = train(MODEL, targetImg)
     print(loss)
+    MODEL.eval()
 
     plt.plot(range(len(loss)), loss)
 
@@ -262,6 +284,7 @@ if __name__ == "__main__":
 
     # print(MODEL)
     # visualise(targetImg)
+
 
 
 
