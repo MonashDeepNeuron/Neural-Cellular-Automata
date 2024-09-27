@@ -22,9 +22,9 @@ class GCA(nn.Module):
             )
         )
 
-        torch.nn.init.zeros_(self.update_network[0].weight)
-        torch.nn.init.zeros_(self.update_network[0].bias)
-        torch.nn.init.zeros_(self.update_network[2].weight)
+        torch.nn.init.normal_(self.update_network[0].weight, mean=0.0, std=0.001, generator=None)
+        torch.nn.init.normal_(self.update_network[0].bias, mean=0.0, std=0.001, generator=None)
+        torch.nn.init.normal_(self.update_network[2].weight, mean=0.0, std=0.001, generator=None)
         
 
     def to(self, device):

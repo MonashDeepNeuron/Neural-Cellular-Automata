@@ -26,7 +26,9 @@ def loss_fn(pred, target):
     pred: (Batch, channels, height, width)
     target: (he)
     '''
-    print(f"pred: {pred.sum()}, target: {target.sum()}")
+
+    # print(f"pred: {pred.sum()}, target: {target.sum()}")
+
     pixel_per_channel_loss = torch.square(pred-target)
     # print(f"pixel_per_channel_loss {pixel_per_channel_loss}")
     loss = torch.sum(pixel_per_channel_loss, dim=(0,1,2))
@@ -38,31 +40,51 @@ def loss_fn(pred, target):
 
 #### VISUALISATION ####
 
-def snapshot(currentGrid: torch.Tensor, save = []): # TODO
-    """
-        Add snapshot of the grid to the visuals list.
-    """
-    save.append(currentGrid.detach())
-    return save
+# def snapshot(currentGrid: torch.Tensor, save = []): # TODO
+#     """
+#         Add snapshot of the grid to the visuals list.
+#     """
+#     save.append(currentGrid.detach())
+#     return save
 
 # End snapshot
 
 
-def visualise(imgTensor): # TODO
+def visualise(imgTensor, anim = False): # TODO
     """
         Visualise a designated snapshot of the grid specified by idx
         Input in form (channels, height, width)
     """
 
-    # We're only interested in the RGBalpha channels, and need numpy representation for plt
-    imgTensor =  imgTensor.squeeze().permute(1, 2, 0)
-    img = imgTensor[:, :, 0:3].detach().numpy()
-    plt.figure()
-    plt.subplot(1,2, 1)
-    plt.imshow(img)
-    plt.subplot(1, 2, 2)
-    plt.imshow(imgTensor[:, :, 3].detach().numpy())
+    if (len(imgTensor.shape) < 4):
+        imgTensor.unsqueeze(0)
+
+    fig, ax = plt.subplots(1, 2)
+
+    def update(imgIdx):
+        # We're only interested in the RGBalpha channels, and need numpy representation for plt
+        img =  imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 0)
+
+        # Plot RGB channels
+        plt.subplot(1,2, 1)
+        plt.imshow(img[:, :, 0:3].detach().numpy())
+
+        # Plot Alpha channel
+        plt.subplot(1, 2, 2)
+        plt.imshow(img[:, :, 3].detach().numpy())
+
+
+    if not anim:
+        update(0)
+        
+        # Display image
+        plt.show()
+        return
+    
+    ani = animation.FuncAnimation(fig, update, frames = len(imgTensor))
+    # Display image
     plt.show()
+    return ani
 
     # TODO enable an animation option
         # frames = [] # for storing the generated images
@@ -115,19 +137,20 @@ def load_image(imagePath: str):
 
 
 #### FORWARD PASSES ####
-def forward_pass(model: nn.Module, input, updates, record=False): # TODO
+def forward_pass(model, input, updates, record=False): # TODO
     """
         Run a forward pass 
     """
-    if (record):
-        recording = []
+    if record:
+
+        saveState = Tensor(updates, CHANNELS, GRID_SIZE, GRID_SIZE)
+
         for i in range(updates):
             input = model(input)
-            snapshot(input, recording)
+            saveState[i] = input
         # End for
-        return (input, recording)
-    # End if recording
 
+        return saveState
 
     for i in range(updates):
         input = model(input)
@@ -149,10 +172,12 @@ def update_pass(model, batch, target, optimiser): # TODO
     
     batch_losses = Tensor(BATCH_SIZE)
     for batch_idx in range(BATCH_SIZE):
-        optimiser.zero_grad()
+        
+        # Forward pass
         updates = random.randrange(UPDATES_RANGE[0], UPDATES_RANGE[1])
         output = forward_pass(model, batch[batch_idx].unsqueeze(0), updates)
 
+        # Calculate loss
         '''
         At the last step we apply pixel-wise L2 loss between RGBA channels in the grid and the target pattern. 
         This loss can be differentiably optimized 4 with respect to update rule parameters by 
@@ -162,8 +187,16 @@ def update_pass(model, batch, target, optimiser): # TODO
         # loss = LOSS_FN(output[0, 0:4], target)
         loss = LOSS_FN(output[0, 0:4], target)
         batch_losses[batch_idx] = loss
+
+        # Back propogation
+        optimiser.zero_grad()
         loss.backward()
+
+        # print(f"GRADIENT: {MODEL.update_network[0].weight.grad}")
+
+
         optimiser.step()
+
     # End for
     # loss = torch.mean(batch_losses)
     # loss.backward()
@@ -178,7 +211,7 @@ def update_pass(model, batch, target, optimiser): # TODO
 
 #### TRAINING ROUND ####
 
-def train(model: nn.Module, target: torch.Tensor, record=False): # TODO
+def train(model: nn.Module, target: torch.Tensor): # TODO
     """
         TRAINING PROCESS: 
             - Define training data storage variables
@@ -191,16 +224,14 @@ def train(model: nn.Module, target: torch.Tensor, record=False): # TODO
             - Return the trained model
     """
     
-    optimiser = torch.optim.Adam(params = MODEL.parameters(), maximize = False, lr=LR)
-    print(optimiser.param_groups)
+    optimiser = torch.optim.Adam(params = model.parameters(), maximize = False, lr=LR)
     try:
         # Record training data
         training_losses = []
 
         for epoch in range(EPOCHS):
+
             model.train()
-            if (record):
-                outputs = torch.zeros_like(batch)
 
             batch = new_seed(BATCH_SIZE)## TODO duplicate seed
 
@@ -208,12 +239,11 @@ def train(model: nn.Module, target: torch.Tensor, record=False): # TODO
             update_pass(model, batch, target, optimiser)
             
             # Assess accuracy TODO
+            model.eval()
             test_seed = new_seed(1)
-            MODEL.eval()
-            test_run = forward_pass(MODEL, test_seed, 64)
+            test_run = forward_pass(model, test_seed, 64)
             training_losses.append(LOSS_FN(test_run[0, 0:4], target).detach().numpy())
             print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
-        
             
             max_val= torch.max(test_run)
             min_val = torch.min(test_run)
@@ -225,13 +255,9 @@ def train(model: nn.Module, target: torch.Tensor, record=False): # TODO
             # if (training_losses[-1] < bestLoss):
             #     BEST_MODEL = model
     except (KeyboardInterrupt):
-        
-        pass
-    
-    if (record):
-        return (model, training_losses, outputs)
-    else:    
-        return model, training_losses
+        pass  
+
+    return model, training_losses
 
 
 
@@ -249,22 +275,22 @@ if __name__ == "__main__":
 
     MODEL = GCA()
 
-    EPOCHS = 5
+    EPOCHS = 50
     BATCH_SIZE = 32
-    UPDATES_RANGE = [1, 10]#[64, 96] # The model is compared to the target image after this many updates, and loss is calculated
+    UPDATES_RANGE = [64, 96] # [1, 10]#[64, 96]# [1, 10]# The model is compared to the target image after this many updates, and loss is calculated
 
-    LR = 1e-3
+    LR = 1e-6
     LOSS_FN = loss_fn # torch.nn.MSELoss(size_average=None , reduce=None , reduction="mean" ) # TODO change to L2
     print([param for param in MODEL.parameters()])
 
-    VISUALS = []
-    
     # random.seed(0)
     # # TODO torch device gpu
 
+
+    # LOAD TARGET IMAGE
+
     targetImg = load_image("cat.png")
     # visualise(targetImg)
-    seed = new_seed(1)
     # print(seed.shape)
     # visualise(seed[0])
     
@@ -274,11 +300,14 @@ if __name__ == "__main__":
 
     plt.plot(range(len(loss)), loss)
 
-    img = seed
-    for i in range(16): 
-        img = forward_pass(MODEL, img, 64)
+    seed = new_seed(1)
+    img = forward_pass(MODEL, seed, 64)
+    video = forward_pass(MODEL, seed, 64, record=True)
 
     visualise(img)
+    visualise(video, anim=True)
+
+    # anim = visualise(video, anim=True)
 
     # MODEL, record_stages = train(MODEL, targetImg, record=True)
 
