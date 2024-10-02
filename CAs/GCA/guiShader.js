@@ -47,22 +47,22 @@ export const guiShader =
         var colour: vec4f = vec4f(0.0, 0.0, 0.0, 0.0);
 
         /* If cell's alpha channel is 0 */
+        /* TODO: CURRENTLY PRINTING OUT THE CHANNELS VALUES EVEN IF ALPHA = 0*/
         if (cellState[index + 3] == 0) {
-            
+            // for (var i: u32 = 0u; i < 4u; i = i + 1u) {
+                
+            //     colour[i] = cellState[index + i];
+            //     // colour[i] =0; //cellState[index + i];
+            // }
             for (var i: u32 = 0u; i < 4u; i = i + 1u) {
                 colour[i] = 0.0;  
                 if (cellState[index + i]> 1){
-                    colour[i] = 1.0;
+                    colour[i] = 0.5;
                 }
                 else if (cellState[index + i]< 0){
                     colour[i] = 0;
                 }
-                else if (cellState[index + i]== 0){
-                        colour[i] = 0.0;
-                }
                 else{
-                    // if (cellState[index + i]> 1){
-                    //     colour[i] = 1.0;
                     colour[i] = cellState[index + i];
                 }
 

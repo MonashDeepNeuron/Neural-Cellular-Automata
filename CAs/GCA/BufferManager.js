@@ -37,8 +37,6 @@ export default class BufferManager {
 
     static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, weights) {
 
-
-        // Uniform grid
         const uniformArray = new Float32Array([gridSize, gridSize]);
         const uniformBuffer = device.createBuffer({
             label: "Grid Uniforms",
@@ -49,12 +47,8 @@ export default class BufferManager {
 
         let cellStateStorage = BufferManager.setInitialStateBuffer(device, gridSize, initialState);
 
-        // const { w1, b1, w2 } = BufferManager.setRuleBuffer(device, weights);
         const { w1Storage: w1, b1Storage: b1, w2Storage: w2 } = BufferManager.setRuleBuffer(device, weights);
 
-
-
-        // setup bind groups
         const bindGroups = [
             BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], w1, b1, w2),
             BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], w1, b1, w2)
@@ -63,11 +57,8 @@ export default class BufferManager {
     }
 
     static setInitialStateBuffer(device, gridSize, initialState) {
-        // If initial state = null, assign random
-        // Cell state arrays
-
         /*
-        Implements double buffering - to improve simulation quality? 
+        Implements double buffering
         */
 
         const cellStateArray = new Float32Array(gridSize * gridSize * BufferManager.NUM_CHANNELS);
@@ -75,13 +66,13 @@ export default class BufferManager {
             device.createBuffer({
                 label: "Cell State A",
                 size: cellStateArray.byteLength,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC, // TODO: ADDED COPY_SRC TO ALLOW BUFFER DEBUGGING
             }),
 
             device.createBuffer({
                 label: "Cell State B",
                 size: cellStateArray.byteLength,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
             })
         ];
 
@@ -96,16 +87,15 @@ export default class BufferManager {
                 cellStateArray[i] = 0;
             }
             const centreOffset = Math.floor((gridSize - initialState.width) / 2);
-            
+
             for (let i = 0; i < initialState.width; i++) {
                 for (let j = 0; j < initialState.height; j++) {
                     console.log(i + centreOffset + (j + centreOffset) * gridSize)
-                    for (let k = 0; k < 16; k++){ // TODO: Not hardcode number of channels
-                        cellStateArray[(i + centreOffset + (j + centreOffset) * gridSize)*16+k] = initialState.pattern[(i + j * initialState.width)*16+k];
+                    for (let k = 0; k < 16; k++) { // TODO: Not hardcode number of channels
+                        cellStateArray[(i + centreOffset + (j + centreOffset) * gridSize) * 16 + k] = initialState.pattern[(i + j * initialState.width) * 16 + k];
                     }
                 }
             }
-            console.log(cellStateArray);
             console.log(`Implementing ${initialState.name}`);
         }
         device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
@@ -162,6 +152,8 @@ export default class BufferManager {
     }
 
     static createBindGroup(device, renderPipeline, label, uniformBuffer, cellStateA, cellStateB, w1, b1, w2) {
+        console.log(w1.byteLength); // Should match 128 * 48 * 4 bytes for Float32Array
+
         return device.createBindGroup({
             label: label,
             layout: renderPipeline.getBindGroupLayout(0), // NOTE: renderpipelne and simulation pipeline use same layout
@@ -178,10 +170,17 @@ export default class BufferManager {
 
     static setRuleBuffer(device, modelWeights) {
 
-        const w1 = modelWeights.slice(0, (128 * 48));
-        const b1 = modelWeights.slice(0, (128 * 1));
-        const w2 = modelWeights.slice(0, (128 * 16));
+        // Sizes based on your PyTorch model's parameter shapes
+        const w1Size = 128 * 48;   // Shape: [128, 48, 1, 1] -> 128 * 48
+        const b1Size = 128;        // Shape: [128] -> 128
+        const w2Size = 16 * 128;   // Shape: [16, 128, 1, 1] -> 16 * 128
 
+        // Slice the weights from modelWeights
+        const w1 = modelWeights.slice(0, w1Size);
+        const b1 = modelWeights.slice(w1Size, w1Size + b1Size);
+        const w2 = modelWeights.slice(w1Size + b1Size, w1Size + b1Size + w2Size);
+
+        // Create buffers for w1, b1, and w2
         const w1Storage = device.createBuffer({
             label: "W1 Storage",
             size: w1.byteLength,
@@ -200,10 +199,12 @@ export default class BufferManager {
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
+        // Write the sliced weights to the buffers
         device.queue.writeBuffer(w1Storage, 0, w1);
         device.queue.writeBuffer(b1Storage, 0, b1);
         device.queue.writeBuffer(w2Storage, 0, w2);
 
         return { w1Storage, b1Storage, w2Storage };
     }
+
 }

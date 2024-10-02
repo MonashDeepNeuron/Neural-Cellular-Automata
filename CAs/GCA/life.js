@@ -1,27 +1,23 @@
-// Import model weights
 import { loadWeights } from "./readBinary.js";
-
-// import shaders
 import { guiShader } from "./guiShader.js";
 import { ComputeShaderManager } from "./ComputeManager.js";
 
-// import static manager classes
+/* Import custom event and buffer managers for GCS*/
 import EventManager from "./EventManager.js";
-import DeviceManager from "../Shared/managers/DeviceManager.js";
-
 import BufferManager from "./BufferManager.js";
 
+import DeviceManager from "../Shared/managers/DeviceManager.js";
 import startingPatterns from "./startingPatterns.js";
-// import PipelineManager from "./managers/PipelineManager.js";
 await DeviceManager.staticConstructor();
+
 const device = DeviceManager.device;
 const canvas = DeviceManager.canvas;
 
-// Set global variables
-const WORKGROUP_SIZE = 2; // only 1, 2, 4, 8, 16 work. higher is smoother. // There is a limitation though to some pcs/graphics cards
+/* Set global variables*/
+const WORKGROUP_SIZE = 2; /* only 1, 2, 4, 8, 16 work. higher is smoother*/
 const INITIAL_TEMPLATE_NO = 1;
 const INITIAL_STATE = startingPatterns[INITIAL_TEMPLATE_NO - 1];
-const GRID_SIZE = 32;//INITIAL_STATE.minGrid*2;//document.getElementById("canvas").getAttribute("width"); // from canvas size in life.html
+const GRID_SIZE = 32;/* from canvas size in life.html*/
 
 EventManager.submitSpeed();
 
@@ -36,22 +32,10 @@ const SQUARE_VERTICIES = new Float32Array([
     -0.8, -0.8,
 ]);
 
+/* Number of compute passes*/
+let step = 0;
 
-// Website inputs : obtain initial canvas
-let select = document.getElementById("templateSelect");
-
-for (let i = 0; i < startingPatterns.length; i++) {
-    let template = document.createElement("option");
-    template.text = startingPatterns[i].name;
-    template.value = i;
-    template.id = startingPatterns[i].name;
-    select.add(template);
-}
-document.getElementById("templateSelect").value = INITIAL_TEMPLATE_NO - 1;
-
-let step = 0; // How many compute passes have been made
-
-// DEVICE SETUP
+/* Set up device*/
 const context = canvas.getContext("webgpu");
 const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
 context.configure({
@@ -59,9 +43,7 @@ context.configure({
     format: canvasFormat,
 });
 
-
-// DRAWING STUFF setup code 
-// vertex setup for a square
+/* Rendering/drawing set up*/
 const { vertexBuffer, vertexBufferLayout } = BufferManager.loadShapeVertexBuffer(device, SQUARE_VERTICIES);
 
 // load shader code for drawing operations
@@ -70,28 +52,24 @@ const cellShaderModule = device.createShaderModule({
     code: guiShader
 });
 
-
-// GPU setup code
-// 1. load grid data into buffers etc. relevant to the simulation inc. 
-// 2. define the layout of loaded binary data 
+/* GPU set up*/
 const bindGroupLayout = BufferManager.createBindGroupLayout(device);
 
 
-// PIPE LAYOUT
+/* Pipeline layout*/
 const pipelineLayout = device.createPipelineLayout({
     label: "Cell Pipeline Layout",
     bindGroupLayouts: [bindGroupLayout],
 });
 
 
-//COMPUTE SHADER SETUP AND PIPELINE
-// Set up compute shader with custom activation function
+
+/* Set up computer shaders*/
 ComputeShaderManager.setWorkgroupSize(WORKGROUP_SIZE);
 ComputeShaderManager.setPipelineLayout(pipelineLayout);
 ComputeShaderManager.initialSetup(device);
 ComputeShaderManager.compileNewSimulationPipeline(device);
 
-//RENDER PIPELINE            
 const renderPipeline = device.createRenderPipeline({
     label: "Cell pipeline",
     layout: pipelineLayout,
@@ -109,82 +87,54 @@ const renderPipeline = device.createRenderPipeline({
     }
 });
 
-let weights = await loadWeights('/model_weights.bin');
+/* Attach actions to inputs (buttons, keys)*/
+EventManager.bindEvents();
 
-// SET BUFFERS
+/* Load model weights*/
+let weights = await loadWeights('/model_weights.bin');
+console.log(weights)
+
+
+/* Set buffers*/
 let { bindGroups, uniformBuffer, cellStateStorage, w1, b1, w2 } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, weights);
 
 
-// INITIAL CANVAS SETUP, 1st render pass
+/* First render pass to initalise canvas*/
 const encoder = device.createCommandEncoder();
 renderPass(encoder);
-
-// Finish the command buffer and immediately submit it.
 device.queue.submit([encoder.finish()]);
 
-// Attatch actions to inputs (buttons, keys)
-EventManager.bindEvents();
 
-// Animation rendering and calculation instructions
-const updateLoop = () => {
-    console.log(step)
-    // The user has set a new tmeplate
-    if (EventManager.resetTemplate || EventManager.randomiseGrid) {
 
-        // Assume that reset template and radomise grid are mutually exclusive events
-        // Prioritise resetTemplate
-
-        console.log(`Resetting canvas bump`)
-
-        let initialState = null;
-
-        if (EventManager.resetTemplate) {
-            initialState = startingPatterns[EventManager.templateNo];
-            // Doin a sneaky here, this means the template reset has to go before the activation setup
-
-        }
-
-        const newCellStateStorage = BufferManager.setInitialStateBuffer(device, GRID_SIZE, initialState);
-        bindGroups[0] = BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, newCellStateStorage[0], newCellStateStorage[1], weights);
-        bindGroups[1] = BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, newCellStateStorage[1], newCellStateStorage[0], weights);
-
-        cellStateStorage = newCellStateStorage;
-        EventManager.resetTemplate = false;
-        EventManager.randomiseGrid = false;
-        step = 0;
-        EventManager.resetCycleCount();
-    }
-
-    // Set new activation function and recompile shader if required
-    if (ComputeShaderManager.newActivation) {
-        ComputeShaderManager.compileNewSimulationPipeline(device);
-        ComputeShaderManager.newActivation = false;
-    }
-
+/* Animation rendering and calculation instructions*/
+const updateLoop = async () => { // TODO: REMOVE ASYNC WHEN REMOVE LOGGING
     const encoder = device.createCommandEncoder();
 
-    // CREATE DRAW TOOL & SET DEFAULT COLOR (BACKGROUND COLOR)
     renderPass(encoder);
-    console.log(cellStateStorage)
+    console.log(step)
+    // Log cell state storage
+    // Only log every 10 frames (or adjust the interval)
+    if (step % 10 === 0) {
+        logCellStateStorage(device, cellStateStorage, GRID_SIZE).then(() => {
+            console.log("Logged cell state storage");
+        });
+    }
 
-    // CREATE COMPUTE TOOL & PERFORM COMPUTATION TASKS
+    /* Perform multiple updates per render pass */
     if (EventManager.running) {
         for (let i = 0; i < EventManager.framesPerUpdateLoop; i++) {
             computePass(encoder);
-            step++; // Note this counter primarily indicates which cell state should be used
-            // In this case the output of the compute pass will be used as input, thus the opposite of
-            // what was used for the compute pass. Hence increment after compute pass but before rendering frame
+            step++;
             EventManager.incrementCycleCount();
         }
 
-    } else { // Someone pressed do one frame, so update once
+    }
 
+    /* Someone pressed "one frame" so do one compute pass*/
+    else {
         computePass(encoder);
-        step++; // Note this counter primarily indicates which cell state should be used
-        // In this case the output of the compute pass will be used as input, thus the opposite of
-        // what was used for the compute pass. Hence increment after compute pass but before rendering frame
+        step++;
         EventManager.incrementCycleCount();
-
         if (EventManager.skipEvenFrames) {
             computePass(encoder);
             step++;
@@ -193,40 +143,35 @@ const updateLoop = () => {
     }
 
 
-
+    /* Update number of cycles count*/
     EventManager.updateCyclesDisplay();
-    // Finish the command buffer and immediately submit it.
+
+    /* Finish the command buffer and immediately submit it*/
     device.queue.submit([encoder.finish()]);
 }
 
 
 
-// start iterative update for cells
+/* Start update animation*/
 EventManager.setUpdateLoop(updateLoop);
 EventManager.playPause();
 
-
-
-
-// FUNCTIONS for convenient break-up of code
-// Can't be removed because relies on a ton of 
-// definitions from this chunk of code.
 function renderPass(encoder) {
     const renderPass = encoder.beginRenderPass({
         colorAttachments:
             [{
                 view: context.getCurrentTexture().createView(),
                 loadOp: "clear",
-                clearValue: { r: 0, g: 0, b: 0, a: 1 }, // New line
+                clearValue: { r: 0, g: 0, b: 0, a: 1 }, /* Clear existing values*/
                 storeOp: "store",
             }]
     });
 
-    // Draw the features
+    /* Draw the grid state*/
     renderPass.setPipeline(renderPipeline);
     renderPass.setVertexBuffer(0, vertexBuffer);
     renderPass.setBindGroup(0, bindGroups[step % 2]);
-    renderPass.draw(SQUARE_VERTICIES.length / 2, GRID_SIZE * GRID_SIZE); // 6 vertices, 12 floats
+    renderPass.draw(SQUARE_VERTICIES.length / 2, GRID_SIZE * GRID_SIZE);
     renderPass.end();
 }
 
@@ -241,4 +186,48 @@ function computePass(encoder) {
     computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
 
     computePass.end();
+}
+
+
+
+
+
+/* FUNCTIONS FOR READING CELL STATE STORAGE BUFFER*/
+// Function to read and log the contents of a GPU buffer
+async function readBuffer(device, buffer, size) {
+    // Create a buffer for reading with the MAP_READ flag
+    const readBuffer = device.createBuffer({
+        size: size,
+        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+    });
+
+    // Create a command encoder and copy the contents of the buffer to the readBuffer
+    const commandEncoder = device.createCommandEncoder();
+    commandEncoder.copyBufferToBuffer(buffer, 0, readBuffer, 0, size);
+    device.queue.submit([commandEncoder.finish()]);
+
+    // Wait for the buffer to be mapped to the CPU
+    await readBuffer.mapAsync(GPUMapMode.READ);
+
+    // Get the data from the buffer
+    const arrayBuffer = readBuffer.getMappedRange();
+    const data = new Float32Array(arrayBuffer);
+
+    // Log the buffer contents
+    console.log(data);
+
+    // Unmap the buffer
+    readBuffer.unmap();
+}
+
+// Function to trigger reading the cell state storage
+async function logCellStateStorage(device, cellStateStorage, gridSize) {
+    const bufferSize = gridSize * gridSize * BufferManager.NUM_CHANNELS * Float32Array.BYTES_PER_ELEMENT;
+
+    // Call readBuffer for both cellStateStorage buffers (double buffering)
+    console.log("Cell State A:");
+    await readBuffer(device, cellStateStorage[0], bufferSize);
+
+    console.log("Cell State B:");
+    await readBuffer(device, cellStateStorage[1], bufferSize);
 }
