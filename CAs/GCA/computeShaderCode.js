@@ -161,7 +161,16 @@ fn computeLinearLayers(perceptionVector: array<f32, 48>, x: i32, y: i32) -> arra
         }
         h1[i] = relu(h1[i] + b1[i]); 
     }
- 
+    
+    // Second linear layer (128 -> 16)
+    for (var i: u32 = 0u; i < 16u; i = i + 1u) {
+        for (var j: u32 = 0u; j < 128u; j = j + 1u) {
+            h2[i] += w2[i * 128u + j] * h1[j];
+        }
+    }
+    
+    return h2;
+
     // Apply stochastic mask to the output
     // return applyStochasticMask(h2);
 }
