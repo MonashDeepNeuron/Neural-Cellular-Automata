@@ -143,7 +143,7 @@ fn computeLinearLayers(perceptionVector: array<f32, 48>, x: i32, y: i32) -> arra
     
     // Compute second linear layer   
     for (var i: u32 = 0u; i < 16u; i = i + 1u) { // for each weight in the second linear layer
-        for (var j: u32 = 0u; j < 128u; j = j + 1u) { // for each perceptron in h1 // TODO: make j < 128u
+        for (var j: u32 = 0u; j < 128u; j = j + 1u) { // for each perceptron in h1
             h2[i] += w2[i* 128u  + j] * h1[j];
         }
     }

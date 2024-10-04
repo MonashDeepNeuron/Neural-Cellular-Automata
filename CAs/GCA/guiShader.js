@@ -45,17 +45,44 @@ export const guiShader =
     fn fragmentMain(vertexOut : VertexOutput) -> @location(0) vec4f {
         let index = vertexOut.cellInstance * NUM_CHANNELS;
         var colour: vec4f = vec4f(0.0, 0.0, 0.0, 0.0);
+
+        /* If cell's alpha channel is 0 */
+        /* TODO: CURRENTLY PRINTING OUT THE CHANNELS VALUES EVEN IF ALPHA = 0*/
         if (cellState[index + 3] == 0) {
+            // for (var i: u32 = 0u; i < 4u; i = i + 1u) {
+                
+            //     colour[i] = cellState[index + i];
+            //     // colour[i] =0; //cellState[index + i];
+            // }
             for (var i: u32 = 0u; i < 4u; i = i + 1u) {
-                colour[i] = 1.0;
+                colour[i] = 0.0;  
+                if (cellState[index + i]> 1){
+                    colour[i] = 0.5;
+                }
+                else if (cellState[index + i]< 0){
+                    colour[i] = 0;
+                }
+                else{
+                    colour[i] = cellState[index + i];
+                }
+
             }
-        } else {
+        
+        /* If cell's alpha channel > 0 */
+        /* Clipping the colour values between 0 and 1*/
+        } else { 
             for (var i: u32 = 0u; i < 4u; i = i + 1u) {
+                if (cellState[index + i]> 1){
+                    colour[i] = 1;
+                }
+                else if (cellState[index + i]< 0){
+                    colour[i] = 0;
+                }
+                else{
                 colour[i] = cellState[index + i];
+                }
             }
         }
 
-        // cast to correct return type
-        // return vec4<f32>(colour[0], colour[1], colour[2], colour[3]);
-        return colour;//vec4f(1, 1, 1, 1);
+        return colour;
     }`

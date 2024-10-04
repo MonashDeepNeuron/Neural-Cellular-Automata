@@ -12,19 +12,22 @@ import matplotlib.animation as animation
 
 
 def visualise(imgTensor, filenameBase = "test", anim = False, save = True, show = True):
+
     """
     Visualise a designated snapshot of the grid specified by idx
     Input in form (channels, height, width)
     """
 
     if (len(imgTensor.shape) < 4):
+
         imgTensor.unsqueeze(0)
 
     fig, ax = plt.subplots(1, 2)
 
     def update(imgIdx):
+      
         # We're only interested in the RGBalpha channels, and need numpy representation for plt
-        img =  imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 0)
+        img =  imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 0) # x, y, rgba
 
         if (anim):
             plt.suptitle("Update " + str(imgIdx))
@@ -34,6 +37,7 @@ def visualise(imgTensor, filenameBase = "test", anim = False, save = True, show 
         plt.subplot(1,2, 1)
         plt.imshow(img[:, :, 0:3].detach().numpy())
         plt.title("RGB")
+
 
         # Plot Alpha channel
         plt.subplot(1, 2, 2)
@@ -242,4 +246,5 @@ if __name__ == "__main__":
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
     video = forward_pass(MODEL, img, 96, record=True)
+
     anim = visualise(video, anim=True)
