@@ -4,7 +4,7 @@ import torch.nn.functional as f
 
 
 class GCA(nn.Module):
-    SOBEL_X = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32)
+    SOBEL_X = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32) # apply circular padding
     SOBEL_Y = torch.tensor([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype=torch.float32)
     IDENTITY = torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=torch.float32)
     GRID_SIZE = 32
@@ -69,6 +69,7 @@ class GCA(nn.Module):
             stride=1,
             padding=1,
             groups=state_grid.size(1),
+            # padding_mode = 'circular',
         )  # TODO Replace padding with logic to make a grid that wraps around on itself.
         grad_y = f.conv2d(
             state_grid,
@@ -76,6 +77,7 @@ class GCA(nn.Module):
             stride=1,
             padding=1,
             groups=state_grid.size(1),
+            # padding_mode = 'circular',
         )  # TODO Replace 16 with a dynamic channels variable?
 
         perception_grid = torch.cat([state_grid, grad_x, grad_y], dim=1)
