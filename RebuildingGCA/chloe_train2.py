@@ -11,40 +11,67 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-def visualise(imgTensor, anim=False):
+def visualise(imgTensor, filenameBase = "test", anim = False, save = True, show = True):
+
     """
     Visualise a designated snapshot of the grid specified by idx
     Input in form (channels, height, width)
     """
-    if len(imgTensor.shape) < 4:
+
+    if (len(imgTensor.shape) < 4):
+
         imgTensor.unsqueeze(0)
 
     fig, ax = plt.subplots(1, 2)
 
     def update(imgIdx):
+      
         # We're only interested in the RGBalpha channels, and need numpy representation for plt
-        img = imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 0)  # x, y, rgba
+        img =  imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 0) # x, y, rgba
+
+        if (anim):
+            plt.suptitle("Update " + str(imgIdx))
+
 
         # Plot RGB channels
-        plt.subplot(1, 2, 1)
+        plt.subplot(1,2, 1)
         plt.imshow(img[:, :, 0:3].detach().numpy())
+        plt.title("RGB")
+
 
         # Plot Alpha channel
         plt.subplot(1, 2, 2)
         plt.imshow(img[:, :, 3].detach().numpy())
+        plt.title("Alpha (alive/dead)")
 
-    ## Display the last image if not anim
+    # End animation update
+
     if not anim:
-        update(-1)
+        update(0)
+        if (save):
+            plt.savefig(filenameBase+'.png', bbox_inches='tight')
 
         # Display image
-        plt.show()
+        if (show):
+            plt.show()
+            plt.close('all')
         return
-
-    ani = animation.FuncAnimation(fig, update, frames=len(imgTensor))
+    
+    ani = animation.FuncAnimation(fig, update, frames = len(imgTensor), repeat = False)
     # Display image
-    plt.show()
+    if (save):
+        # To save the animation using Pillow as a gif
+        writer = animation.PillowWriter(fps=15,
+                                        metadata=dict(artist='Me'),
+                                        bitrate=1800)
+        ani.save(filenameBase+'.gif', writer=writer)
+
+    if (show):
+        plt.show()
+        plt.close('all')
+
     return ani
+
 
 
 def new_seed(batch_size=1):
@@ -171,6 +198,9 @@ def initialiseGPU(model):
 
 
 if __name__ == "__main__":
+    
+    TRAINING = False # Is our purpose to train or are we just looking rn?
+
     GRID_SIZE = 32
     CHANNELS = 16
 
@@ -186,8 +216,9 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
+    MODEL_PATH = "model_weights.pth"
+
     targetImg = load_image("cat.png")
-    seed = new_seed(1)
 
     ## Load model weights if available
     try:
@@ -197,20 +228,27 @@ if __name__ == "__main__":
         print("Loaded model weights successfully!")
     except FileNotFoundError:
         print("No previous model weights found, training from scratch.")
+        if (not TRAINING):
+            exit()
 
-    MODEL, loss = train(MODEL, targetImg, optimizer)
-    print(loss)
+
+    if (TRAINING):
+        MODEL, loss = train(MODEL, targetImg, optimizer)
+        print(loss)
+        
+        ## Plot loss
+        plt.plot(range(len(loss)), loss)
+        
+        ## Save the model's weights after training
+        torch.save(MODEL.state_dict(), MODEL_PATH)
+
 
     ## Switch state to evaluation to disable dropout e.g.
-    MODEL.eval()
+    MODEL.eval()       
 
-    ## Save the model's weights after training
-    torch.save(MODEL.state_dict(), "model_weights.pth")
-
-    ## Plot loss
-    plt.plot(range(len(loss)), loss)
-
+    
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
-    video = forward_pass(MODEL, seed, 96, record=True)
+    video = forward_pass(MODEL, img, 96, record=True)
+
     anim = visualise(video, anim=True)
