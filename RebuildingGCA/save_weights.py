@@ -1,8 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-
-from gca_model import GCA
+from chloe_train2 import GCA
 
 
 # Function to save the model weights as binary
