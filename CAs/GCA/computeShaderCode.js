@@ -13,7 +13,8 @@ const NUM_CHANNELS: u32 = 16;
 /* Converts x y to scalar value. Represents first index of sixteen channels
 Takes x, y, channel --> k (indexes cellstatein column vector) */
 fn cellIndex(cell: vec2<u32>, channel: u32) -> u32 {
-    return (cell.y * u32(grid.x) + cell.x) * NUM_CHANNELS + channel;
+    /* with modulo wrap around*/
+    return (cell.y%u32(grid.y)) * u32(grid.x) * NUM_CHANNELS + (cell.x%u32(grid.x)) * NUM_CHANNELS + channel;
 }
 
 
@@ -109,9 +110,8 @@ fn computeLinearLayers(perceptionVector: array<f32, 48>, x: i32, y: i32) -> arra
         -> 128 vec -> fully interconnected linear (w2) -> 16 vec (output)
 
     */
-    var h1 = array<f32, 128>(); // First linear layer output
-    var h2 = array<f32, 16>(); // Initializes all elements to 1.0 (1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 
-    // 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0); 
+    var h1 = array<f32, 128>(); 
+    var h2 = array<f32, 16>(); 
     // First linear layer (48 -> 128)
     for (var i: u32 = 0u; i < 128u; i = i + 1u) {
         for (var j: u32 = 0u; j < 48u; j = j + 1u) {
@@ -127,27 +127,7 @@ fn computeLinearLayers(perceptionVector: array<f32, 48>, x: i32, y: i32) -> arra
         }
     }
 
-    // for (var i: u32 = 0u; i < 16u; i = i + 1u) {
-    //     h2[i] = w2[126u+i];
-    // }
-
     return h2;
-}
-
-fn applyStochasticMask(output_cell: array<f32, 16>, x: u32, y: u32) -> array<f32, 16> {
-    // Generate a pseudo-random value based on the cell position
-    let random_val = fract(sin(dot(vec2<f32>(f32(x), f32(y)), vec2<f32>(12.9898, 78.233))) * 43758.5453);
-
-    var ds_cell = output_cell;
-    // Apply mask with 50% chance on the entire vector for the current cell
-    if (random_val < 0.5) {
-        // Zero out the entire update vector for this cell
-        for (var i: u32 = 0u; i < 16u; i = i + 1u) {
-            ds_cell[i] = 0.0;  // Zero out the update for this cell
-        }
-    } 
-
-    return ds_cell;
 }
 
 @compute @workgroup_size(WORKGROUP_SIZE, WORKGROUP_SIZE)
@@ -160,8 +140,7 @@ fn computeMain(@builtin(global_invocation_id) cell: vec3<u32>) {
     // Apply the update using linear layers
     let output = computeLinearLayers(perceptionVector, i32(cell.x), i32(cell.y));
 
-    // Apply stochastic mask to the output
-    // let masked_output = applyStochasticMask(output, cell.x, cell.y);
+    // TODO: Apply stochastic mask to the output
 
     // Calculate the final output (add the masked update to the current state)
     var finalState: array<f32, 16> = array<f32, 16>();
@@ -169,60 +148,15 @@ fn computeMain(@builtin(global_invocation_id) cell: vec3<u32>) {
     // NYAN DIAGNOSIS -> output = [value , 0, 0, 0...,0]
 
     for (var i: u32 = 0u; i < 16u; i = i + 1u) {
-        finalState[i] = cellStateIn[i + offset] + output[i]; // input_grid + filtered_ds_grid
-        //finalState[i] = cellStateIn[i] + output[i]; // input_grid + filtered_ds_grid
+        finalState[i] = cellStateIn[i + offset] + output[i];
     }
 
     // Apply the alive mask to the entire final state
-    let finalOutput =  finalState; //applyAliveMask(finalState, i32(cell.x), i32(cell.y)); // output_filtered_grid
+    let finalOutput = applyAliveMask(finalState, i32(cell.x), i32(cell.y));
 
     // Write the final output to cellStateOut
     for (var i: u32 = 0u; i < 16u; i = i + 1u) {
         cellStateOut[i + offset] = finalOutput[i];
-        // cellStateOut[i] = finalOutput[i];
     }
 }
-
-/* Converts x y to scalar value. Represents first index of sixteen channels*/
-// fn cellIndex(cell: vec2<u32>) -> u32 {
-//     return ((cell.y % u32(grid.y)) * u32(grid.x) + (cell.x % u32(grid.x)))*16;
-// }
-
-/* Returns index of channel of given cell*/
-// fn cellValue(x: u32, y: u32, channel: u32) -> f32 {
-//     return cellStateIn[cellIndex(vec2(x, y))+ channel];
-// }
-
-/* perception vector with interleaved identity + sobelx + sobel y */
-// fn computePerceptionVector(x: i32, y: i32) -> array<f32, 48> {
-
-//     // our py code: filters = torch.stack([identity, sobel_x, sobel_y]).repeat((n_channels, 1, 1))
-//     // paper py code: perception_grid = concat(state_grid, grad_x, grad_y, axis=2)
-
-//     var perceptionVector: array<f32, 48> = array<f32, 48>(); // x y identity (16 times)
-
-//     // For each channel calculate sobelX, sobelY and identity, and add to perception vector
-//     for (var j: i32= 0; j <= 15; j = j + 1) {
-//         let sobelX = calculateSobelX(x, y, j);
-//         let sobelY = calculateSobelY(x, y, j);
-    
-
-//         // As implemented in our version
-//         perceptionVector[3*j] = cellValue(u32(x), u32(y), u32(j));
-//         perceptionVector[3*j+1] = sobelX;
-//         perceptionVector[3*j+2] = sobelY;
-//     }
-//     return perceptionVector;
-// }
-
-// fn applyStochasticMask(ds_grid: array<f32, 16>) -> array<f32, 16> {
-//     let random_val = random();  // Generate random number
-//     for (var i: u32 = 0u; i < 16u; i = i + 1u) {
-//         if (random_val < 0.5) {
-//             ds_grid[i] = 0.0;  // Zero out with 50% probability
-//         }
-//     }
-//     return ds_grid;
-// }
-
 `

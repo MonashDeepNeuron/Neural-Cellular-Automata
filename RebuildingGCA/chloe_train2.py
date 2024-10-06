@@ -176,11 +176,13 @@ if __name__ == "__main__":
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
-    EPOCHS = 0
+    EPOCHS = 0  # 100 epochs for best results
+    ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
+
     BATCH_SIZE = 32
     UPDATES_RANGE = [64, 96]
 
-    LR = 1e-3
+    LR = 1e-5
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
@@ -189,7 +191,9 @@ if __name__ == "__main__":
 
     ## Load model weights if available
     try:
-        MODEL.load_state_dict(torch.load("model_weights.pth"))
+        MODEL.load_state_dict(
+            torch.load("model_weights.pth")
+        )  ## CHANGE TO WHICHEVER PATHNAME
         print("Loaded model weights successfully!")
     except FileNotFoundError:
         print("No previous model weights found, training from scratch.")
