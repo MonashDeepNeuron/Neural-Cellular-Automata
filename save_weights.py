@@ -30,7 +30,7 @@ if __name__ == "__main__":
         model.load_state_dict(torch.load("model_weights.pth"))
         print("Loaded model weights successfully!")
     except FileNotFoundError:
-        print("No previous model weights found, training from scratch.")
+        print("No previous model weights found.")
 
     # Save the model weights as binary
     save_weights(model)

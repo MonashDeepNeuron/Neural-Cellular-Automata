@@ -63,20 +63,25 @@ class GCA(nn.Module):
         Perception vectors are 4 dimensional. Unsqueeze used to add dimension of size 1 at index
         """
 
+        # Manually apply circular padding
+        state_grid_padded = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
+
+        ## Convolve sobel x and y
         grad_x = f.conv2d(
-            state_grid,
+            state_grid_padded,  # state_grid
             self.SOBEL_X.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
             stride=1,
-            padding=1,
+            padding=0,  # 1
             groups=state_grid.size(1),
-        )  # TODO Replace padding with logic to make a grid that wraps around on itself.
+        )
+
         grad_y = f.conv2d(
-            state_grid,
+            state_grid_padded,  # state_grid
             self.SOBEL_Y.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
             stride=1,
-            padding=1,
+            padding=0,  # 1
             groups=state_grid.size(1),
-        )  # TODO Replace 16 with a dynamic channels variable?
+        )
 
         perception_grid = torch.cat([state_grid, grad_x, grad_y], dim=1)
 
