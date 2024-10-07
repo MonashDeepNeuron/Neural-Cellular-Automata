@@ -2,6 +2,7 @@
 
 import torch
 from torchvision.io import read_image
+from torchvision.io.image import ImageReadMode
 import torchvision
 from torch import Tensor
 import torch.nn as nn
@@ -90,7 +91,7 @@ def load_image(imagePath: str):
     Output image as 3D Tensor, with floating point values between 0 and 1
     Dimensions should be (colour channels, height, width)
     """
-    img = read_image(imagePath)
+    img = read_image(imagePath, mode = ImageReadMode.RGB_ALPHA)
     img = torchvision.transforms.functional.resize(img, (GRID_SIZE, GRID_SIZE))
     img = img.to(dtype=torch.float32) / 255
 
@@ -199,14 +200,14 @@ def initialiseGPU(model):
 
 if __name__ == "__main__":
     
-    TRAINING = False # Is our purpose to train or are we just looking rn?
+    TRAINING = True # Is our purpose to train or are we just looking rn?
 
     GRID_SIZE = 32
     CHANNELS = 16
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
-    EPOCHS = 0  # 100 epochs for best results
+    EPOCHS = 100 # 100 epochs for best results
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     BATCH_SIZE = 32
@@ -216,9 +217,9 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    MODEL_PATH = "model_weights.pth"
+    MODEL_PATH = "model_weights_logo.pth"
 
-    targetImg = load_image("cat.png")
+    targetImg = load_image("logo.png")
 
     ## Load model weights if available
     try:

@@ -14,7 +14,8 @@ const NUM_CHANNELS: u32 = 16;
 Takes x, y, channel --> k (indexes cellstatein column vector) */
 fn cellIndex(cell: vec2<u32>, channel: u32) -> u32 {
     /* with modulo wrap around*/
-    return (cell.y%u32(grid.y)) * u32(grid.x) * NUM_CHANNELS + (cell.x%u32(grid.x)) * NUM_CHANNELS + channel;
+    /* with correct orientation: y = u32(grid.y) - 1u - u32(cell.y) */
+    return ((u32(grid.y) - 1u - u32(cell.y))%u32(grid.y)) * u32(grid.x) * NUM_CHANNELS + (cell.x%u32(grid.x)) * NUM_CHANNELS + channel;
 }
 
 
