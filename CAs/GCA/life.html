@@ -5,28 +5,17 @@
   <meta charset="utf-8" />
   <title>WebGPU Life</title>
   <link rel="stylesheet" href="../Shared/style.css"> <!-- Link to the CSS file -->
-  <link rel="icon" type="image/x-icon" href="../../Images/favicon.ico">
 </head>
 
+<div class="text-column">
+  <h1>Growing Neural Cellular Automata </h1>
+  <h2><i>Work in progress</i></h2>
+</div>
+
 <body>
-  <div class="navbar">
-    <a href="https://www.deepneuron.org/">
-      <img src="../Shared/mdn_logo.png" alt="Logo" style="height: 20px; vertical-align: middle;">
-    </a>
-    <a href="/">Home</a>
-    <a href="/about.html">About</a>
-    <a href="https://www.deepneuron.org/contact-us">Contact Us</a>
-  </div>
-
-  <div class="text-column">
-    <h1>Continuous Automata</h1>
-    <p><i>Having issues? See our troubleshooting <a href="/troubleshooting.html">page</a></i></p>
-  </div>
-
-  
   <div class="controlPanel">
     <!-- Kernel Grid: divided into 3 control groups for aesthetic grid purposes-->
-    <div class="controlGroup grid">
+    <!-- <div class="controlGroup grid">
       <div class="panelRow">
         <h3>Kernel</h3>
       </div>
@@ -48,23 +37,25 @@
         <input type="number" id="kernel9" placeholder="0.11">
       </div>
       <div class="panelRow fullRow"><button id="submitInput">Submit Kernel</button></div>
-    </div>
-    <div class="controlGroup grid">
+    </div> -->
+    <!-- <div class="controlGroup grid">
       <div class="panelRow fullRow">
         <h3>Activation Function</h3>
       </div>
       <div class="panelRow fullRow"><textarea id="activationTextField">Activation function...</textarea></div>
       <div class="panelRow fullRow"><button id="submitActivation">Submit Activation</button></div>
-    </div>
+    </div> -->
 
     <!-- Input Box for Speed -->
     <div class="panelRow">
       <div class="controlGroup">
-        <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="10" min="1" max="900">
+        <label for="speedInputBox">Speed(fps):</label><input type="number" id="speedInputBox" value="1" min="1"
+          max="900">
         <button id="speedInput">Submit Speed</button>
       </div>
       <div class="controlGroup">
-        <label for="skipEvenCheckbox">Skip Every Second Frame: </label><input type="checkbox" id="skipEvenCheckbox" value="true">
+        <label for="skipEvenCheckbox">Skip Every Second Frame: </label><input type="checkbox" id="skipEvenCheckbox"
+          value="false">
       </div>
     </div>
 
@@ -96,9 +87,6 @@
     <div class="footerElement" id="framesDisplayed">Displays every Nth frame</div>
   </div>
 
-  <div class="centre">
-    <p> Key: green->blue = negative, darkred->yellow = positive</p>
-  </div>
   <script type="module" src="life.js"></script>
 </body>
 

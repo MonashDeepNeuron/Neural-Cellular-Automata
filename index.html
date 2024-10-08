@@ -5,6 +5,7 @@
   <meta name="viewport">
   <title>Neural Cellular Automata</title>
   <link rel="stylesheet" href="./CAs/Shared/style.css"> <!-- Link to the CSS file -->
+  <link rel="icon" type="image/x-icon" href="./Images/favicon.ico">
 </head>
 <body>
   <div class="navbar">
@@ -33,10 +34,17 @@
     <h3>Select a model:</h3>
     <div class="panelRow controlGroup">
       <a href="./CAs/ConwaysLife/life.html" class="button" id="classic_conway">Classic Conway</a>
-      <a href="./CAs/Continuous/life.html" class="button" id="continuous">Continuous</a>
-      <a href="./CAs/Larger/life.html" class="button" id="larger">Larger</a>
       <a href="./CAs/LifeLike/life.html" class="button" id="life_like">Life Like</a>
+      <a href="./CAs/Larger/life.html" class="button" id="larger">Larger</a>
     </div>
+    <div class="panelRow controlGroup">
+      <a href="./CAs/Continuous/life.html" class="button" id="continuous">Continuous</a>
+      <a href="./CAs/GCA/life.html" class="button" id="Growing Neural Cellular Automata">G-NCA</a>
+    </div>
+  </div>
+
+  <div class = "centre">
+    <img src="./gca_demo.gif">
   </div>
 
   <div class="centre">
@@ -61,7 +69,7 @@
       that exhibit organism-like behaviour.
     </p>
 
-    
+
     <h2>
       Terminology 
     </h2>
@@ -86,7 +94,12 @@
       cell uses to determine its new value in the next update cycle. Every 
       cell in the grid uses the same rule.
     </p>
-    <h2>Neural Cellular Automata (Coming Soon)</h2>
+    
+    
+    <h1>Models</h1>
+
+    <h2>Neural Cellular Automata</h2>
+    <a href="./CAs/GCA/life.html" class="button" id="Growing Neural Cellular Automata">G-NCA</a> 
     <p>
       Neural Cellular Automata (NCA) are a category of cellular automata that 
       involves using a neural network as the cell’s update rule. The neural 
@@ -108,10 +121,11 @@
       when the pattern was disturbed during development, so long as the disturbance 
       was not too drastic, the model was able to recover. 
     </p>
-    
-    <h1>Models</h1>
 
+
+    
     <h2>John Conway’s Game of Life / THE Game of Life</h2>
+    <a href="./CAs/ConwaysLife/life.html" class="button" id="classic_conway">Classic Conway</a>
     <div class="sideBySide">
       <div>
         <p>
@@ -133,7 +147,9 @@
           can be found <a href="https://playgameoflife.com/">here</a>.
         </p>
       
+        
         <h2>Life Like Cellular Automata</h2>
+        <a href="./CAs/LifeLike/life.html" class="button" id="life_like">Life Like</a>
         <p>
           Life like CA operate very similarly to the Game of Life in that all cells
           are either alive or dead. However, Life Like gives you the freedom to 
@@ -149,7 +165,9 @@
           for a dead cell to come to life/be born.
         </p>
 
+        
         <h2>Larger than Life</h2>
+        <a href="./CAs/Larger/life.html" class="button" id="larger">Larger</a>
         <p>
           Larger than Life builds on Life Like CA by introducing even more flexibility. 
           This means the following are now specifieable in the rule string:
@@ -179,7 +197,9 @@
     </div>
     
 
+    
     <h2>Continuous Cellular Automata</h2>
+    <a href="./CAs/Continuous/life.html" class="button" id="continuous">Continuous</a> 
     <p>
       Continuous CA also builds on Life Like CA. Continuous CA can display 
       behaviours similar to basic organisms and population level behaviours of 

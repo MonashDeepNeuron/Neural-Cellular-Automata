@@ -1,1 +1,0 @@
-// Main life like CA logic
