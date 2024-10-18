@@ -65,7 +65,6 @@ class GCA(nn.Module):
         ## Add input grid to the device model parameters are on
         input_grid = input_grid.to(next(self.parameters()).device)
 
-
         ## Add input grid to the device model parameters are on
         input_grid = input_grid.to(next(self.parameters()).device)
 
@@ -82,23 +81,24 @@ class GCA(nn.Module):
         Perception vectors are 4 dimensional. Unsqueeze used to add dimension of size 1 at index
         """
 
+        state_grid_padded = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
+
         grad_x = f.conv2d(
-            state_grid,
+            state_grid_padded,
             self.SOBEL_X.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
             stride=1,
-            padding=1,
-            groups=state_grid.size(1),
+            padding=0,
+            groups=state_grid_padded.size(1),
         )  # TODO Replace padding with logic to make a grid that wraps around on itself.
         grad_y = f.conv2d(
-            state_grid,
+            state_grid_padded,
             self.SOBEL_Y.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
             stride=1,
-            padding=1,
-            groups=state_grid.size(1),
+            padding=0,
+            groups=state_grid_padded.size(1),
         )  # TODO Replace 16 with a dynamic channels variable?
 
         perception_grid = torch.cat([state_grid, grad_x, grad_y], dim=1)
-
 
         return perception_grid
 
@@ -122,13 +122,9 @@ class GCA(nn.Module):
         Does not use GPU to generate alive mask as doing max pooling
         A cell is considered empty (set rgba : 0) if there is no mature (alpha > 0.1) cell in its 3x3 neighbourhood
         """
-        Does not use GPU to generate alive mask as doing max pooling
-        A cell is considered empty (set rgba : 0) if there is no mature (alpha > 0.1) cell in its 3x3 neighbourhood
-        """
         alive_mask = (
             f.max_pool2d(state_grid[:, 3:4, :, :], kernel_size=3, stride=1, padding=1)
             > 0.1
-        )
         )
 
         return alive_mask * state_grid

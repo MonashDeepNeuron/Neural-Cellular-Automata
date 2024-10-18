@@ -8,7 +8,7 @@ from chloe_train2 import GCA
 def save_weights(model):
     model_state = model.state_dict()  # Get model parameters
 
-    with open("model_weights.bin", "wb") as f:
+    with open("model_weights_logo.bin", "wb") as f:
         for name, param in model_state.items():
             weight = param.cpu().numpy()  # Convert to NumPy array
             weight = weight.astype(np.float32)  # Ensure it's in float32 format
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     # Load weights from .pth file
     try:
-        model.load_state_dict(torch.load("model_weights.pth"))
+        model.load_state_dict(torch.load("model_weights_logo.pth"))
         print("Loaded model weights successfully!")
     except FileNotFoundError:
         print("No previous model weights found.")
