@@ -1,84 +1,47 @@
 # Neural-Cellular-Automata
 
-This project involves the creation of a cellular automata model trained using neural networks, which will be hosted online.
+## Goals
 
-## Progress so Far
+Our goals can be broken down into answering three topics:
 
-Initial project setup is complete
-- Initial versions of the following models of cell perception have been developed (work will be done to make them more efficient) 
-  - Conway's game of Life
-  - LifeLike CA
-  - Larger than Life
-  - Continuous CA
+1. What are NCA? How is NCA different from other NCA?
+2. What can NCA be used for? Does NCA provide an advantage over other similar architectures?
+3. How can NCA be improved?
 
-## To Do List
+As a result of answering these questions, we aim to produce a research paper.
 
-### General
-- [ ] Modularise .js code
-- [ ] Bigger frame with more cells
-- [ ] Update template
-- [ ] explanations for each CA
-  - [x] Life
-  - [ ] Life-like
-  - [ ] LTL
-  - [ ] Convolving CA
-  - [ ] Vec4, Vec16
+## Open Source Website!
 
-### Model Development (Cell Perception)
+All of our code for <a href="https://neuralca.org">our website</a> and for generating website content is open source and available here! There are two main parts:
 
-- [ ] Life
-  - [x] Get Running
-  - [ ] Find some good start state templates (bunnies, stable configurations, gliders, calculator)
-  - [ ] Implement interactions
-    - [x] Pause / play (spacebar)
-    - [x] Move forward one frame (full-stop button)
-    - [x] change speed while sim is running
-    - [x] allow selectable start state templates
-    - [ ] Change state (click)
-  - [ ] Place into template
-- [ ] Life-like CA
-  - [x] Implement a couple different basic rule sets
-  - [ ] find good templates for select ruleset
-  - [ ] Dynamic shaders, respond to user inputted rule-strings
-  - [ ] Place into template
-- [ ] LTL CA
-  - [x] Implement wider neighbourhoods:
-        see line 22ish of
-        [computeShader.js](My-App/src/routes/life/computeShader.js)
-  - [x] Figure out what to do with rule strings
-  - [ ] Insert into template
-- [ ] Continuous CA
-  - [x] Implement 3x3 weighted kernel
-  - [ ] Implement discrete convolution as shader function
-  - [ ] Make convolution shader function dynamic
-        (respond to input convolution)
-  - [ ] Insert into template
-- [ ] Ltl/Contunuous CA hybridisation
-- [ ] Vec4 based CA
-  - [ ] Understand vector convolutions
-  - [ ] Implement efficient way to pull info from the picture
-  - [ ] Insert into template
-- [ ] vec16 based CA (haven't written this out yet)
-  - [ ] insert into template
+1. **The Training Code:** This produces the weights an biases of our neural network. All implemented in **PyTorch**. There will be multiple versions of this for various experiments.
+2. **The Website:** Models are rendered in **WebGPU** and **JavaScript.** Output is what you see in front of you!
 
-### Model Training (Cell behaviours)
-- [ ] WebGPU compatibility with python training code
-- Waiting for:
-  - [x] continuity
-  - [x] convolutions
-- [ ] ?? Create a training method that allows us to find interesting behaviours on the simple implementation as seen [here](https://neuralpatterns.io)
+## Current Progress
+
+- [x] Learning WebGPU and creating a platform to share our work
+  - [x] Built Conway's game of life
+  - [x] Built Life-like CA, capable of taking input changing the behaviour of the CA
+  - [x] Built Larger than Life, capable of creating coloured outputs 
+  - [x] Built Continuous, implementing convolutions and live-editable WebGPU code
+  - [ ] Built Growing Neural Cellular Automata
+    - [x] Developed and trained model
+    - [x] Ported model weights over to the website in readable format
+    - [ ] Implemented Growing Neural Cellular Automata on website
+- [ ] Built the about page
+- [x] Created basic descriptions of Neural Cellular Automata
+- [ ] Created advanced resources on Neural Cellular Automata
 
 ## Resources
 
 This project is currently using the Notion platform to document project progress and important information. This Notion workspace will be made public at a later point in time.
 
 However, some useful resources for this project include:
-
 - Understanding Cellular Automata (CA)
   - Introduction to [Conway's Game of Life](https://playgameoflife.com/)
   - [Explaining CA](https://natureofcode.com/book/chapter-7-cellular-automata/)
   - What are ["Life-Like" CAs](https://en.m.wikipedia.org/wiki/Life-like_cellular_automaton#cite_note-23)
-- Implementing CAs
+- Neural Cellular Automata
   - [Neural Patterns](https://neuralpatterns.io)
   - [Growing Neural Cellular Automata](https://distill.pub/2020/growing-ca/)
 - Tutorials for Building CAs
@@ -94,10 +57,6 @@ However, some useful resources for this project include:
   - [WebGPU Shader Tips](https://toji.dev/webgpu-best-practices/dynamic-shader-construction.html)
   - [Typescript & WebGPU Examples](https://webgpu.github.io/webgpu-samples/samples/helloTriangle)
 
-- Event Handling in JavaScript
-  - [HTML DOM Events](https://www.w3schools.com/jsref/dom_obj_event.asp)
-  - [JavaScript Events](https://www.w3schools.com/js/js_events.asp)
-  - [Event handling (overview)](https://developer.mozilla.org/en-US/docs/Web/Events/Event_handlers)
 More resources will be made available in this repo as the project progresses.
 
 ## Repository Maintenance
