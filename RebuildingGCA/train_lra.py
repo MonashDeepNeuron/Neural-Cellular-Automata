@@ -11,6 +11,7 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import argparse
+from learning_rate_adjuster import lradj
 
 
 def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
@@ -148,7 +149,7 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
     """
     TRAINING PROCESS:
         - Define training data storage variables
-        - For each epoch:
+        - For each epoch_idx:
             - Initialise batch
             - Forward pass (runs the model on the batch)
             - Backward pass (calculates loss and updates params)
@@ -162,32 +163,34 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
     target = target.to(device)
 
     try:
-        # minibatch epoch =N
         training_losses = []
-        for epoch in range(EPOCHS):
+        loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
+
+        for epoch_idx in range(EPOCHS):
+            loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
+            if loss_window_idx == 0:
+                updated_lr = lradj.get_adjusted_learning_rate(loss_window)
+                loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
+                ## SET OPTIMISER
+                optimiser["lr"] = updated_lr
+
             model.train()
             if record:
                 outputs = torch.zeros_like(batch)
-
-            batch = new_seed(BATCH_SIZE)  ## TODO duplicate seed
+            batch = new_seed(BATCH_SIZE)
             batch = batch.to(device)
 
             ## Optimisation step
             update_pass(model, batch, target, optimiser)
-
-            ## TODO: Assess accuracy. Can we remove this for faster training?
             test_seed = new_seed(1)
             MODEL.eval()
             test_run = forward_pass(MODEL, test_seed, 64)
             training_losses.append(
                 LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
             )
-            print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
+            print(f"Epoch {epoch_idx} complete, loss = {training_losses[-1]}")
 
-            # check modulo minibatch epoch
-            # for input
-            # run lradj.adjust_learning_rate
-            #
+            loss_window[loss_window_idx] = training_losses[-1]
 
     except KeyboardInterrupt:
         pass
@@ -213,6 +216,9 @@ if __name__ == "__main__":
 
     TRAINING = True  # Is our purpose to train or are we just looking rn?
 
+    ## For learning rate adjustmnet
+    ADJUSTMENT_WINDOW = 7
+
     GRID_SIZE = 32
     CHANNELS = 16
 
@@ -229,7 +235,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    MODEL_PATH = "model_weights_logo.pthj"
+    MODEL_PATH = "model_weights_logo.pth"
 
     targetImg = load_image("logo.png")
 
@@ -252,11 +258,7 @@ if __name__ == "__main__":
 
     if TRAINING:
         MODEL, losses = train(MODEL, targetImg, optimizer)
-        # losses_file = open("losses.txt", "a")
-        # losses_file.write(losses)
-        # losses_file.close()
 
-        print(losses)
         ## Plot loss
         plt.plot(range(len(losses)), losses)
 
