@@ -241,7 +241,7 @@ if __name__ == "__main__":
 
     MODEL_PATH = "model_weights_logo_updated_lr.pth"
 
-    targetImg = load_image("logo.png")
+    targetImg = load_image("RebuildingGCA/logo.png")
 
     ## Load model weights if available
     if LOAD_WEIGHTS:
