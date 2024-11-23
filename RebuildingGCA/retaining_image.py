@@ -144,69 +144,12 @@ def update_pass(model, batch, target, optimiser):
 
     print(f"batch loss = {batch_losses.cpu().numpy()}")  ## print on cpu
 
-'''
-def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # TODO
-    """
-    TRAINING PROCESS:
-        - Define training data storage variables
-        - For each epoch_idx:
-            - Initialise batch
-            - Forward pass (runs the model on the batch)
-            - Backward pass (calculates loss and updates params)
-            - SANITY CHECK: check current loss and record loss
-            - Save model if this is the best model TODO
-        - Return the trained model
-    """
-
-    ## Obtain device of model, and send all related data to device
-    device = next(model.parameters()).device
-    target = target.to(device)
-
-    try:
-        training_losses = []
-        updated_learning_rates = []
-        loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
-
-        for epoch_idx in range(EPOCHS):
-            loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
-            if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
-                updated_lr = lradj.get_adjusted_learning_rate(loss_window) 
-                loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
-                ## SET OPTIMISER
-                for param_group in optimiser.param_groups:
-                    param_group["lr"] = updated_lr
-                updated_learning_rates.append(updated_lr)
-
-            model.train()
-            if record:
-                outputs = torch.zeros_like(batch)
-            batch = new_seed(BATCH_SIZE)
-            batch = batch.to(device)
-
-            ## Optimisation step
-            update_pass(model, batch, target, optimiser)
-            test_seed = new_seed(1)
-            MODEL.eval()
-            test_run = forward_pass(MODEL, test_seed, 64)
-            training_losses.append(
-                LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
-            )
-            print(f"Epoch {epoch_idx} complete, loss = {training_losses[-1]}")
-
-            loss_window[loss_window_idx] = training_losses[-1].item()
-
-    except KeyboardInterrupt:
-        pass
-
-    if record:
-        return (model, training_losses, outputs)
-    else:
-        return model, training_losses
-'''
 
 def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
     device = next(model.parameters()).device
     target = target.to(device)
+
+    # sample pool starts off as the default seed for all 1024 random samples that we have 
     sample_pool = [new_seed(1).to(device) for _ in range(POOL_SIZE)]
 
     try:
@@ -216,28 +159,40 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
 
         for epoch_idx in range(EPOCHS):
             loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
-            if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
-                updated_lr = lradj.get_adjusted_learning_rate(loss_window) 
-                loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
-                ## SET OPTIMISER
-                for param_group in optimiser.param_groups:
-                    param_group["lr"] = updated_lr
-                updated_learning_rates.append(updated_lr)
+            if loss_window_idx == 0 and epoch_idx != 0:  # don't start lr adjuster at the start of training
+                # Ensure loss_window contains valid values
+                valid_losses = [loss for loss in loss_window if loss is not None]
+                if valid_losses:
+                    loss_window_tensor = torch.tensor(valid_losses)
+                    updated_lr = lradj.get_adjusted_learning_rate(loss_window_tensor)
+                    loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
+                    ## SET OPTIMISER
+                    for param_group in optimiser.param_groups:
+                        param_group["lr"] = updated_lr
+                    updated_learning_rates.append(updated_lr)
 
             model.train()
             if record:
                 outputs = torch.zeros_like(batch)
+
+            # get a random sample of indices from the poolsize to create a batch
             batch_indices = random.sample(range(POOL_SIZE), BATCH_SIZE)
             batch = torch.cat([sample_pool[idx] for idx in batch_indices], dim=0)
+
+            # Replace one sample with the original single-pixel seed state
             batch[0] = new_seed(1).to(device)
 
             ## Optimisation step
             update_pass(model, batch, target, optimiser)
-            #update sample pool to learnt output of batch
+
+            # Replace samples in the pool with the output states, eg we are updating the pool with the persisting states that we need to train on in future
             for i, idx in enumerate(batch_indices):
+                print(f"Updating sample {idx} in pool")
+                print(sample_pool[idx], batch[i].unsqueeze(0))
                 sample_pool[idx] = batch[i].unsqueeze(0)
 
-            test_seed = batch[2]
+            # Test the model on the original seed state, and record the loss
+            test_seed = new_seed(1).to(device)
             MODEL.eval()
             test_run = forward_pass(MODEL, test_seed, 64)
             training_losses.append(
@@ -246,6 +201,7 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
             print(f"Epoch {epoch_idx} complete, loss = {training_losses[-1]}")
 
             loss_window[loss_window_idx] = training_losses[-1].item()
+
 
     except KeyboardInterrupt:
         pass
