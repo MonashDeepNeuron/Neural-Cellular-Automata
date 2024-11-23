@@ -71,7 +71,7 @@ def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     return ani
 
 
-def new_seed(batch_size=1):
+def new_initial_seed(batch_size=1):
     """
     Creates a 4D tensor with dimensions batch_size x GRID_SIZE x GRID_SIZE x CHANNELS
     There is a single 1 in the alpha channel of center cell on each grid in the batch.
@@ -79,6 +79,19 @@ def new_seed(batch_size=1):
     seed = torch.zeros(batch_size, CHANNELS, GRID_SIZE, GRID_SIZE)
     seed[:, 3, GRID_SIZE // 2, GRID_SIZE // 2] = 1  # Alpha channel = 1
 
+    return seed
+
+def new_seed(batch_size=1):
+    """
+    Creates a 4D tensor with dimensions batch_size x GRID_SIZE x GRID_SIZE x CHANNELS
+    Initializes the center cell's alpha and hidden channels with random values.
+    """
+    seed = torch.zeros(batch_size, CHANNELS, GRID_SIZE, GRID_SIZE)
+    
+    # Set the center cell's alpha and hidden channels to random values
+    center = GRID_SIZE // 2
+    seed[:, 3:, center, center] = torch.rand(batch_size, CHANNELS - 3)
+    
     return seed
 
 
@@ -174,7 +187,7 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
     device = next(model.parameters()).device
     target = target.to(device)
 
-    # Initialize the sample pool with the single black pixel seed state
+    # Initialize the sample pool with randomised seeds
     sample_pool = [new_seed(1).to(device) for _ in range(POOL_SIZE)]
 
     try:
@@ -201,7 +214,7 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
             batch = torch.cat([sample_pool[idx] for idx in batch_indices], dim=0)
 
             # Replace one sample with the original single-pixel seed state
-            batch[0] = new_seed(1).to(device)
+            batch[0] = new_initial_seed(1).to(device)
 
             ## Optimisation step
             update_pass(model, batch, target, optimiser)
@@ -239,16 +252,16 @@ if __name__ == "__main__":
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
-    EPOCHS = 40
+    EPOCHS = 100
     BATCH_SIZE = 32
     UPDATES_RANGE = [64, 192]
-    LR = 1e-3
+    LR = 1e-4
 
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
     MODEL_PATH = "model_weights_logo_updated_lr.pth"
-    targetImg = load_image("RebuildingGCA/logo.png")
+    targetImg = load_image("RebuildingGCA/smiley.png")
 
     if LOAD_WEIGHTS:
         try:
