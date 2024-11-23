@@ -275,5 +275,5 @@ if __name__ == "__main__":
 
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
-    video = forward_pass(MODEL, img, 200, record=True)
+    video = forward_pass(MODEL, img, 2000, record=True)
     anim = visualise(video, anim=True)

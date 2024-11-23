@@ -175,9 +175,9 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
             batch_indices = random.sample(range(POOL_SIZE), BATCH_SIZE)
             batch = torch.cat([sample_pool[idx] for idx in batch_indices], dim=0)
 
-            # Replace one sample with the original single-pixel seed state; i actually changed this to ten otherwise it will take way to long to render regular outcome 
-            batch[0] = new_seed(1).to(device)
-            for i in range(10):
+            # Replace one sample with the original single-pixel seed state; i actually changed this to ten otherwise it will take way to long to render regular outcome of the model
+            #batch[0] = new_seed(1).to(device)
+            for i in range(5):
                 batch[i] = new_seed(1).to(device)
 
             ## Optimisation step
@@ -187,7 +187,7 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
             for i, idx in enumerate(batch_indices):
                 sample_pool[idx] = batch[i].unsqueeze(0)
 
-            test_seed = new_seed(1)
+            test_seed = new_seed(1) # test on the default seed state (could be worth also testing on a persisting state ? )
             MODEL.eval()
             test_run = forward_pass(MODEL, test_seed, 64)
             training_losses.append(
@@ -283,5 +283,5 @@ if __name__ == "__main__":
 
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
-    video = forward_pass(MODEL, img, 200, record=True)
+    video = forward_pass(MODEL, img, 2000, record=True)
     anim = visualise(video, anim=True)
