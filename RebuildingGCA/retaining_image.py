@@ -71,7 +71,7 @@ def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     return ani
 
 
-def new_initial_seed(batch_size=1):
+def new_seed(batch_size=1):
     """
     Creates a 4D tensor with dimensions batch_size x GRID_SIZE x GRID_SIZE x CHANNELS
     There is a single 1 in the alpha channel of center cell on each grid in the batch.
@@ -79,19 +79,6 @@ def new_initial_seed(batch_size=1):
     seed = torch.zeros(batch_size, CHANNELS, GRID_SIZE, GRID_SIZE)
     seed[:, 3, GRID_SIZE // 2, GRID_SIZE // 2] = 1  # Alpha channel = 1
 
-    return seed
-
-def new_seed(batch_size=1):
-    """
-    Creates a 4D tensor with dimensions batch_size x GRID_SIZE x GRID_SIZE x CHANNELS
-    Initializes the center cell's alpha and hidden channels with random values.
-    """
-    seed = torch.zeros(batch_size, CHANNELS, GRID_SIZE, GRID_SIZE)
-    
-    # Set the center cell's alpha and hidden channels to random values
-    center = GRID_SIZE // 2
-    seed[:, 3:, center, center] = torch.rand(batch_size, CHANNELS - 3)
-    
     return seed
 
 
@@ -157,27 +144,15 @@ def update_pass(model, batch, target, optimiser):
 
     print(f"batch loss = {batch_losses.cpu().numpy()}")  ## print on cpu
 
-def initialiseGPU(model):
-    ## Check if GPU available
-    if torch.cuda.is_available():
-        print(f"GPU: {torch.cuda.get_device_name(0)} is available.")
-
-    ## Configure device as GPU
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    return model
-
-
+'''
 def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # TODO
     """
     TRAINING PROCESS:
         - Define training data storage variables
         - For each epoch_idx:
-            - Sample a batch from the pool
-            - Replace one sample with the original single-pixel seed state
+            - Initialise batch
             - Forward pass (runs the model on the batch)
             - Backward pass (calculates loss and updates params)
-            - Replace samples in the pool with the output states
             - SANITY CHECK: check current loss and record loss
             - Save model if this is the best model TODO
         - Return the trained model
@@ -187,9 +162,6 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
     device = next(model.parameters()).device
     target = target.to(device)
 
-    # Initialize the sample pool with randomised seeds
-    sample_pool = [new_seed(1).to(device) for _ in range(POOL_SIZE)]
-
     try:
         training_losses = []
         updated_learning_rates = []
@@ -197,8 +169,8 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
 
         for epoch_idx in range(EPOCHS):
             loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
-            if loss_window_idx == 0 and epoch_idx != 0:  # don't start lr adjuster at the start of training
-                updated_lr = lradj.get_adjusted_learning_rate(loss_window)
+            if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
+                updated_lr = lradj.get_adjusted_learning_rate(loss_window) 
                 loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
                 ## SET OPTIMISER
                 for param_group in optimiser.param_groups:
@@ -208,21 +180,11 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
             model.train()
             if record:
                 outputs = torch.zeros_like(batch)
-
-            # Sample a batch from the pool
-            batch_indices = random.sample(range(POOL_SIZE), BATCH_SIZE)
-            batch = torch.cat([sample_pool[idx] for idx in batch_indices], dim=0)
-
-            # Replace one sample with the original single-pixel seed state
-            batch[0] = new_initial_seed(1).to(device)
+            batch = new_seed(BATCH_SIZE)
+            batch = batch.to(device)
 
             ## Optimisation step
             update_pass(model, batch, target, optimiser)
-
-            # Replace samples in the pool with the output states
-            for i, idx in enumerate(batch_indices):
-                sample_pool[idx] = batch[i].unsqueeze(0)
-
             test_seed = new_seed(1)
             MODEL.eval()
             test_run = forward_pass(MODEL, test_seed, 64)
@@ -240,36 +202,114 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
         return (model, training_losses, outputs)
     else:
         return model, training_losses
+'''
+
+def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
+    device = next(model.parameters()).device
+    target = target.to(device)
+    sample_pool = [new_seed(1).to(device) for _ in range(POOL_SIZE)]
+
+    try:
+        training_losses = []
+        updated_learning_rates = []
+        loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
+
+        for epoch_idx in range(EPOCHS):
+            loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
+            if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
+                updated_lr = lradj.get_adjusted_learning_rate(loss_window) 
+                loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
+                ## SET OPTIMISER
+                for param_group in optimiser.param_groups:
+                    param_group["lr"] = updated_lr
+                updated_learning_rates.append(updated_lr)
+
+            model.train()
+            if record:
+                outputs = torch.zeros_like(batch)
+            batch_indices = random.sample(range(POOL_SIZE), BATCH_SIZE)
+            batch = torch.cat([sample_pool[idx] for idx in batch_indices], dim=0)
+            batch[0] = new_seed(1).to(device)
+
+            ## Optimisation step
+            update_pass(model, batch, target, optimiser)
+            #update sample pool to learnt output of batch
+            for i, idx in enumerate(batch_indices):
+                sample_pool[idx] = batch[i].unsqueeze(0)
+
+            test_seed = batch[2]
+            MODEL.eval()
+            test_run = forward_pass(MODEL, test_seed, 64)
+            training_losses.append(
+                LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
+            )
+            print(f"Epoch {epoch_idx} complete, loss = {training_losses[-1]}")
+
+            loss_window[loss_window_idx] = training_losses[-1].item()
+
+    except KeyboardInterrupt:
+        pass
+
+    if record:
+        return (model, training_losses, outputs)
+    else:
+        return model, training_losses
+
+
+
+def initialiseGPU(model):
+    ## Check if GPU available
+    if torch.cuda.is_available():
+        print(f"GPU: {torch.cuda.get_device_name(0)} is available.")
+
+    ## Configure device as GPU
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    return model
+
 
 if __name__ == "__main__":
-    TRAINING = True
-    LOAD_WEIGHTS = False
 
+    TRAINING = True  # Is our purpose to train or are we just looking rn?
+    LOAD_WEIGHTS = False # only load weights if we want to start training from previous
+
+    ## For learning rate adjustmnet
     ADJUSTMENT_WINDOW = 10
+
     GRID_SIZE = 32
     CHANNELS = 16
-    POOL_SIZE = 1024
+
+    POOL_SIZE=1024
+    BATCH_SIZE=32
+    UPDATES_RANGE=(64, 192)
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
-    EPOCHS = 100
+    EPOCHS = 100  # 100 epochs for best results
+    ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
+
     BATCH_SIZE = 32
-    UPDATES_RANGE = [64, 192]
-    LR = 1e-4
+    UPDATES_RANGE = [64,192] # for longer life
+
+    LR = 1e-3
 
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
     MODEL_PATH = "model_weights_logo_updated_lr.pth"
-    targetImg = load_image("RebuildingGCA/smiley.png")
 
+    targetImg = load_image("RebuildingGCA/logo.png")
+
+    ## Load model weights if available
     if LOAD_WEIGHTS:
         try:
             MODEL.load_state_dict(
                 torch.load(
                     MODEL_PATH,
                     weights_only=True,
-                    map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+                    map_location=torch.device(
+                        "cuda" if torch.cuda.is_available() else "cpu"
+                    ),
                 )
             )
             print("Loaded model weights successfully!")
@@ -279,14 +319,18 @@ if __name__ == "__main__":
                 exit()
 
     if TRAINING:
-        MODEL, losses = train(MODEL, targetImg, optimizer)
+        MODEL, losses = pool_train(MODEL, targetImg, optimizer)
 
+        ## Plot loss
         plt.plot(range(len(losses)), losses)
-        plt.savefig("training_loss.png")
 
+        ## Save the model's weights after training
         torch.save(MODEL.state_dict(), MODEL_PATH)
 
+    ## Switch state to evaluation to disable dropout e.g.
     MODEL.eval()
+
+    ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
     video = forward_pass(MODEL, img, 200, record=True)
     anim = visualise(video, anim=True)
