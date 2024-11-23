@@ -175,8 +175,10 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
             batch_indices = random.sample(range(POOL_SIZE), BATCH_SIZE)
             batch = torch.cat([sample_pool[idx] for idx in batch_indices], dim=0)
 
-            # Replace one sample with the original single-pixel seed state
+            # Replace one sample with the original single-pixel seed state; i actually changed this to ten otherwise it will take way to long to render regular outcome 
             batch[0] = new_seed(1).to(device)
+            for i in range(10):
+                batch[i] = new_seed(1).to(device)
 
             ## Optimisation step
             update_pass(model, batch, target, optimiser)
