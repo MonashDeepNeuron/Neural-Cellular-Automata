@@ -164,15 +164,18 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
 
     try:
         training_losses = []
+        updated_learning_rates = []
         loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
 
         for epoch_idx in range(EPOCHS):
             loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
-            if loss_window_idx == 0:
-                updated_lr = lradj.get_adjusted_learning_rate(loss_window)
+            if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
+                updated_lr = lradj.get_adjusted_learning_rate(loss_window) 
                 loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
                 ## SET OPTIMISER
-                optimiser["lr"] = updated_lr
+                for param_group in optimiser.param_groups:
+                    param_group["lr"] = updated_lr
+                updated_learning_rates.append(updated_lr)
 
             model.train()
             if record:
@@ -190,7 +193,7 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
             )
             print(f"Epoch {epoch_idx} complete, loss = {training_losses[-1]}")
 
-            loss_window[loss_window_idx] = training_losses[-1]
+            loss_window[loss_window_idx] = training_losses[-1].item()
 
     except KeyboardInterrupt:
         pass
@@ -215,46 +218,48 @@ def initialiseGPU(model):
 if __name__ == "__main__":
 
     TRAINING = True  # Is our purpose to train or are we just looking rn?
+    LOAD_WEIGHTS = False # only load weights if we want to start training from previous
 
     ## For learning rate adjustmnet
-    ADJUSTMENT_WINDOW = 7
+    ADJUSTMENT_WINDOW = 10
 
     GRID_SIZE = 32
     CHANNELS = 16
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
-    EPOCHS = 30  # 100 epochs for best results
+    EPOCHS = 100  # 100 epochs for best results
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     BATCH_SIZE = 32
-    UPDATES_RANGE = [64, 96]
+    UPDATES_RANGE = [64,192] # for longer life
 
     LR = 1e-3
 
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    MODEL_PATH = "model_weights_logo.pth"
+    MODEL_PATH = "model_weights_logo_updated_lr.pth"
 
     targetImg = load_image("logo.png")
 
     ## Load model weights if available
-    try:
-        MODEL.load_state_dict(
-            torch.load(
-                MODEL_PATH,
-                weights_only=True,
-                map_location=torch.device(
-                    "cuda" if torch.cuda.is_available() else "cpu"
-                ),
+    if LOAD_WEIGHTS:
+        try:
+            MODEL.load_state_dict(
+                torch.load(
+                    MODEL_PATH,
+                    weights_only=True,
+                    map_location=torch.device(
+                        "cuda" if torch.cuda.is_available() else "cpu"
+                    ),
+                )
             )
-        )
-        print("Loaded model weights successfully!")
-    except FileNotFoundError:
-        print("No previous model weights found, training from scratch.")
-        if not TRAINING:
-            exit()
+            print("Loaded model weights successfully!")
+        except FileNotFoundError:
+            print("No previous model weights found, training from scratch.")
+            if not TRAINING:
+                exit()
 
     if TRAINING:
         MODEL, losses = train(MODEL, targetImg, optimizer)
