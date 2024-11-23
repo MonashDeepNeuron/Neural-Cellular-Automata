@@ -159,17 +159,13 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
 
         for epoch_idx in range(EPOCHS):
             loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
-            if loss_window_idx == 0 and epoch_idx != 0:  # don't start lr adjuster at the start of training
-                # Ensure loss_window contains valid values
-                valid_losses = [loss for loss in loss_window if loss is not None]
-                if valid_losses:
-                    loss_window_tensor = torch.tensor(valid_losses)
-                    updated_lr = lradj.get_adjusted_learning_rate(loss_window_tensor)
-                    loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
-                    ## SET OPTIMISER
-                    for param_group in optimiser.param_groups:
-                        param_group["lr"] = updated_lr
-                    updated_learning_rates.append(updated_lr)
+            if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
+                updated_lr = lradj.get_adjusted_learning_rate(loss_window) 
+                loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
+                ## SET OPTIMISER
+                for param_group in optimiser.param_groups:
+                    param_group["lr"] = updated_lr
+                updated_learning_rates.append(updated_lr)
 
             model.train()
             if record:
@@ -187,12 +183,9 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
 
             # Replace samples in the pool with the output states, eg we are updating the pool with the persisting states that we need to train on in future
             for i, idx in enumerate(batch_indices):
-                print(f"Updating sample {idx} in pool")
-                print(sample_pool[idx], batch[i].unsqueeze(0))
                 sample_pool[idx] = batch[i].unsqueeze(0)
 
-            # Test the model on the original seed state, and record the loss
-            test_seed = new_seed(1).to(device)
+            test_seed = new_seed(1)
             MODEL.eval()
             test_run = forward_pass(MODEL, test_seed, 64)
             training_losses.append(
