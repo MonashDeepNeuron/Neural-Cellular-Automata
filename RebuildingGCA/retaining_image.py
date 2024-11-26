@@ -105,7 +105,7 @@ def load_image(imagePath: str):
     return img
 
 
-def forward_pass(model: nn.Module, state, updates, record=False):  # TODO
+def forward_pass(model: nn.Module, state, updates, record=False, CHANNELS=16, GRID_SIZE = 32):  # TODO
     """
     Run a forward pass consisting of `updates` number of updates
     If `record` is true, then records the state in a tensor to animate and saves the video

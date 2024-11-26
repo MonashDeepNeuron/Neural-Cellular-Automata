@@ -11,16 +11,110 @@ import matplotlib.animation as animation
 import argparse
 from learning_rate_adjuster import lradj
 import retaining_image as ri
+from retaining_image import initialiseGPU
 
-def new_seed(batch_size=1):
-    """
-    Creates a 4D tensor with dimensions batch_size x GRID_SIZE x GRID_SIZE x CHANNELS
-    There is a single 1 in the alpha channel of center cell on each grid in the batch.
-    """
-    seed = torch.zeros(batch_size, CHANNELS, GRID_SIZE, GRID_SIZE)
-    seed[:, 3, GRID_SIZE // 2, GRID_SIZE // 2] = 1  # Alpha channel = 1
+# Change these constants to desired output behaviour
+GRID_SIZE = 32
+CHANNELS = 16
+TICKRATE = 30  # Milliseconds per tick fyi
+TRAINING = False  # Is our purpose to train or are we just looking rn?
+LOAD_WEIGHTS = True  # only load weights if we want to start training from previous
 
-    return seed
+MODEL = GCA()
+MODEL = initialiseGPU(MODEL)
+MODEL_PATH = "model_weights_logo_updated_lr.pth"
+
+class Grid:
+    def __init__(self, model: GCA, img: torch.Tensor, channels: int, grid_size: int):
+        self.model = model
+        self.img = img
+        self.channels = channels
+        self.grid_size = grid_size
+        self.count = [0]  # Initialize count as a list with a single element
+        self.device = next(model.parameters()).device
+        self.state = self.new_seed(1).to(self.device)
+        self.fig, self.ax = plt.subplots()
+        self.imshow = self.ax.imshow(self.state[0, :3].permute(1, 2, 0).cpu().detach().numpy().clip(0, 1))
+        plt.title("Press 'q' to quit")
+        self.mouse_pressed = False
+        self.prev_x = None
+        self.prev_y = None
+
+    def new_seed(self, batch_size):
+        """
+        Creates a 4D tensor with dimensions batch_size x GRID_SIZE x GRID_SIZE x CHANNELS
+        There is a single 1 in the alpha channel of center cell on each grid in the batch.
+        """
+        seed = torch.zeros(batch_size, CHANNELS, GRID_SIZE, GRID_SIZE)
+        seed[:, 3, GRID_SIZE // 2, GRID_SIZE // 2] = 1  # Alpha channel = 1
+        return seed
+
+    def tick(self):
+        '''
+        Tick method updates a single foward step for the ML model and updates the plot
+        '''
+        self.count[0] += 1
+        plt.suptitle(f"Step: {self.count[0]}")
+        self.state = self.model(self.state)
+        self.imshow.set_data(self.state[0, :3].permute(1, 2, 0).cpu().detach().numpy().clip(0, 1))
+        self.fig.canvas.draw()
+
+    def remove_pixels(self, x, y, radius):
+        '''
+        Remove pixels from the grid (used in event handlers)
+        '''
+        _, _, height, width = self.state.shape
+        for i in range(height):
+            for j in range(width):
+                if (i - y) ** 2 + (j - x) ** 2 <= radius ** 2:
+                    self.state[0, :, i, j] = 0  # Set the pixel values to 0 (black)
+
+    def interpolate_and_remove(self, x0, y0, x1, y1, radius):
+        dist = max(abs(x1 - x0), abs(y1 - y0))
+        for i in range(dist + 1):
+            #Idk how this works without safe division but it does
+            x = int(x0 + i * (x1 - x0) / dist)
+            y = int(y0 + i * (y1 - y0) / dist)
+            self.remove_pixels(x, y, radius)
+
+    def on_click(self, event):
+        #this should be a double click explosion? could be fun 
+        if event.inaxes is not None:
+            self.mouse_pressed = True
+            self.prev_x, self.prev_y = int(event.xdata), int(event.ydata)
+            radius = 5  # Define the radius around the cursor to remove pixels
+            self.remove_pixels(self.prev_x, self.prev_y, radius)
+            self.imshow.set_data(self.state[0, :3].permute(1, 2, 0).cpu().detach().numpy().clip(0, 1))
+            self.fig.canvas.draw()
+
+    def on_release(self, event):
+        self.mouse_pressed = False
+        self.prev_x = None
+        self.prev_y = None
+
+    def on_motion(self, event):
+        if self.mouse_pressed and event.inaxes is not None:
+            x, y = int(event.xdata), int(event.ydata)
+            radius = 5  # Define the radius around the cursor to remove pixels
+            if self.prev_x is not None and self.prev_y is not None:
+                self.interpolate_and_remove(self.prev_x, self.prev_y, x, y, radius)
+            self.prev_x, self.prev_y = x, y
+            self.imshow.set_data(self.state[0, :3].permute(1, 2, 0).cpu().detach().numpy().clip(0, 1))
+            self.fig.canvas.draw()
+
+    def update(self, frame):
+        self.tick()
+
+    def grid_interaction(self):
+        # Connect all event handlers into canvas. I Suppose this is sort of like 
+        # the state transducer, and could be made in a more functionally reactive way if we wanted.
+        self.fig.canvas.mpl_connect("button_press_event", self.on_click)
+        self.fig.canvas.mpl_connect("button_release_event", self.on_release)
+        self.fig.canvas.mpl_connect("motion_notify_event", self.on_motion)
+
+        # Create the animation
+        ani = animation.FuncAnimation(self.fig, self.update, interval=TICKRATE)  
+        plt.show()
 
 def load_image(imagePath: str):
     """
@@ -28,97 +122,21 @@ def load_image(imagePath: str):
     Dimensions should be (colour channels, height, width)
     """
     img = read_image(imagePath, mode=ImageReadMode.RGB_ALPHA)
-    ## Pad image with 3 pixels with of black border before resizing
-
-    ## Reduce existing image to 28*28
-    img = torchvision.transforms.functional.resize(
-        img, ((GRID_SIZE - 4), (GRID_SIZE - 4))
-    )
-
-    ## Pad it to original grid size
+    img = torchvision.transforms.functional.resize(img, (GRID_SIZE - 4, GRID_SIZE - 4))
     padding_transform = torchvision.transforms.Pad(2, 2)
     img = padding_transform(img)
-
     img = img.to(dtype=torch.float32) / 255
-
     return img
 
-def grid_interaction(model: GCA, img: Tensor):
-    """
-    Creates a matplotlib interactive grid to interact with the model step by step.
-    """
-    # Initialize the figure and axes
-    fig, ax = plt.subplots()
-
-    # Ensure the input image is on the appropriate device
-    device = next(model.parameters()).device
-    img = img.to(device)
-
-    # Create an image plot with the initial image state
-    state = img.clone().detach()
-    imshow = ax.imshow(state[0, :3].permute(1, 2, 0).cpu().numpy().clip(0, 1))
-    plt.title("Press 'n' for next step, 'q' to quit")
-
-    # Define the event handler for keypress events
-    def on_key(event):
-        nonlocal state
-        if event.key == "n":  # Move to the next step
-            state = model(state)  # Apply the model transformation
-            imshow.set_data(state[0, :3].permute(1, 2, 0).cpu().numpy().clip(0, 1))
-            fig.canvas.draw()
-        elif event.key == "q":  # Quit interaction
-            plt.close(fig)
-
-    # Connect the keypress event to the handler
-    fig.canvas.mpl_connect("key_press_event", on_key)
-
-    # Show the interactive plot
-    plt.show()
-
-
 if __name__ == "__main__":
-    
-    TRAINING = False  # Is our purpose to train or are we just looking rn?
-    LOAD_WEIGHTS = True # only load weights if we want to start training from previous
+    img = load_image("RebuildingGCA/cat.png")
 
-    ## For learning rate adjustmnet
-    ADJUSTMENT_WINDOW = 10
-
-    GRID_SIZE = 32
-    CHANNELS = 16
-
-    POOL_SIZE= 1024
-    BATCH_SIZE= 32
-    UPDATES_RANGE = (64, 192)
-
-
-    MODEL = GCA()
-    MODEL = ri.initialiseGPU(MODEL)
-    EPOCHS = 100  # 100 epochs for best results
-    ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
-
-    BATCH_SIZE = 32
-    UPDATES_RANGE = [64,192] # for longer life
-
-    LR = 1e-4
-
-    optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
-    LOSS_FN = torch.nn.MSELoss(reduction="mean")
-
-    MODEL_PATH = "model_weights_logo_updated_lr.pth"
-
-    targetImg = load_image("RebuildingGCA/cat.png")
-
-    ## Load model weights if available
     if LOAD_WEIGHTS:
         try:
             MODEL.load_state_dict(
                 torch.load(
                     MODEL_PATH,
-                    weights_only=True,
-                    map_location=torch.device(
-                        "cuda" if torch.cuda.is_available() else "cpu"
-                    ),
+                    map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
                 )
             )
             print("Loaded model weights successfully!")
@@ -127,9 +145,5 @@ if __name__ == "__main__":
             if not TRAINING:
                 exit()
 
-    ## Switch state to evaluation to disable dropout e.g.
-    MODEL.eval()
-
-    ## Plot final state of evaluation OR evaluation animation
-    img = new_seed(1)
-    video = grid_interaction(MODEL, img)
+    grid = Grid(MODEL, img, CHANNELS, GRID_SIZE)
+    grid.grid_interaction()
