@@ -242,14 +242,14 @@ if __name__ == "__main__":
     BATCH_SIZE = 32
     UPDATES_RANGE = [64,192] # for longer life
 
-    LR = 1e-3
+    LR = 1e-4
 
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
     MODEL_PATH = "model_weights_logo_updated_lr.pth"
 
-    targetImg = load_image("RebuildingGCA/logo.png")
+    targetImg = load_image("RebuildingGCA/cat.png")
 
     ## Load model weights if available
     if LOAD_WEIGHTS:
