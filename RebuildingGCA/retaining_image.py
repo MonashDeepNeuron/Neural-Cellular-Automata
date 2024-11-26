@@ -87,6 +87,7 @@ def load_image(imagePath: str):
     Output image as 3D Tensor, with floating point values between 0 and 1
     Dimensions should be (colour channels, height, width)
     """
+    GRID_SIZE = 32
     img = read_image(imagePath, mode=ImageReadMode.RGB_ALPHA)
     ## Pad image with 3 pixels with of black border before resizing
 
