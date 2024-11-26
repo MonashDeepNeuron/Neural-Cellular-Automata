@@ -7,7 +7,7 @@ class GCA(nn.Module):
     SOBEL_X = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32)
     SOBEL_Y = torch.tensor([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype=torch.float32)
     IDENTITY = torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=torch.float32)
-    GRID_SIZE = 32
+    GRID_SIZE = 64
 
     def __init__(self, n_channels=16, hidden_channels=128):
         ## Hidden channels are the number of channels in the linear layer in network

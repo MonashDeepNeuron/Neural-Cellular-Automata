@@ -90,13 +90,13 @@ def load_image(imagePath: str):
     img = read_image(imagePath, mode=ImageReadMode.RGB_ALPHA)
     ## Pad image with 3 pixels with of black border before resizing
 
-    ## Reduce existing image to 28*28
+    ## Reduce existing image to 28*28; Manually changed this from gridsize - 4 to 28,28 for purpose of padding
     img = torchvision.transforms.functional.resize(
-        img, ((GRID_SIZE - 4), (GRID_SIZE - 4))
+        img, ((28), (28))
     )
 
     ## Pad it to original grid size
-    padding_transform = torchvision.transforms.Pad(2, 2)
+    padding_transform = torchvision.transforms.Pad(18, 18)
     img = padding_transform(img)
 
     img = img.to(dtype=torch.float32) / 255
@@ -176,14 +176,13 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
             batch = torch.cat([sample_pool[idx] for idx in batch_indices], dim=0)
 
             # Replace one sample with the original single-pixel seed state; i actually changed this to ten otherwise it will take way to long to render regular outcome of the model
-            #batch[0] = new_seed(1).to(device)
-            for i in range(5):
-                batch[i] = new_seed(1).to(device)
+            batch[0] = new_seed(1).to(device)
 
             ## Optimisation step
             update_pass(model, batch, target, optimiser)
 
             # Replace samples in the pool with the output states, eg we are updating the pool with the persisting states that we need to train on in future
+
             for i, idx in enumerate(batch_indices):
                 sample_pool[idx] = batch[i].unsqueeze(0)
 
@@ -227,10 +226,10 @@ if __name__ == "__main__":
     ## For learning rate adjustmnet
     ADJUSTMENT_WINDOW = 10
 
-    GRID_SIZE = 32
+    GRID_SIZE = 64
     CHANNELS = 16
 
-    POOL_SIZE=1024
+    POOL_SIZE= 2500
     BATCH_SIZE=32
     UPDATES_RANGE=(64, 192)
 
@@ -242,14 +241,14 @@ if __name__ == "__main__":
     BATCH_SIZE = 32
     UPDATES_RANGE = [64,192] # for longer life
 
-    LR = 1e-3
+    LR = 1e-4
 
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    MODEL_PATH = "model_weights_logo_updated_lr.pth"
+    MODEL_PATH = "increase_grid_size.pth"
 
-    targetImg = load_image("RebuildingGCA/logo.png")
+    targetImg = load_image("RebuildingGCA/cat.png")
 
     ## Load model weights if available
     if LOAD_WEIGHTS:
@@ -283,5 +282,5 @@ if __name__ == "__main__":
 
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
-    video = forward_pass(MODEL, img, 2000, record=True)
-    anim = visualise(video, anim=True)
+    video = forward_pass(MODEL, img, 800, record=True)
+    anim = visualise(video, anim=True, filenameBase="catonincreasedgridsize")
