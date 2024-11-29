@@ -7,7 +7,6 @@ class GCA(nn.Module):
     SOBEL_X = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32)
     SOBEL_Y = torch.tensor([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype=torch.float32)
     IDENTITY = torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=torch.float32)
-    GRID_SIZE = 32
 
     def __init__(self, n_channels=16, hidden_channels=128):
         ## Hidden channels are the number of channels in the linear layer in network
@@ -72,6 +71,7 @@ class GCA(nn.Module):
         ds_grid = self.calculate_ds_grid(perception_grid)
         filtered_ds_grid = self.apply_stochastic_mask(ds_grid)
         output_raw_grid = input_grid + filtered_ds_grid
+
         output_filtered_grid = self.apply_alive_mask(output_raw_grid)
         return output_filtered_grid
 
@@ -112,10 +112,7 @@ class GCA(nn.Module):
         Zero out (with 0.5 chance) a random fraction of the updates using a random mask
         Uses the GPU for random mask generation
         """
-        rand_mask = (
-            torch.rand(self.GRID_SIZE, self.GRID_SIZE, device=ds_grid.device) < 0.5
-        ).float()
-        return ds_grid * rand_mask
+        return nn.functional.dropout(ds_grid, p=0.5)
 
     def apply_alive_mask(self, state_grid):
         """Applies alive mask to state_grid

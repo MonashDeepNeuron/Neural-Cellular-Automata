@@ -13,7 +13,7 @@ import matplotlib.animation as animation
 import argparse
 
 
-def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
+def visualiseRGB(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     """
     Visualise a designated snapshot of the grid specified by idx
     Input in form (channels, height, width)
@@ -22,36 +22,38 @@ def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     if len(imgTensor.shape) < 4:
         imgTensor.unsqueeze(0)
 
-    fig, ax = plt.subplots(1, 2)
+    fig = plt.figure()
+    plt.xticks([])
+    plt.yticks([])
 
+    
     def update(imgIdx):
         # We're only interested in the RGBalpha channels, and need numpy representation for plt
-        img = imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 0)
+        plt.clf()
+        img = imgTensor[imgIdx].squeeze().permute(1, 2, 0)
 
         if anim:
             plt.suptitle("Update " + str(imgIdx))
 
         # Plot RGB channels
         plt.subplot(1, 2, 1)
-        plt.imshow(img[:, :, 0:3].detach().numpy())
+        plt.imshow(img[:, :, 0:3].clip(0, 1).detach().numpy())
         plt.title("RGB")
 
         # Plot Alpha channel
         plt.subplot(1, 2, 2)
-        plt.imshow(img[:, :, 3].detach().numpy())
+        plt.imshow(img[:, :, 3].clip(0, 1).detach().numpy())
         plt.title("Alpha (alive/dead)")
 
-    # End animation update
+        print(f"Rendered frame {imgIdx}")
 
     if not anim:
         update(0)
         if save:
             plt.savefig(filenameBase + ".png", bbox_inches="tight")
 
-        # Display image
         if show:
             plt.show()
-            plt.close("all")
         return
 
     ani = animation.FuncAnimation(fig, update, frames=len(imgTensor), repeat=False)
@@ -59,15 +61,78 @@ def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     if save:
         # To save the animation using Pillow as a gif
         writer = animation.PillowWriter(
-            fps=15, metadata=dict(artist="Me"), bitrate=1800
+            fps=15, metadata=dict(artist="Me"), bitrate=-1
         )
         ani.save(filenameBase + ".gif", writer=writer)
 
     if show:
         plt.show()
-        plt.close("all")
+
+
+def visualiseHidden(imgTensor, channels_idxs = [], filenameBase="test", anim=False, save=True, show=True, columns=4):
+    """
+    Visualise a designated snapshot of the grid specified by idx
+    imgTensor should be in the form (batch, channels, height, width) OR (channels, height, width)
+    Outputs a saved GIF format file saved to <filenameBase>_ch.gif
+    """
+
+    if len(imgTensor.shape) < 4:
+        imgTensor.unsqueeze(0)
+
+    if (len(channels_idxs) == 0): # Pixels
+        channels_idxs = list(*range(imgTensor.shape(1))) # This should be the number of channels
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    plt.subplots_adjust(top=0.9)
+
+
+    def update(imgIdx):
+        # We're interested in specific hidden channels, and need numpy representation for plt
+        plt.clf()
+        img = imgTensor[imgIdx].squeeze().permute(1, 2, 0)
+        
+        ch_mag = torch.max(torch.abs(img)).item()
+    
+        # Add reference scale (also combats plt autoscale)
+        img[0, 0, :] = -ch_mag
+        img[1, 0, :] = 0
+        img[2, 0, :] = ch_mag
+
+        channels = []
+
+        for ch in channels_idxs:
+            ch = img[:, :, ch]
+            channels.append(ch.detach().numpy())
+
+        if anim:
+            plt.suptitle("Update " + str(imgIdx), fontdict={'family': 'serif', 'color':  'darkred', 'weight': 'normal', 'size': 16 })
+
+        for i in range(len(channels_idxs)):
+
+            plt.subplot(len(channels_idxs)//columns + 1, columns , i+1)
+            plt.imshow(channels[i], cmap="twilight_shifted")
+            plt.title(f"Channel {channels_idxs[i]}", fontdict={'family': 'serif', 'color':  'darkred', 'weight': 'normal', 'size': 12 }, x = 0.5, y = 0.95)
+            plt.xticks([])
+            plt.yticks([])
+        
+        print(f"Rendered frame {imgIdx}")
+
+    # End animation update
+
+    ani = animation.FuncAnimation(fig, update, frames=len(imgTensor), repeat=False)
+    # Display image
+    if save:
+        # To save the animation using Pillow as a gif
+        writer = animation.PillowWriter(
+            fps=15, metadata=dict(artist="Me"), bitrate=-1
+        )
+        ani.save(filenameBase + "_chs.gif", writer=writer)
+
+    if show:
+        plt.show()
 
     return ani
+
 
 
 def new_seed(batch_size=1):
@@ -91,11 +156,11 @@ def load_image(imagePath: str):
 
     ## Reduce existing image to 28*28
     img = torchvision.transforms.functional.resize(
-        img, ((GRID_SIZE - 4), (GRID_SIZE - 4))
+        img, ((GRID_SIZE-10), (GRID_SIZE-10))
     )
 
     ## Pad it to original grid size
-    padding_transform = torchvision.transforms.Pad(2, 2)
+    padding_transform = torchvision.transforms.Pad(5, 5)
     img = padding_transform(img)
 
     img = img.to(dtype=torch.float32) / 255
@@ -103,7 +168,7 @@ def load_image(imagePath: str):
     return img
 
 
-def forward_pass(model: nn.Module, state, updates, record=False):  # TODO
+def forward_pass(model: nn.Module, state, updates, record=False): 
     """
     Run a forward pass consisting of `updates` number of updates
     If `record` is true, then records the state in a tensor to animate and saves the video
@@ -144,7 +209,7 @@ def update_pass(model, batch, target, optimiser):
     print(f"batch loss = {batch_losses.cpu().numpy()}")  ## print on cpu
 
 
-def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # TODO
+def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
     """
     TRAINING PROCESS:
         - Define training data storage variables
@@ -211,9 +276,9 @@ def initialiseGPU(model):
 
 if __name__ == "__main__":
 
-    TRAINING = True  # Is our purpose to train or are we just looking rn?
+    TRAINING = False  # Is our purpose to train or are we just looking rn?
 
-    GRID_SIZE = 32
+    GRID_SIZE = 42
     CHANNELS = 16
 
     MODEL = GCA()
@@ -224,14 +289,14 @@ if __name__ == "__main__":
     BATCH_SIZE = 32
     UPDATES_RANGE = [64, 96]
 
-    LR = 1e-3
+    LR = 1e-4
 
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    MODEL_PATH = "model_weights_logo.pthj"
+    MODEL_PATH = "model_weights_logo_k0.pth"
 
-    targetImg = load_image("logo.png")
+    targetImg = load_image("RebuildingGCA/cat.png")
 
     ## Load model weights if available
     try:
@@ -269,4 +334,12 @@ if __name__ == "__main__":
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
     video = forward_pass(MODEL, img, 200, record=True)
-    anim = visualise(video, anim=True)
+
+    # anim1 = visualiseRGB(video, anim=True, show=False)
+    # anim2 = visualiseHidden(video, channels_idxs= [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], anim=True, show=False)
+    from Toolbox import visualiser
+
+    visualiser.visualiseHidden(video, channels_idxs= [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+
+    exit(0)
+
