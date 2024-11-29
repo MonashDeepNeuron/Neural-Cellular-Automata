@@ -14,7 +14,7 @@ import retaining_image as ri
 from retaining_image import initialiseGPU
 
 # Change these constants to desired output behaviour
-GRID_SIZE = 32
+GRID_SIZE = 64
 CHANNELS = 16
 TICKRATE = 30  # Milliseconds per tick fyi
 TRAINING = False  # Is our purpose to train or are we just looking rn?

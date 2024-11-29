@@ -87,25 +87,22 @@ def load_image(imagePath: str):
     Output image as 3D Tensor, with floating point values between 0 and 1
     Dimensions should be (colour channels, height, width)
     """
-    GRID_SIZE = 32
     img = read_image(imagePath, mode=ImageReadMode.RGB_ALPHA)
     ## Pad image with 3 pixels with of black border before resizing
 
     ## Reduce existing image to 28*28
     img = torchvision.transforms.functional.resize(
-        img, ((GRID_SIZE - 4), (GRID_SIZE - 4))
+        img, ((28), (28))
     )
-
     ## Pad it to original grid size
-    padding_transform = torchvision.transforms.Pad(2, 2)
+    padding_transform = torchvision.transforms.Pad(18, 18)
     img = padding_transform(img)
-
     img = img.to(dtype=torch.float32) / 255
 
     return img
 
 
-def forward_pass(model: nn.Module, state, updates, record=False, CHANNELS=16, GRID_SIZE = 32):  # TODO
+def forward_pass(model: nn.Module, state, updates, record=False):  # TODO
     """
     Run a forward pass consisting of `updates` number of updates
     If `record` is true, then records the state in a tensor to animate and saves the video
@@ -158,7 +155,8 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
         updated_learning_rates = []
         loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
 
-        for epoch_idx in range(EPOCHS):
+        for idx, epoch_idx in enumerate(len(EPOCHS)):
+            print(idx)
             loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
             if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
                 updated_lr = lradj.get_adjusted_learning_rate(loss_window) 
@@ -228,12 +226,14 @@ if __name__ == "__main__":
     ## For learning rate adjustmnet
     ADJUSTMENT_WINDOW = 10
 
-    GRID_SIZE = 32
+    GRID_SIZE = 64
     CHANNELS = 16
 
     POOL_SIZE=1024
     BATCH_SIZE=32
     UPDATES_RANGE=(64, 192)
+
+    print("Initialising model...")
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
@@ -248,11 +248,12 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    MODEL_PATH = "model_weights_logo_updated_lr.pth"
+    MODEL_PATH = "abc.pth"
 
     targetImg = load_image("RebuildingGCA/cat.png")
 
     ## Load model weights if available
+    print("Loading model weights...")
     if LOAD_WEIGHTS:
         try:
             MODEL.load_state_dict(
@@ -284,5 +285,5 @@ if __name__ == "__main__":
 
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
-    video = forward_pass(MODEL, img, 2000, record=True)
+    video = forward_pass(MODEL, img, 600, record=True)
     anim = visualise(video, anim=True)
