@@ -69,3 +69,8 @@ class SelfOrganisingTexture(nn.Module):
     def seed(self, height=128, width=128):
         """Creates an initial state for the model."""
         return torch.zeros(1, self.channels, height, width)
+    
+    def rgb(self, x):
+        """Converts the model output to an RGB image."""
+        # Return the first 3 channels, clamped between 0 and 1
+        return x[:, :3].clamp(0, 1)
