@@ -15,7 +15,7 @@ LAPLACIAN = torch.tensor([[1,2,1],[2,-12,2],[1,2,1]], dtype=float)
 PERCEPTIONS = torch.stack([IDENTITY, SOBEL_X, SOBEL_Y, LAPLACIAN])
 PERCEPTION_COUNT = PERCEPTIONS.shape[0]
 
-class SelfOrganisingTexture(nn.Model):
+class SelfOrganisingTexture(nn.Module):
     def __init__(self, channels=12, hidden_channels=96):
         super().__init__()
 
