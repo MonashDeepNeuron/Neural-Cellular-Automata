@@ -20,11 +20,7 @@ from moviepy.video.io.ffmpeg_writer import FFMPEG_VideoWriter
 
 def imread(url, max_size=None, mode=None):
   if url.startswith(('http:', 'https:')):
-    # wikimedia requires a user agent
-    headers = {
-      "User-Agent": "Requests in Colab/0.0 (https://colab.research.google.com/; no-reply@google.com) requests/0.0"
-    }
-    r = requests.get(url, headers=headers)
+    r = requests.get(url)
     f = io.BytesIO(r.content)
   else:
     f = url
@@ -189,7 +185,7 @@ def to_nchw(img):
 
 
 ca = SelfOrganisingTexture()
-opt = torch.optim.Adam(ca.parameters(), 1e-3, capturable=False)
+opt = torch.optim.Adam(ca.parameters(), 1e-3, capturable=torch.cuda.is_available())
 lr_sched = torch.optim.lr_scheduler.MultiStepLR(opt, [1000, 2000], 0.3)
 loss_log = []
 with torch.no_grad():
