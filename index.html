@@ -4,16 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport">
   <title>Neural Cellular Automata</title>
-  <link rel="stylesheet" href="./CAs/Shared/style.css"> <!-- Link to the CSS file -->
-  <link rel="icon" type="image/x-icon" href="./Images/favicon.ico">
+  <link rel="stylesheet" href="/Pages/style.css"> <!-- Link to the CSS file -->
+  <link rel="icon" type="image/x-icon" href="/Pages/Images/favicon.ico">
 </head>
 <body>
   <div class="navbar">
     <a href="https://www.deepneuron.org/">
-      <img src="./CAs/Shared/mdn_logo.png" alt="Logo" style="height: 20px; vertical-align: middle;">
+      <img src="/Pages/Images/mdn_logo.png" alt="Logo" style="height: 20px; vertical-align: middle;">
     </a>
     <a href="/">Home</a>
-    <a href="/about.html">About</a>
+    <a href="/Pages/about.html">About</a>
     <a href="https://www.deepneuron.org/contact-us">Contact Us</a>
   </div>
 
@@ -33,18 +33,18 @@
   <div class="controlPanel">
     <h3>Select a model:</h3>
     <div class="panelRow controlGroup">
-      <a href="./CAs/ConwaysLife/life.html" class="button" id="classic_conway">Classic Conway</a>
-      <a href="./CAs/LifeLike/life.html" class="button" id="life_like">Life Like</a>
-      <a href="./CAs/Larger/life.html" class="button" id="larger">Larger</a>
+      <a href="/CAs/ConwaysLife/life.html" class="button" id="classic_conway">Classic Conway</a>
+      <a href="/CAs/LifeLike/life.html" class="button" id="life_like">Life Like</a>
+      <a href="/CAs/Larger/life.html" class="button" id="larger">Larger</a>
     </div>
     <div class="panelRow controlGroup">
-      <a href="./CAs/Continuous/life.html" class="button" id="continuous">Continuous</a>
-      <a href="./CAs/GCA/life.html" class="button" id="Growing Neural Cellular Automata">G-NCA</a>
+      <a href="/CAs/Continuous/life.html" class="button" id="continuous">Continuous</a>
+      <a href="/CAs/GCA/life.html" class="button" id="Growing Neural Cellular Automata">G-NCA</a>
     </div>
   </div>
 
   <div class = "centre">
-    <img src="./gca_demo.gif">
+    <img src="/Pages/Images/gca_demo.gif">
   </div>
 
   <div class="centre">
@@ -99,7 +99,7 @@
     <h1>Models</h1>
 
     <h2>Neural Cellular Automata</h2>
-    <a href="./CAs/GCA/life.html" class="button" id="Growing Neural Cellular Automata">G-NCA</a> 
+    <a href="/CAs/GCA/life.html" class="button" id="Growing Neural Cellular Automata">G-NCA</a> 
     <p>
       Neural Cellular Automata (NCA) are a category of cellular automata that 
       involves using a neural network as the cell’s update rule. The neural 
@@ -125,7 +125,7 @@
 
     
     <h2>John Conway’s Game of Life / THE Game of Life</h2>
-    <a href="./CAs/ConwaysLife/life.html" class="button" id="classic_conway">Classic Conway</a>
+    <a href="/CAs/ConwaysLife/life.html" class="button" id="classic_conway">Classic Conway</a>
     <div class="sideBySide">
       <div>
         <p>
@@ -149,7 +149,7 @@
       
         
         <h2>Life Like Cellular Automata</h2>
-        <a href="./CAs/LifeLike/life.html" class="button" id="life_like">Life Like</a>
+        <a href="/CAs/LifeLike/life.html" class="button" id="life_like">Life Like</a>
         <p>
           Life like CA operate very similarly to the Game of Life in that all cells
           are either alive or dead. However, Life Like gives you the freedom to 
@@ -167,7 +167,7 @@
 
         
         <h2>Larger than Life</h2>
-        <a href="./CAs/Larger/life.html" class="button" id="larger">Larger</a>
+        <a href="/CAs/Larger/life.html" class="button" id="larger">Larger</a>
         <p>
           Larger than Life builds on Life Like CA by introducing even more flexibility. 
           This means the following are now specifieable in the rule string:
@@ -181,16 +181,16 @@
         </ul>
       </div>
       <div class="sideDiagramContainer">
-         <img src="./Images/GoL neighbourhood.png" class="sideDiagram" 
+         <img src="/Pages/Images/GoL neighbourhood.png" class="sideDiagram" 
               alt="The neighbourhood of each cell consists of the cells in contact with it.">
          <p class="figureCaption">The neighbourhood of each cell consists of 
           the cells in contact with it.</p>
-         <img src="./Images/LargerRadius2.png" class="sideDiagram"
+         <img src="/Pages/Images/LargerRadius2.png" class="sideDiagram"
               alt="The neighbourhood in larger than life also contains all the 
               cells within a specified distance from the target cell">
           <p class="figureCaption">Neighbourhood of a target cell in Larger 
             than Life when the neighbourhood radius is set to 2 cells</p>
-          <img src="./Images/LargerNeighbourhoodTypes.png" class="sideDiagram">
+          <img src="/Pages/Images/LargerNeighbourhoodTypes.png" class="sideDiagram">
           <p class="figureCaption">Different neighbourhood shapes/different 
             ways of determining a cell's distance from the target cell</p>
       </div>
@@ -199,7 +199,7 @@
 
     
     <h2>Continuous Cellular Automata</h2>
-    <a href="./CAs/Continuous/life.html" class="button" id="continuous">Continuous</a> 
+    <a href="/CAs/Continuous/life.html" class="button" id="continuous">Continuous</a> 
     <p>
       Continuous CA also builds on Life Like CA. Continuous CA can display 
       behaviours similar to basic organisms and population level behaviours of 
@@ -208,7 +208,7 @@
       continuous range of values. The new cell state value is calculated in 
       the following way:
     </p>
-    <img src="./Images/Continuous.png" class="centreDiagram"  alt="Calculating continuous CA"  >
+    <img src="/Pages/Images/Continuous.png" class="centreDiagram"  alt="Calculating continuous CA"  >
   </div>
 </body>
 </html>
