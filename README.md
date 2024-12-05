@@ -115,7 +115,7 @@ If you do not have a discrete GPU, or have an older GPU that does not support CU
 ```bash
 conda create -n nca python==3.12
 conda activate nca
-pip install matplotlib
+pip install matplotlib moviepy
 ```
 
 You will also need to install the correct PyTorch version with conda using their [installation guide](https://pytorch.org/get-started/locally/).  Ensure that you choose `Conda` as the package manager, and select the correct CUDA version for your GPU or CPU.
