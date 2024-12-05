@@ -30,6 +30,9 @@ class SelfOrganisingTexture(nn.Module):
             nn.Conv2d(hidden_channels, channels, 1, bias=False)
         )
 
+        # Initialize weights of the last conv layer to zero
+        nn.init.zeros_(self.layers[-1].weight)
+
     def forward(self, x):
         # Create perception vector
         y = self.perception_conv(x)
