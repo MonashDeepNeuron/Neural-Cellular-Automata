@@ -3,13 +3,14 @@ from torch import nn
 import torch.nn.functional as f
 
 # Use GPU if available
-torch.set_default_device('cuda')
+if torch.cuda.is_available():
+    torch.set_default_device('cuda')
 
 # Define perceptions
-IDENTITY = torch.tensor([[0,0,0],[0,1,0],[0,0,0]], dtype=float)
-SOBEL_X = torch.tensor([[-1,0,1],[-2,0,2],[-1,0,1]], dtype=float)
+IDENTITY = torch.tensor([[0,0,0],[0,1,0],[0,0,0]], dtype=torch.float)
+SOBEL_X = torch.tensor([[-1,0,1],[-2,0,2],[-1,0,1]], dtype=torch.float)
 SOBEL_Y = SOBEL_X.T
-LAPLACIAN = torch.tensor([[1,2,1],[2,-12,2],[1,2,1]], dtype=float)
+LAPLACIAN = torch.tensor([[1,2,1],[2,-12,2],[1,2,1]], dtype=torch.float)
 
 # Create perception layer, consisting of the identity, sobel x, sobel y and laplacian
 PERCEPTIONS = torch.stack([IDENTITY, SOBEL_X, SOBEL_Y, LAPLACIAN])
@@ -66,9 +67,9 @@ class SelfOrganisingTexture(nn.Module):
         # Apply mask
         return x * mask
     
-    def seed(self, height=128, width=128):
+    def seed(self, n=256, size=128):
         """Creates an initial state for the model."""
-        return torch.zeros(1, self.channels, height, width)
+        return torch.zeros(n, self.channels, size, size)
     
     def rgb(self, x):
         """Converts the model output to an RGB image."""
