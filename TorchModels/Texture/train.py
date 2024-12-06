@@ -10,6 +10,7 @@ import base64
 import requests
 import numpy as np
 import matplotlib.pylab as pl
+import tqdm 
 
 # Use GPU if available
 if torch.cuda.is_available():
@@ -235,3 +236,15 @@ for i in range(5000):
       pl.ylim(np.min(loss_log), loss_log[0])
       pl.tight_layout()
       imgs = ca.rgb(x).permute([0, 2, 3, 1]).cpu()
+
+# Save the model
+torch.save(ca.state_dict(), 'ca.pth')
+
+with VideoWriter() as vid, torch.no_grad():
+  x = ca.seed(1, 256)
+  for k in tnrange(300, leave=False):
+    step_n = min(2**(k//30), 8)
+    for i in range(step_n):
+      x[:] = ca(x)
+    img = ca.rgb(x[0]).permute(1, 2, 0).cpu()
+    vid.add(zoom(img, 2))
