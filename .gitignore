@@ -6,9 +6,6 @@
 # Virtual environment
 venv
 
-# NCA Output
-nca_output.mp4
-
 # User-specific files
 *.rsuser
 *.suo
