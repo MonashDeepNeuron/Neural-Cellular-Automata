@@ -5,6 +5,7 @@
 #
 # Virtual environment
 venv
+
 # User-specific files
 *.rsuser
 *.suo
