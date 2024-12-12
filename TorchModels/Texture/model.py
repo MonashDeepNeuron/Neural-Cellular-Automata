@@ -7,10 +7,10 @@ if torch.cuda.is_available():
     torch.set_default_device('cuda')
 
 # Define perceptions
-IDENTITY = torch.tensor([[0,0,0],[0,1,0],[0,0,0]], dtype=torch.float)
-SOBEL_X = torch.tensor([[-1,0,1],[-2,0,2],[-1,0,1]], dtype=torch.float)
-SOBEL_Y = SOBEL_X.T
-LAPLACIAN = torch.tensor([[1,2,1],[2,-12,2],[1,2,1]], dtype=torch.float)
+IDENTITY = torch.tensor([[0,0,0],[0,1,0],[0,0,0]], dtype=torch.float)       # Used to maintain the current state
+SOBEL_X = torch.tensor([[-1,0,1],[-2,0,2],[-1,0,1]], dtype=torch.float)     # Detects horizontal edges
+SOBEL_Y = SOBEL_X.T                                                         # Detects vertical edges
+LAPLACIAN = torch.tensor([[1,2,1],[2,-12,2],[1,2,1]], dtype=torch.float)    # Detects sharp changes in intensity
 
 # Create perception layer, consisting of the identity, sobel x, sobel y and laplacian
 PERCEPTIONS = torch.stack([IDENTITY, SOBEL_X, SOBEL_Y, LAPLACIAN])
