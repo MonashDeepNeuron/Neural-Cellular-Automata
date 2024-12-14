@@ -82,9 +82,9 @@ def robusttraining(inputimg, targetimg):
     return augmented_input, augmented_target
 
 # Absolute paths to the folders
-images_folder = '/home/labadmin/dev/imagesegment/images'
-trimaps_folder = '/home/labadmin/dev/imagesegment/trimaps_colored'
-output_folder = '/home/labadmin/dev/imagesegment/outputimages'
+images_folder = './TorchModels/ImageSegmentation/images'
+trimaps_folder = './TorchModels/ImageSegmentation/trimaps_colored'
+output_folder = './TorchModels/ImageSegmentation/outputimages'
 
 # Instantiate the dataset
 dataset = CustomDataset(images_folder, trimaps_folder, transform=transform)

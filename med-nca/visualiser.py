@@ -82,7 +82,7 @@ def plotRGB(imgTensor, filenameBase="test", save = True):
     plt.close(fig)
 
 
-def animateRGB(imgTensor, filenameBase="test", alpha = True, save=True):
+def animateRGB(imgTensor, filenameBase="test", alpha = True, save=True, fps = 15):
     """
     Visualise a designated snapshot of the grid specified by idx
     Input in form (channels, height, width)
@@ -133,7 +133,7 @@ def animateRGB(imgTensor, filenameBase="test", alpha = True, save=True):
 
     # To save the animation using Pillow as a gif
     writer = animation.PillowWriter(
-        fps=15, metadata=dict(artist="Me"), bitrate=-1
+        fps=fps, metadata=dict(artist="Me"), bitrate=-1
     )
     ani.save(filenameBase + ".gif", writer=writer)
 
@@ -142,7 +142,7 @@ def animateRGB(imgTensor, filenameBase="test", alpha = True, save=True):
     return fig, ani
 
 
-def visualiseHidden(imgTensor, channels_idxs = [], filenameBase="test", columns=4, sigmoid = False):
+def visualiseHidden(imgTensor, channels_idxs = [], filenameBase="test", columns=4, sigmoid = False, fps = 15):
     """
     Visualise a designated snapshot of the grid specified by idx
     imgTensor should be in the form (batch, channels, height, width) OR (channels, height, width)
@@ -197,7 +197,7 @@ def visualiseHidden(imgTensor, channels_idxs = [], filenameBase="test", columns=
     
     # To save the animation using Pillow as a gif
     writer = animation.PillowWriter(
-        fps=15, metadata=dict(artist="Me"), bitrate=-1
+        fps=fps, metadata=dict(artist="Me"), bitrate=-1
     )
     ani.save(filenameBase + ".gif", writer=writer)
 

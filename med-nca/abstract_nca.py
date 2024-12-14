@@ -22,8 +22,9 @@ class BasicNCA(nn.Module):
         self.channel_n = channel_n
         self.input_channels = input_channels
 
-        self.fc0 = nn.Linear(channel_n*3, hidden_size)
-        self.fc1 = nn.Linear(hidden_size, channel_n, bias=False)
+        self.fc0 = nn.Conv2d(channel_n*3, hidden_size, kernel_size = 1)
+        self.fc1 = nn.Conv2d(hidden_size, channel_n, kernel_size=1, bias=False)
+
         with torch.no_grad():
             self.fc1.weight.zero_()
 
@@ -44,7 +45,7 @@ class BasicNCA(nn.Module):
             conv_weights = conv_weights.view(1,1,3,3).repeat(self.channel_n, 1, 1, 1)
             return F.conv2d(x, conv_weights, padding=1, groups=self.channel_n)
 
-        dx = np.outer([1, 2, 1], [-1, 0, 1]) / 8.0  # Sobel filter
+        dx = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32) # Sobel filter
         dy = dx.T
 
         y1 = _perceive_with(x, dx)
@@ -60,19 +61,18 @@ class BasicNCA(nn.Module):
         """
         x = x_in.transpose(1,3)
 
-        dx = self.perceive(x)
-        dx = dx.transpose(1,3)
-        dx = self.fc0(dx)
-        dx = F.relu(dx)
-        dx = self.fc1(dx)
+        ds = self.perceive(x) # ds = difference in state
+        ds = self.fc0(ds)
+        ds= F.relu(ds)
+        ds = self.fc1(ds)
 
         if fire_rate is None:
             fire_rate=self.fire_rate
-        stochastic = torch.rand([dx.size(0),dx.size(1),dx.size(2),1])>fire_rate
+        stochastic = torch.rand([ds.size(0),ds.size(1),ds.size(2),1])>fire_rate
         stochastic = stochastic.float().to(self.device)
-        dx = dx * stochastic
+        ds = ds * stochastic
 
-        x = x+dx.transpose(1,3)
+        x = x+ds
 
         x = x.transpose(1,3)
 
