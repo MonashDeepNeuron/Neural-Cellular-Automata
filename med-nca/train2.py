@@ -1,3 +1,7 @@
+#    images_folder = '/home/labadmin/dev/imagesegment/images'
+#    trimaps_folder = '/home/labadmin/dev/imagesegment/trimaps_colored'
+#    output_folder = '/home/labadmin/dev/imagesegment/outputimages'
+
 #### IMPORTS ####
 
 import torch
@@ -119,7 +123,7 @@ def run_frames(model: nn.Module, state, updates, record=False):
     return state
 
 
-def forward_pass(model1: nn.Module, model2: nn.Module, batch, targets, updates, record=False):
+def forward_pass(model1: nn.Module, model2: nn.Module, batch, targets, updates, record=False):  # TODO
     """
     Run a forward pass consisting of `updates` number of updates
     If `record` is true, then records the state in a tensor to animate and saves the video
@@ -175,7 +179,7 @@ def update_pass(model1, model2, batch, targets, optimiser1, optimiser2):
     print(f"batch loss = {batch_losses}")  ## print on cpu
 
 
-def train(model1: nn.Module, model2:nn.Module, optimiser1, optimiser2, train_loader, val_loader, record=False):
+def train(model1: nn.Module, model2:nn.Module, optimiser1, optimiser2, train_loader, val_loader, record=False):  # TODO
     """
     TRAINING PROCESS:
         - Define training data storage variables
@@ -200,14 +204,15 @@ def train(model1: nn.Module, model2:nn.Module, optimiser1, optimiser2, train_loa
         for epoch in range(EPOCHS):
             model1.train()
             model2.train()
-
-            batch, targets = next(iter(train_loader))
-
-            batch = batch.to(device)
-            targets = targets.to(device)            
-
-            ## Optimisation step
-            update_pass(model1, model2, batch, targets, optimiser1, optimiser2)
+            i=0
+            for batch, target in train_loader:
+                i+=1
+                print(f"Iteration {i} of {len(train_loader)}")
+                batch = batch.to(device)
+                targets = target.to(device)
+                update_pass(model1, model2, batch, targets, optimiser1, optimiser2)
+                
+            ## TODO: Assess accuracy. Can we remove this for faster training?
             test, test_target = next(iter(val_loader))
 
             model1.eval()
@@ -219,9 +224,9 @@ def train(model1: nn.Module, model2:nn.Module, optimiser1, optimiser2, train_loa
 
             if record:
                 if recording == None:
-                    recording = test_run[0].detach().unsqueeze(0)
+                    recording = test_run[0].unsqueeze(0)
                 else:
-                    recording = torch.cat((recording, test_run[0].detech().unsqueeze(0)), dim=0) 
+                    recording = torch.cat((recording, test_run[0].unsqueeze(0)), dim=0) 
 
             print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
 
@@ -263,7 +268,7 @@ if __name__ == "__main__":
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     BATCH_SIZE = 6
-    UPDATES_RANGE = [54, 74]
+    UPDATES_RANGE = [64, 96]
 
     LR1 = 1e-3
     LR2 = 1e-3
@@ -272,14 +277,17 @@ if __name__ == "__main__":
     optimiser2 = torch.optim.Adam(MODEL2.parameters(), lr=LR2)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    # These path weights are the load and save location
-    # Old model will be updated with the new training result
     MODEL_PATH1 = "imgseg_big0.pth"
     MODEL_PATH2 = "imgseg_small0.pth"
+    
 
-    images_folder = './TorchModels/ImageSegmentation/images'
-    trimaps_folder = './TorchModels/ImageSegmentation/trimaps_colored'
-    output_folder = './TorchModels/ImageSegmentation/outputimages'
+    images_folder = '/home/labadmin/dev/imagesegment/images'
+    trimaps_folder = '/home/labadmin/dev/imagesegment/trimaps_colored'
+    output_folder = '/home/labadmin/dev/imagesegment/outputimages'
+
+#images_folder = './TorchModels/ImageSegmentation/images'
+    #trimaps_folder = './TorchModels/ImageSegmentation/trimaps_colored'
+    #output_folder = './TorchModels/ImageSegmentation/outputimages'
 
 
     transform = transforms.Compose([
@@ -288,7 +296,6 @@ if __name__ == "__main__":
     ])
 
     train_loader, val_loader = load_datasets(images_folder, trimaps_folder, transform, CHANNELS, INPUT_CHANNELS)
-
     ## Load model weights if available
     try:
         MODEL1.load_state_dict(
@@ -319,7 +326,7 @@ if __name__ == "__main__":
 
 
     if TRAINING:
-        MODEL1, MODEL2, losses = train(MODEL1, MODEL2, optimiser1, optimiser2, train_loader, val_loader, record=False)
+        MODEL1, MODEL2, losses, output = train(MODEL1, MODEL2, optimiser1, optimiser2, train_loader, val_loader, record=True)
         # losses_file = open("losses.txt", "a")
         # losses_file.write(losses)
         # losses_file.close()
@@ -333,11 +340,12 @@ if __name__ == "__main__":
         torch.save(MODEL2.state_dict(), MODEL_PATH2)
 
         
-        # visualiser.animateRGB(output[:, 3:], filenameBase="recording", alpha = False)
+        visualiser.animateRGB(output[:, 3:], filenameBase="recording", alpha = False)
 
     ## Switch state to evaluation to disable dropout e.g.
     MODEL1.eval()
     MODEL2.eval()
+
 
     data, target = next(iter(val_loader))
     data.to(DEVICE)
@@ -349,8 +357,11 @@ if __name__ == "__main__":
     visualiser.plotRGB(target, filenameBase="target")
     visualiser.plotRGB(patch_target, filenameBase="patch_target")
 
+
+
     # Save model weights
     torch.save(MODEL1.state_dict(), MODEL_PATH1)
     torch.save(MODEL2.state_dict(), MODEL_PATH2)
 
     print("Model weights saved.")
+
