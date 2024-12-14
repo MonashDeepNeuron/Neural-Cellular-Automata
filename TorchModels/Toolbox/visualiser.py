@@ -64,11 +64,30 @@ import torch
 #     io_buf.close()
 #     return img_arr
 
-def animateRGB(imgTensor, filenameBase="test", save=True):
+
+
+def plotRGB(imgTensor, filenameBase="test", save = True):
+    imgTensor = imgTensor.detach().cpu()
+    fig = plt.figure()
+
+    # Get canvases for Images
+    print("plotRGB", imgTensor.shape)
+    canvasRGB = plt.imshow((imgTensor[0].squeeze().permute(1, 2, 0))[:, :, 0:3].clip(0, 1).detach().numpy())
+    plt.title("RGB")
+    plt.xticks([])
+    plt.yticks([])
+
+    plt.savefig(filenameBase + ".png")
+
+    plt.close(fig)
+
+
+def animateRGB(imgTensor, filenameBase="test", alpha = True, save=True):
     """
     Visualise a designated snapshot of the grid specified by idx
     Input in form (channels, height, width)
     """
+    imgTensor = imgTensor.detach().cpu()
 
     if len(imgTensor.shape) < 4:
         imgTensor.unsqueeze(0)
@@ -76,18 +95,25 @@ def animateRGB(imgTensor, filenameBase="test", save=True):
     fig = plt.figure()
     title = plt.suptitle("Update 0")
 
-    # Get canvases for Images
-    plt.subplot(1, 2, 1)
-    canvasRGB = plt.imshow((imgTensor[0].squeeze().permute(1, 2, 0))[:, :, 0:3].clip(0, 1).detach().numpy())
-    plt.title("RGB")
-    plt.xticks([])
-    plt.yticks([])
+    if alpha:
+        # Get canvases for Images
+        plt.subplot(1, 2, 1)
+        canvasRGB = plt.imshow((imgTensor[0].squeeze().permute(1, 2, 0))[:, :, 0:3].clip(0, 1).detach().numpy())
+        plt.title("RGB")
+        plt.xticks([])
+        plt.yticks([])
 
-    plt.subplot(1, 2, 2)
-    canvasAlpha = plt.imshow((imgTensor[0].squeeze().permute(1, 2, 0))[:, :, 3].clip(0, 1).detach().numpy())
-    plt.title("Alpha (alive/dead)")
-    plt.xticks([])
-    plt.yticks([])
+        plt.subplot(1, 2, 2)
+        canvasAlpha = plt.imshow((imgTensor[0].squeeze().permute(1, 2, 0))[:, :, 3].clip(0, 1).detach().numpy())
+        plt.title("Alpha (alive/dead)")
+        plt.xticks([])
+        plt.yticks([])
+    else: 
+        canvasRGB = plt.imshow((imgTensor[0].squeeze().permute(1, 2, 0))[:, :, 0:3].clip(0, 1).detach().numpy())
+        plt.title("RGB")
+        plt.xticks([])
+        plt.yticks([])
+
     
     def update(imgIdx):
 
@@ -99,8 +125,9 @@ def animateRGB(imgTensor, filenameBase="test", save=True):
         # Plot RGB channels
         canvasRGB.set_data(img[:, :, 0:3].clip(0, 1).detach().numpy())
 
-        # Plot Alpha channel
-        canvasAlpha.set_data(img[:, :, 3].clip(0, 1).detach().numpy())
+        if alpha:
+            # Plot Alpha channel
+            canvasAlpha.set_data(img[:, :, 3].clip(0, 1).detach().numpy())
 
     ani = animation.FuncAnimation(fig, update, frames=len(imgTensor), repeat=False)
 
@@ -120,7 +147,8 @@ def visualiseHidden(imgTensor, channels_idxs = [], filenameBase="test", columns=
     Visualise a designated snapshot of the grid specified by idx
     imgTensor should be in the form (batch, channels, height, width) OR (channels, height, width)
     Outputs a saved GIF format file saved to <filenameBase>.gif
-    """
+    """    
+    imgTensor = imgTensor.detach().cpu()
 
     if len(imgTensor.shape) < 4:
         imgTensor.unsqueeze(0)
