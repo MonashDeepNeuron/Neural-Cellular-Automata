@@ -93,7 +93,7 @@ def animateRGB(imgTensor, filenameBase="test", alpha = True, save=True, fps = 15
         imgTensor.unsqueeze(0)
 
     fig = plt.figure()
-    title = plt.suptitle("Update 0")
+    title = plt.suptitle("Frame 0")
 
     if alpha:
         # Get canvases for Images
@@ -120,7 +120,7 @@ def animateRGB(imgTensor, filenameBase="test", alpha = True, save=True, fps = 15
         # We're only interested in the RGBalpha channels, and need numpy representation for plt
         img = imgTensor[imgIdx].squeeze().permute(1, 2, 0)
 
-        title.set_text("Update " + str(imgIdx))
+        title.set_text("Frame " + str(imgIdx))
 
         # Plot RGB channels
         canvasRGB.set_data(img[:, :, 0:3].clip(0, 1).detach().numpy())
@@ -168,7 +168,7 @@ def visualiseHidden(imgTensor, channels_idxs = [], filenameBase="test", columns=
         imgTensor[:, :, 0:3, 0] = torch.Tensor([-ch_mag, 0.5, ch_mag])
 
     fig = plt.figure()
-    title = plt.suptitle("Update 0")
+    title = plt.suptitle("Frame 0")
     canvases = []
 
     # Get canvases for Images
@@ -182,7 +182,7 @@ def visualiseHidden(imgTensor, channels_idxs = [], filenameBase="test", columns=
     
     def update(imgIdx):
 
-        title.set_text("Update " + str(imgIdx))
+        title.set_text("Frame " + str(imgIdx))
 
         img = imgTensor[imgIdx].squeeze().permute(1, 2, 0)
         
