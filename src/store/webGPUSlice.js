@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     running: false,
-    framesPerUpdateLoop: 1,
+    framesPerSecond: 40,
     step: 0,
     template: 8,
 };
@@ -28,8 +28,9 @@ const webGPUSlice = createSlice({
             state.step += 1;
         },
 
-        setFramesPerUpdateLoop(state, action) {
-            state.framesPerUpdateLoop = action.payload;
+        setFramesPerSecond(state, action) {
+            console.log('frames', action.payload);
+            state.framesPerSecond = action.payload;
         },
     },
 });
@@ -39,7 +40,7 @@ export const {
     toggleRunning,
     resetStep,
     incrementStep,
-    setFramesPerUpdateLoop,
+    setFramesPerSecond,
 } = webGPUSlice.actions;
 
 export default webGPUSlice.reducer;

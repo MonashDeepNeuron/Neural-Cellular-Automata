@@ -117,13 +117,9 @@ export default function useWebGPU(canvasRef, settings) {
                     parseRuleString(ruleString)
                 );
 
-
-
-
                 /**
                 * Step 3: Update refs to point at WebGPU state
                 */
-
                 resources.current = {
                     device,
                     context,
