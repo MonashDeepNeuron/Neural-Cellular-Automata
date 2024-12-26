@@ -6,6 +6,7 @@ from torchvision.io.image import ImageReadMode
 import torchvision
 from torch import Tensor
 import torch.nn as nn
+
 from model import NCA_3D
 import random
 import matplotlib.pyplot as plt
@@ -15,64 +16,71 @@ import numpy as np
 import os
 import trimesh
 
+# Use GPU if available
+if torch.cuda.is_available():
+    torch.set_default_device("cuda")
+
 
 def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     """
     Visualise a designated snapshot of the grid specified by idx and axis.
 
     Input in form (channels, x,y,z)
-
     """
 
     if len(imgTensor.shape) < 5:
         imgTensor.unsqueeze(0)
 
-    fig, ax = plt.figure()
+    imgTensor = imgTensor.squeeze(0).permute(1, 2, 3, 4, 0).cpu().detach().numpy()
+
+    fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
 
-    def update(imgIdx):
-        # We're only interested in the RGBalpha channels, and need numpy representation for plt
-        img = imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 3, 0)
+    # def update(imgIdx):
+    # We're only interested in the RGBalpha channels, and need numpy representation for plt
+    # img = imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 3, 0)
 
-        if anim:
-            plt.suptitle("Update " + str(imgIdx))
+    # if anim:
+    #     plt.suptitle("Update " + str(imgIdx))
 
-        ## define references to vectors of each colour
-        colours = np.zeroes(imgTensor)
-        colours[0, ...] = img[:, :, :, 0]  # red
-        colours[1, ...] = img[:, :, :, 1]
-        colours[2, ...] = img[:, :, :, 2]
+    ## define references to vectors of each colour
+    colours = np.zeros_like(imgTensor)
+    colours[..., 0] = imgTensor[..., 0]  # red
+    colours[..., 1] = imgTensor[..., 1]
+    colours[..., 2] = imgTensor[..., 2]
 
-        ## x, y, z
-        ax.voxels(imgTensor[:, :, :, 3], facecolors=colours, edgecolor="k")
+    imgTensor = imgTensor[:, :, :, :, 0]
+    print(imgTensor.shape)
+    ## x, y, z
+    ax.voxels(imgTensor[:, :, :, 3], edgecolor="k")
 
     # End animation update
+    plt.show()
+    # if not anim:
+    #     update(0)
+    #     if save:
+    #         plt.savefig(filenameBase + ".png", bbox_inches="tight")
 
-    if not anim:
-        update(0)
-        if save:
-            plt.savefig(filenameBase + ".png", bbox_inches="tight")
+    #     # Display image
+    #     if show:
+    #         plt.show()
+    #         plt.close("all")
+    #     return
 
-        # Display image
-        if show:
-            plt.show()
-            plt.close("all")
-        return
+    # ani = animation.FuncAnimation(fig, update, frames=len(imgTensor), repeat=False)
+    # # Display image
+    # if save:
+    #     # To save the animation using Pillow as a gif
+    #     writer = animation.PillowWriter(
+    #         fps=15, metadata=dict(artist="Me"), bitrate=1800
+    #     )
+    #     ani.save(filenameBase + ".gif", writer=writer)
 
-    ani = animation.FuncAnimation(fig, update, frames=len(imgTensor), repeat=False)
-    # Display image
-    if save:
-        # To save the animation using Pillow as a gif
-        writer = animation.PillowWriter(
-            fps=15, metadata=dict(artist="Me"), bitrate=1800
-        )
-        ani.save(filenameBase + ".gif", writer=writer)
+    # if show:
+    #     plt.show()
+    #     plt.close("all")
 
-    if show:
-        plt.show()
-        plt.close("all")
-
-    return ani
+    # return ani
 
 
 def new_seed(batch_size=1):
@@ -80,33 +88,73 @@ def new_seed(batch_size=1):
     seed is like a cube map that sets a singular pixel activated
     """
     seed = torch.zeros(
-        batch_size, CHANNELS, GRID_SIZE, GRID_SIZE, GRID_SIZE
-    )  # create a cube map
-    seed[:, 3, GRID_SIZE // 2, GRID_SIZE // 2, 0] = 1  # Alpha channel = 1
+        batch_size, CHANNELS, 15, 11, 13
+    )  # create a cube map 15 = depth, 11 is width, 13 height
+    seed[:, 3, 15 // 2, 11 // 2, 0] = 1  # Alpha channel = 1
     return seed
 
 
 def load_image(imagePath: str):
     """
     Get the output image, which is a OBJ, and transform it into a tensor such that we can use it as the target image for the output.
+    1. Obtain mesh
+    2. Obtain the vertices from the mesh
+    3. Convert colours to mesh
+
     """
-    mesh_path = "TorchModels/Minecraft/voxel-trees/source/moreTrees/moreTrees.obj"
-    mesh = trimesh.load(mesh_path, force="mesh")
     RESOLUTION = 16
+    HIDDEN_CHANNELS = 9
+
+    mesh_path = imagePath
+    mesh = trimesh.load(mesh_path)
+
+    if mesh.is_empty:
+        raise ValueError("The mesh is empty and cannot be voxelized.")
+
+    print("Mesh loaded successfully with vertices:", mesh.vertices.shape)
+    print("Mesh loaded successfully with faces:", mesh.faces.shape)
 
     ## voxelize mesh with resolution 1 (dist between two most adjacent vertices is one)
-    voxel = mesh.voxelized(pitch=mesh.extent).max
+    # voxel = mesh.voxelized(pitch=mesh.extents.max())
+    voxel = mesh.voxelized(2)
 
     ## convert texture information into colours
     colours = mesh.visual.to_color().vertex_colors
     colours = np.asarray(colours)
 
     ## get vertices from mesh
-    meshvertices = mesh.vertices
-    , vertex_idx = trimesh.proximity.ProximityQuery(mesh).vertex(voxel.points)
+    mesh_vertices = mesh.vertices
+    _, vertex_idx = trimesh.proximity.ProximityQuery(mesh).vertex(voxel.points)
 
-    # We initialize a array of zeros of size X,Y,Z,4 to contain the colors for each voxel of the voxelized mesh in the grid
-    cube_colour=np.zeros([voxel.shape[0],voxel.shape[1],voxel.shape[2],4])
+    # we initialize a array of zeros of size X,Y,Z,4 to contain the colors for each voxel of the voxelized mesh in the grid
+    cube_colour = np.zeros([voxel.shape[0], voxel.shape[1], voxel.shape[2], 4])
+
+    ## map vertices to grid coordinates
+    # We loop through all the calculated closest voxel points
+    for idx, vert in enumerate(vertex_idx):
+        # Get the voxel grid index of each closest voxel center point
+        vox_verts = voxel.points_to_indices(mesh_vertices[vert])
+        # Get the color vertex color
+        curr_colour = colours[vert]
+        # Set the alpha channel of the color
+        curr_colour[3] = 255
+        # add the color to the specific voxel grid index
+        cube_colour[vox_verts[0], vox_verts[1], vox_verts[2], :] = curr_colour
+
+    # Convert the voxel grid and its colors to a PyTorch tensor
+    # The tensor will have shape (X, Y, Z, 4), where 4 corresponds to RGBA channels
+    voxel_tensor = torch.tensor(cube_colour, dtype=torch.float32)
+
+    # ## this breaks if tensor not of shaep 15, 13, 11
+    # padding = (0, 0, 1, 0, 1, 0, 1, 0)
+
+    # voxel_tensor = torch.nn.functional.pad(
+    #     voxel_tensor, padding, mode="constant", value=0
+    # )
+    # print("Shape of the resultant tensor:", voxel_tensor.shape)
+
+    return voxel_tensor
+
 
 def forward_pass(model: nn.Module, state, updates, record=False):  # TODO
     """
@@ -115,7 +163,7 @@ def forward_pass(model: nn.Module, state, updates, record=False):  # TODO
     Returns the final state
     """
     if record:
-        frames_array = Tensor(updates, CHANNELS, GRID_SIZE, GRID_SIZE)
+        frames_array = Tensor(updates, CHANNELS, 15, 11, 13)
         for i in range(updates):
             state = model(state)
             frames_array[i] = state
@@ -140,7 +188,11 @@ def update_pass(model, batch, target, optimiser):
         output = forward_pass(model, batch[batch_idx].unsqueeze(0), updates)
 
         ## apply pixel-wise MSE loss between RGBA channels in the grid and the target pattern
-        loss = LOSS_FN(output[0, 1:5], target)
+        output = output.squeeze(0).permute(1, 2, 3, 0)
+        print(output.shape)
+        loss = LOSS_FN(
+            output[:, :, :, 0:4], target
+        )  # FLAG, indexation may need to be changed here
         ## .item() removes computational graph for memory efficiency
         batch_losses[batch_idx] = loss.item()
         loss.backward()
@@ -149,7 +201,7 @@ def update_pass(model, batch, target, optimiser):
     print(f"batch loss = {batch_losses.cpu().numpy()}")  ## print on cpu
 
 
-def train(model: nn.Module, target: torch.Tensor, optimiser, record=False, STEPS=40):  # TODO
+def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # TODO
     """
     TRAINING PROCESS:
         - Define training data storage variables
@@ -161,7 +213,6 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False, STEPS
             - Save model if this is the best model TODO
         - Return the trained model
     """
-
     ## Obtain device of model, and send all related data to device
     device = next(model.parameters()).device
     target = target.to(device)
@@ -180,11 +231,11 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False, STEPS
 
             test_seed = new_seed(1)
             MODEL.eval()
-            test_run = forward_pass(MODEL, test_seed, STEPS)
-            training_losses.append(
-                LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
-            )
-            print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
+            test_run = forward_pass(MODEL, test_seed, 32)
+            # training_losses.append(
+            #     LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
+            # )
+            # print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
 
     except KeyboardInterrupt:
         pass
@@ -214,8 +265,8 @@ if __name__ == "__main__":
     CHANNELS = 16
 
     MODEL = NCA_3D()
-    MODEL = initialiseGPU(MODEL)
-    EPOCHS = 50  # 100 epochs for best results
+    # MODEL = initialiseGPU(MODEL)
+    EPOCHS = 10  # 50  # 100 epochs for best results
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     BATCH_SIZE = 32
@@ -226,39 +277,17 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    MODEL_PATH = "model_weights_logo.pthj"
-
-    targetImg = load_image("logo.png")
-
-    ## Load model weights if available
-    try:
-        MODEL.load_state_dict(
-            torch.load(
-                MODEL_PATH,
-                weights_only=True,
-                map_location=torch.device(
-                    "cuda" if torch.cuda.is_available() else "cpu"
-                ),
-            )
-        )
-        print("Loaded model weights successfully!")
-    except FileNotFoundError:
-        print("No previous model weights found, training from scratch.")
-        if not TRAINING:
-            exit()
+    targetVoxel = load_image("./voxel-trees/source/moreTrees/moreTrees.obj")
 
     if TRAINING:
-        MODEL, losses = train(MODEL, targetImg, optimizer, STEPS)
-        # losses_file = open("losses.txt", "a")
-        # losses_file.write(losses)
-        # losses_file.close()
+        MODEL, losses = train(MODEL, targetVoxel, optimizer)
 
         print(losses)
         ## Plot loss
         plt.plot(range(len(losses)), losses)
 
         ## Save the model's weights after training
-        torch.save(MODEL.state_dict(), MODEL_PATH)
+        torch.save(MODEL.state_dict(), "Minecraft.pth")
 
     ## Switch state to evaluation to disable dropout e.g.
     MODEL.eval()
