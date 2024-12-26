@@ -26,7 +26,7 @@ IDENTITY = torch.tensor([torch.zeros(3, 3), [[0, 0, 0], [0, 1, 0], [0, 0, 0]], t
 PERCEPTIONS = torch.stack([IDENTITY, SOBEL_X, SOBEL_Y, SOBEL_Z])
 PERCEPTION_COUNT = PERCEPTIONS.shape[0]
 
-class SelfOrganisingTexture(nn.Module):
+class NCA_3D(nn.Module):
     def __init__(self, channels=16, hidden_channels=16):
         super().__init__()
 
@@ -85,10 +85,10 @@ class SelfOrganisingTexture(nn.Module):
 
         # Apply mask
         return x * mask
-    
+    '''
     def seed(self, n=256, size=128):
         """Creates an initial state for the model."""
-        return torch.zeros(n, self.channels, size, size)
+        return torch.zeros(n, self.channels, size, size)'''
     
     def rgb(self, x):
         """Converts the model output to an RGB image."""

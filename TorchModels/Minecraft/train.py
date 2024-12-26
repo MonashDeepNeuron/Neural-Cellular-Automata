@@ -6,7 +6,7 @@ from torchvision.io.image import ImageReadMode
 import torchvision
 from torch import Tensor
 import torch.nn as nn
-from model2 import GCA
+from model import NCA_3D
 import random
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -136,8 +136,6 @@ def update_pass(model, batch, target, optimiser):
     batch_losses = torch.zeros(BATCH_SIZE, device=device)
     for batch_idx in range(BATCH_SIZE):
         optimiser.zero_grad()
-        # updates = random.randrange(UPDATES_RANGE[0], UPDATES_RANGE[1])
-        # output = forward_pass(model, batch[batch_idx].unsqueeze(0), updates)
         updates = random.randrange(UPDATES_RANGE[0], UPDATES_RANGE[1])
         output = forward_pass(model, batch[batch_idx].unsqueeze(0), updates)
 
@@ -151,7 +149,7 @@ def update_pass(model, batch, target, optimiser):
     print(f"batch loss = {batch_losses.cpu().numpy()}")  ## print on cpu
 
 
-def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # TODO
+def train(model: nn.Module, target: torch.Tensor, optimiser, record=False, STEPS=40):  # TODO
     """
     TRAINING PROCESS:
         - Define training data storage variables
@@ -169,32 +167,24 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
     target = target.to(device)
 
     try:
-        # minibatch epoch =N
         training_losses = []
         for epoch in range(EPOCHS):
             model.train()
             if record:
                 outputs = torch.zeros_like(batch)
 
-            batch = new_seed(BATCH_SIZE)  ## TODO duplicate seed
+            batch = new_seed(BATCH_SIZE)
             batch = batch.to(device)
 
-            ## Optimisation step
             update_pass(model, batch, target, optimiser)
 
-            ## TODO: Assess accuracy. Can we remove this for faster training?
             test_seed = new_seed(1)
             MODEL.eval()
-            test_run = forward_pass(MODEL, test_seed, 64)
+            test_run = forward_pass(MODEL, test_seed, STEPS)
             training_losses.append(
                 LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
             )
             print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
-
-            # check modulo minibatch epoch
-            # for input
-            # run lradj.adjust_learning_rate
-            #
 
     except KeyboardInterrupt:
         pass
@@ -223,13 +213,13 @@ if __name__ == "__main__":
     GRID_SIZE = 32
     CHANNELS = 16
 
-    MODEL = GCA()
+    MODEL = NCA_3D()
     MODEL = initialiseGPU(MODEL)
-    EPOCHS = 30  # 100 epochs for best results
+    EPOCHS = 50  # 100 epochs for best results
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     BATCH_SIZE = 32
-    UPDATES_RANGE = [64, 96]
+    UPDATES_RANGE = [30, 48]
 
     LR = 1e-3
 
@@ -258,7 +248,7 @@ if __name__ == "__main__":
             exit()
 
     if TRAINING:
-        MODEL, losses = train(MODEL, targetImg, optimizer)
+        MODEL, losses = train(MODEL, targetImg, optimizer, STEPS)
         # losses_file = open("losses.txt", "a")
         # losses_file.write(losses)
         # losses_file.close()
