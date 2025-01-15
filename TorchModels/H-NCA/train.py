@@ -105,8 +105,7 @@ def create_vgg_loss_fn(target: torch.Tensor):
         return loss
 
     return vgg_loss_fn
-    
-    from model import SelfOrganisingTexture
+
 
 model = HNCAImgModel()
 optimiser = torch.optim.Adam(model.parameters(), lr=0.01, capturable=True)
@@ -146,19 +145,20 @@ for epoch in range(EPOCHS):
     vgg_loss = loss_fn(model.rgb(x))
     loss = overflow_loss + vgg_loss
     losses.append(loss.item())
+    #print(losses)
 
     # Backpropagate and update model
     with torch.no_grad():
         loss.backward()
-
+        print(loss)
         # Normalise gradients and add a small value to the denominator to avoid division by zero
-        for param in model.parameters():
-            param.grad /= (param.grad.norm() + 1e-8)
-    
+        #for param in model.parameters():
+        #    param.grad /= (param.grad.norm() + 1e-8)
+
         optimiser.step()
         optimiser.zero_grad()
         lr_scheduler.step()
-
+        
         # Update the pool with the new samples
         pool[batch_idx] = x
 
@@ -176,8 +176,6 @@ for epoch in range(EPOCHS):
 
             # Clear the output and display the plot
             clear_output(wait=True)
-
-
 
 STEPS = 100
 SIZE = 512

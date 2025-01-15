@@ -21,9 +21,10 @@ class ImgCA(nn.Module):
         super().__init__()
 
         self.channels = input_channels
+        print(PERCEPTIONS.shape, PERCEPTION_COUNT)
 
         self.bn0 = nn.BatchNorm2d(input_channels)
-        self.bn1 = nn.BatchNorm2d(input_channels * len(PERCEPTIONS))
+        self.bn1 = nn.BatchNorm2d(input_channels * PERCEPTION_COUNT)
         self.bn2 = nn.BatchNorm2d(hidden_channels)
 
         # Define dense layers (2D convolutions with kernel size of 1)
@@ -32,7 +33,7 @@ class ImgCA(nn.Module):
             self.bn1,
             nn.Conv2d(input_channels*PERCEPTION_COUNT, hidden_channels, 1),
             nn.ReLU(),
-            self.bn0,
+            self.bn2,
             nn.Conv2d(hidden_channels, output_channels, 1, bias=False)
         )
 
@@ -52,7 +53,7 @@ class ImgCA(nn.Module):
         y = self.mask(y)
 
         # Return input + stochastic delta
-        return x + y
+        return y
     
     def perception_conv(self, x):
         """Apply each perception convolution to the current state."""
@@ -77,12 +78,3 @@ class ImgCA(nn.Module):
 
         # Apply mask
         return x * mask
-    
-    def seed(self, n=256, size=128):
-        """Creates an initial state for the model."""
-        return torch.zeros(n, self.channels, size, size)
-    
-    def rgb(self, x):
-        """Converts the model output to an RGB image."""
-        # Return the first 3 channels, clamped between 0 and 1
-        return x[:, :3].clamp(0, 1)
