@@ -1,10 +1,9 @@
-
 import torch
 from torch import nn
 import torch.nn.functional as f
 from ImgCA import ImgCA
 
-class HCAImgModel(nn.Module):
+class HNCAImgModel(nn.Module):
     def __init__(self):
         super().__init__()
 
@@ -31,5 +30,3 @@ class HCAImgModel(nn.Module):
 
         return x
 
-model = HCAImgModel()
-print("model initialized")

@@ -17,23 +17,23 @@ PERCEPTIONS = torch.stack([IDENTITY, SOBEL_X, SOBEL_Y, LAPLACIAN])
 PERCEPTION_COUNT = PERCEPTIONS.shape[0]
 
 class ImgCA(nn.Module):
-    def __init__(self, channels=12, hidden_channels=96):
+    def __init__(self, input_channels=12, output_channels=12, hidden_channels=64, trainable_perception=False):
         super().__init__()
 
-        self.channels = channels
+        self.channels = input_channels
 
-        self.bn0 = nn.BatchNorm2d(channels)
-        self.bn1 = nn.BatchNorm2d(channels * len(PERCEPTIONS))
+        self.bn0 = nn.BatchNorm2d(input_channels)
+        self.bn1 = nn.BatchNorm2d(input_channels * len(PERCEPTIONS))
         self.bn2 = nn.BatchNorm2d(hidden_channels)
 
         # Define dense layers (2D convolutions with kernel size of 1)
         self.layers = nn.Sequential(
             # Input channels = channels * # of perceptions
             self.bn1,
-            nn.Conv2d(channels*PERCEPTION_COUNT, hidden_channels, 1),
+            nn.Conv2d(input_channels*PERCEPTION_COUNT, hidden_channels, 1),
             nn.ReLU(),
             self.bn0,
-            nn.Conv2d(hidden_channels, channels, 1, bias=False)
+            nn.Conv2d(hidden_channels, output_channels, 1, bias=False)
         )
 
         # Initialize weights of the last conv layer to zero
@@ -42,7 +42,7 @@ class ImgCA(nn.Module):
     def forward(self, x):
         # Create perception vector
         y = self.bn0(x)
-        
+
         y = self.perception_conv(x)
 
         # Pass through fully-connected layers
