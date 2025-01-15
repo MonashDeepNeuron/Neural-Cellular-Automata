@@ -22,13 +22,13 @@ class HNCAImgModel(nn.Module):
 
         x = x + self.child(x)
                 
-        y = self.sensor(x)
+        # y = self.sensor(x)
 
-        y = self.parent(y)
+        # y = self.parent(y)
 
-        y = y.repeat_interleave(2, dim=2).repeat_interleave(2, dim=3)
+        # y = y.repeat_interleave(2, dim=2).repeat_interleave(2, dim=3)
 
-        x = torch.cat((x[:, :3, :, :], y + x[:, 3:, :, :]), dim=1)  # add the 9 signal channels from the child to the 3 channels
+        # x = torch.cat((x[:, :3, :, :], y + x[:, 3:, :, :]), dim=1)  # add the 9 signal channels from the child to the 3 channels
 
         return x
 

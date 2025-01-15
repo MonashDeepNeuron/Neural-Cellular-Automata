@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from HNCA import HNCAImgModel
+import random
 
 print("Imports successful")
 
@@ -106,7 +107,6 @@ def create_vgg_loss_fn(target: torch.Tensor):
 
     return vgg_loss_fn
 
-
 model = HNCAImgModel()
 optimiser = torch.optim.Adam(model.parameters(), lr=0.01, capturable=True)
 lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimiser, milestones=[500, 1000], gamma=0.3)
@@ -116,66 +116,125 @@ with torch.no_grad():
   loss_fn = create_vgg_loss_fn(target)
   pool = model.seed(256)
 
-
+steps = [32, 96]
 EPOCHS = 2000
 BATCH_SIZE = 4
+checkpoint_freq = 10
 
-# Plot losses
-losses = []
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
+## Obtain device of model, and send all related data to device
+device = next(model.parameters()).device
+with torch.no_grad():
+    batch_losses = []
+    best_loss = None
+    best_model = model.state_dict()
+    best_epoch = 0
 
-for epoch in range(EPOCHS):
-    with torch.no_grad():
-        # Select a random batch of samples from the pool
-        batch_idx = np.random.choice(len(pool), BATCH_SIZE, replace=False)
-        x = pool[batch_idx]
+    fig = plt.figure()
+    plt.show(block = False)
+    plt.ion()
+    plt.pause(0.01)
+    ax = fig.add_subplot(1, 1, 1)
 
-        # Every 8 epochs, seed the model with a new sample
-        if epoch % 8 == 0:
-            x[:1] = model.seed(1)
+try:
+    training_losses = []
+    for epoch in range(EPOCHS):
+        model.train()
 
-    # Run the model for a random number of steps
-    steps = np.random.randint(32, 96)
-    for i in range(steps):
-        x = model(x)
+        ## Optimisation step
+        with torch.no_grad():
+            batch_idx = np.random.choice(len(pool), BATCH_SIZE, replace=False)
+            batch = pool[batch_idx]
 
-    # Calculate loss = overflow loss + VGG loss
-    overflow_loss = (x - x.clamp(-1.0, 1.0)).abs().sum()
-    vgg_loss = loss_fn(model.rgb(x))
-    loss = overflow_loss + vgg_loss
-    losses.append(loss.item())
-    #print(losses)
+        batch_losses = []
 
-    # Backpropagate and update model
-    with torch.no_grad():
-        loss.backward()
-        print(loss)
-        # Normalise gradients and add a small value to the denominator to avoid division by zero
-        #for param in model.parameters():
-        #    param.grad /= (param.grad.norm() + 1e-8)
+        with torch.no_grad():
+            # Select a random batch of samples from the pool
+            batch_idx = np.random.choice(len(pool), BATCH_SIZE, replace=False)
+            batch = pool[batch_idx]
 
-        optimiser.step()
         optimiser.zero_grad()
-        lr_scheduler.step()
+        updates = random.randrange(steps[0], steps[1])
         
-        # Update the pool with the new samples
-        pool[batch_idx] = x
+        batch.to(device)
+        for i in range(updates):
+            batch = model(batch)
 
-        # Update loss plot
-        if epoch % 10 == 0:
-            ax.cla()
-            ax.set_yscale('log')
-            ax.set_xlim(0, EPOCHS)
-            ax.set_ylim(min(losses), losses[0])
-            ax.set_xlabel('Epoch')
-            ax.set_ylabel('Loss')
-            ax.set_title('Loss')
-            ax.plot(losses, '.', alpha=0.2)
-            display(fig)
+        # Calculate loss = overflow loss + VGG loss
+        overflow_loss = (batch - batch.clamp(-1.0, 1.0)).abs().sum()
+        vgg_loss = loss_fn(model.rgb(batch))
+        loss = overflow_loss + vgg_loss
+        batch_losses.append(loss.item())
 
-            # Clear the output and display the plot
-            clear_output(wait=True)
+        with torch.no_grad():
+            loss.backward()
+
+            # Normalise gradients and add a small value to the denominator to avoid division by zero
+            for param in model.parameters():
+                param.grad /= (param.grad.norm() + 1e-8)
+        
+            optimiser.step()
+            optimiser.zero_grad()
+            lr_scheduler.step()
+
+            # Update the pool with the new samples
+            pool[batch_idx] = batch
+
+
+            if epoch % 8 == 0:
+                randseeds = np.random.choice(len(pool), BATCH_SIZE, replace=False)
+                pool[randseeds] = model.new_seed(BATCH_SIZE)
+            
+
+            if (epoch % checkpoint_freq == 0):
+
+                # training_losses.append(nn.functional.mse_loss(batch[:, 0:4], targetImg.squeeze()).item())
+                print(f"Epoch {epoch} loss: {batch_losses[-1]}")
+                # Every 8 epochs, seed the model with a new sample
+                
+                
+                if (epoch > 20 and (best_loss == None or batch_losses[-1] < best_loss)):
+                    best_model = model.state_dict()
+                    best_loss = batch_losses[-1]
+                    best_epoch = epoch
+                    torch.save(model.state_dict(), "best_model.pth")
+                    print("---- SAVING BEST MODEL ----")
+
+                # if epoch > best_epoch + tolerance:
+                #     break # It's been too many epochs since there's
+                #     # been an improvement on the model. Give up.
+                
+                ax.cla()
+                ax.set_yscale('log')
+                ax.set_xlim(0, EPOCHS)
+                ax.set_xlabel('Epoch')
+                ax.set_ylabel('Loss')
+                ax.set_title('Loss')
+                ax.plot(batch_losses, '.', alpha=0.2)
+                # ax.plot(np.array(list(range(len(training_losses))))*checkpoint_freq, training_losses, 'r.', alpha=0.2)
+                ax.set_ylim(min(batch_losses),   batch_losses[0])
+                # ax.set_ylim(min(training_losses),  max(training_losses))
+                    
+                plt.pause(0.01)
+
+            # Update loss plot
+            if epoch % 10 == 0:
+                ax.cla()
+                ax.set_yscale('log')
+                ax.set_xlim(0, EPOCHS)
+                ax.set_xlabel('Epoch')
+                ax.set_ylabel('Loss')
+                ax.set_title('Loss')
+                ax.plot(batch_losses, '.', alpha=0.2)
+                # ax.plot(np.array(list(range(len(training_losses))))*checkpoint_freq, training_losses, 'r.', alpha=0.2)
+                ax.set_ylim(min(batch_losses),  batch_losses[0])
+                
+                plt.pause(0.01)
+                plt.savefig("loss.png")
+
+except KeyboardInterrupt:
+    pass
+
+model.load_state_dict(best_model)
 
 STEPS = 100
 SIZE = 512
