@@ -7,22 +7,29 @@ from ImgCA import ImgCA
 class HCAImgModel(nn.Module):
     def __init__(self):
         super().__init__()
+
+        self.sensor = nn.Sequential( # Sensor taking output of child and transforming for something the parent can understand by downscaling by average
+            nn.AvgPool2d(2, 2),
+        )
         
-        self.leaf_ca_model = ImgCA(n_channels=3, n_schannels=9, hidden_channels=64, trainable_perception=False)
-        
-        '''state = self.leaf_ca_model.seed(n=1, size=128)
-        output = self.leaf_ca_model.step(state, s=self.leaf_ca_model.n_schannels, n_steps=300, update_rate=0.5)
-        rgb_image = self.leaf_ca_model.rgb(output)
-        print(rgb_image.shape)  # Should be [1, 3, 128, 128]'''
+        self.child = ImgCA(input_channels=12, output_channels=12, hidden_channels=64, trainable_perception=False)
+
+        self.parent = ImgCA(input_channels=12, output_channels=9, hidden_channels=256, trainable_perception=True)
 
 
-        self.parent_ca_model = ImgCA(n_channels=12, n_schannels=0, hidden_channels=256, trainable_perception=True)
-    
-        '''state = self.parent_ca_model.seed(n=1, size=256)
-        output = self.parent_ca_model.step(state, self.parent_ca_model.n_schannels, n_steps=300, update_rate=0.5)
-        rgb_image = self.parent_ca_model.rgb(output)
-        print(rgb_image.shape)  # Should be [1, 3, height, width]'''
+    def forward(self, x):
 
+        x = self.child(x)
+                
+        y = self.sensor(x)
+
+        y = self.parent(y)
+
+        y = y.repeat_interleave(2, dim=2).repeat_interleave(2, dim=3)
+
+        x[:, 2:, :, :]  = y + x[:, 2:, :, :]   # add the 9 signal channels from the child to the 3 channels
+
+        return x
 
 model = HCAImgModel()
 print("model initialized")

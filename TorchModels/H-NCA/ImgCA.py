@@ -6,128 +6,83 @@ import torch.nn.functional as f
 if torch.cuda.is_available():
     torch.set_default_device('cuda')
 
-# Define static perceptions (not required for parent NCA)
-IDENTITY = torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=torch.float)       # Maintains the current state
-SOBEL_X = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float)     # Detects horizontal edges
-SOBEL_Y = SOBEL_X.T                                                                # Detects vertical edges
-LAPLACIAN = torch.tensor([[1, 2, 1], [2, -12, 2], [1, 2, 1]], dtype=torch.float)    # Detects sharp intensity changes
+# Define perceptions
+IDENTITY = torch.tensor([[0,0,0],[0,1,0],[0,0,0]], dtype=torch.float)       # Used to maintain the current state
+SOBEL_X = torch.tensor([[-1,0,1],[-2,0,2],[-1,0,1]], dtype=torch.float)     # Detects horizontal edges
+SOBEL_Y = SOBEL_X.T                                                         # Detects vertical edges
+LAPLACIAN = torch.tensor([[1,2,1],[2,-12,2],[1,2,1]], dtype=torch.float)    # Detects sharp changes in intensity
 
-# Stack static perceptions
+# Create perception layer, consisting of the identity, sobel x, sobel y and laplacian
 PERCEPTIONS = torch.stack([IDENTITY, SOBEL_X, SOBEL_Y, LAPLACIAN])
 PERCEPTION_COUNT = PERCEPTIONS.shape[0]
 
 class ImgCA(nn.Module):
-    def __init__(self, n_channels=12, n_schannels=0, hidden_channels=128, trainable_perception=False):
-        # hidden channels is the same as features from the paper
+    def __init__(self, channels=12, hidden_channels=96):
         super().__init__()
 
-        self.n_channels = n_channels
-        self.n_schannels = n_schannels
-        self.trainable_perception = trainable_perception
+        self.channels = channels
 
-        # Define trainable perception if enabled
-        if self.trainable_perception:
-            self.perceptions = nn.Parameter(PERCEPTIONS[None, None, :, :, :].clone(), requires_grad=True)
-        else:
-            self.register_buffer('perceptions', PERCEPTIONS[None, None, :, :, :])
-
-        # Batch normalization and layers
-        self.bn0 = nn.BatchNorm2d(n_channels + n_schannels)
-        self.bn1 = nn.BatchNorm2d((n_channels + n_schannels )* PERCEPTION_COUNT) 
+        self.bn0 = nn.BatchNorm2d(channels)
+        self.bn1 = nn.BatchNorm2d(channels * len(PERCEPTIONS))
         self.bn2 = nn.BatchNorm2d(hidden_channels)
 
-        self.perception = nn.Conv2d(
-            in_channels=n_channels + n_schannels,
-            out_channels=(n_channels + n_schannels) * PERCEPTION_COUNT,
-            kernel_size=3,
-            groups=n_channels + n_schannels,
-            padding=0,
-            bias=False
+        # Define dense layers (2D convolutions with kernel size of 1)
+        self.layers = nn.Sequential(
+            # Input channels = channels * # of perceptions
+            self.bn1,
+            nn.Conv2d(channels*PERCEPTION_COUNT, hidden_channels, 1),
+            nn.ReLU(),
+            self.bn0,
+            nn.Conv2d(hidden_channels, channels, 1, bias=False)
         )
 
-        self.features = nn.Conv2d(
-            in_channels=(n_channels + n_schannels) * PERCEPTION_COUNT,
-            out_channels=hidden_channels,
-            kernel_size=1,
-            bias=True
-        )
+        # Initialize weights of the last conv layer to zero
+        nn.init.zeros_(self.layers[-1].weight)
 
-        self.new_state = nn.Conv2d(
-            in_channels=hidden_channels,
-            out_channels=n_channels + n_schannels,
-            kernel_size=1,
-            bias=False
-        )
-
-        # Initialize weights of the last layer to zero
-        nn.init.zeros_(self.new_state.weight)
-
-    def forward(self, x, s=None, update_rate=0.5):
-        if s is not None:
-            x = torch.cat([x, s], dim=1)
+    def forward(self, x):
+        # Create perception vector
+        y = self.bn0(x)
         
-        x = self.circular_pad(x, pad=1)
-        x = self.bn0(x)
+        y = self.perception_conv(x)
 
-        y = self.perception(x)
-        
-        y = self.bn1(y)
-        
-        y = self.features(y)
-        
-        y = self.bn2(y)
-        
-        y = self.new_state(y)
+        # Pass through fully-connected layers
+        y = self.layers(y)
 
-        update_mask = (torch.rand_like(y[:, :1]) + update_rate).floor()
-        y = y * update_mask
-        return y
+        # Stochastic update
+        y = self.mask(y)
 
-    def step(self, x_initial, s=None, n_steps=50, update_rate=0.5):
-        """
-        Iteratively updates the state `n_steps` times.
-        """
-        x = x_initial
+        # Return input + stochastic delta
+        return x + y
+    
+    def perception_conv(self, x):
+        """Apply each perception convolution to the current state."""
+        # Reshape input to apply perception convolution
+        batches, channels, height, width = x.shape
+        y = x.reshape(batches*channels, 1, height, width)
 
-        # If s is an integer, convert it to a tensor with the correct shape
-        if isinstance(s, int):
-            s = torch.zeros(
-                x.size(0),  # batch size
-                s,          # number of signal channels
-                x.size(2),  # height
-                x.size(3),  # width
-                device=x.device
-            )
+        # Circular pad the input to avoid losing information at the edges
+        y = f.pad(y, [1, 1, 1, 1], 'circular')
 
-        for _ in range(n_steps):
-            x = self.forward(x, s, update_rate=update_rate)
-            s = None  # Signal is only used in the first step
-        return x
+        # Apply each perception convolution
+        y = f.conv2d(y, PERCEPTIONS[:,None])
 
+        # Reshape back to original shape
+        return y.reshape(batches, -1, height, width)
+    
+    def mask(self, x, update_rate = 0.5):
+        """Stochastically mask updates to mimic the random updates found in biological cells."""
+        # Uniformly mask across all channels
+        batches, channels, height, width = x.shape
+        mask = (torch.rand(batches, 1, height, width) + update_rate).floor()
 
-    def circular_pad(self, x, pad):
-        """
-        Applies circular padding to avoid information loss at edges.
-        """
-        return f.pad(x, (pad, pad, pad, pad), mode='circular')
-
+        # Apply mask
+        return x * mask
+    
     def seed(self, n=256, size=128):
-        """
-        Creates an initial state for the model.
-        """
-        return torch.zeros(n, self.n_channels, size, size, device=next(self.parameters()).device)
-
-    def mask_signal_channels(self, x):
-        """
-        Masks the signal channels with zeros, keeping only feature channels active.
-        """
-        feature_channels = self.n_channels
-        x[:, feature_channels:] = 0
-        return x
-
+        """Creates an initial state for the model."""
+        return torch.zeros(n, self.channels, size, size)
+    
     def rgb(self, x):
-        """
-        Converts the model output to an RGB image.
-        """
+        """Converts the model output to an RGB image."""
         # Return the first 3 channels, clamped between 0 and 1
         return x[:, :3].clamp(0, 1)
