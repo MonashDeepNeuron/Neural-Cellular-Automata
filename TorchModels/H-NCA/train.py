@@ -169,8 +169,8 @@ try:
             loss.backward()
 
             # Normalise gradients and add a small value to the denominator to avoid division by zero
-            for param in model.parameters():
-                param.grad /= (param.grad.norm() + 1e-8)
+            #for param in model.parameters():
+            #    param.grad /= (param.grad.norm() + 1e-8)
         
             optimiser.step()
             optimiser.zero_grad()
@@ -182,7 +182,7 @@ try:
 
             if epoch % 8 == 0:
                 randseeds = np.random.choice(len(pool), BATCH_SIZE, replace=False)
-                pool[randseeds] = model.new_seed(BATCH_SIZE)
+                pool[randseeds] = model.seed(BATCH_SIZE)
             
 
             if (epoch % checkpoint_freq == 0):
@@ -202,19 +202,6 @@ try:
                 # if epoch > best_epoch + tolerance:
                 #     break # It's been too many epochs since there's
                 #     # been an improvement on the model. Give up.
-                
-                ax.cla()
-                ax.set_yscale('log')
-                ax.set_xlim(0, EPOCHS)
-                ax.set_xlabel('Epoch')
-                ax.set_ylabel('Loss')
-                ax.set_title('Loss')
-                ax.plot(batch_losses, '.', alpha=0.2)
-                # ax.plot(np.array(list(range(len(training_losses))))*checkpoint_freq, training_losses, 'r.', alpha=0.2)
-                ax.set_ylim(min(batch_losses),   batch_losses[0])
-                # ax.set_ylim(min(training_losses),  max(training_losses))
-                    
-                plt.pause(0.01)
 
             # Update loss plot
             if epoch % 10 == 0:
@@ -229,7 +216,9 @@ try:
                 ax.set_ylim(min(batch_losses),  batch_losses[0])
                 
                 plt.pause(0.01)
+                plt.ioff()
                 plt.savefig("loss.png")
+                plt.ion()
 
 except KeyboardInterrupt:
     pass
