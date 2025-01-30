@@ -4,6 +4,10 @@ import torch.nn.functional as f
 
 
 class GCA(nn.Module):
+    """
+    Persisting variation of Growing Neural Cellular Automata. Minimal changes have been made, except
+    Dropout replacing manual stochastic mask.
+    """
     SOBEL_X = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32)
     SOBEL_Y = torch.tensor([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype=torch.float32)
     IDENTITY = torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=torch.float32)
@@ -20,7 +24,8 @@ class GCA(nn.Module):
                 nn.Conv2d(3 * n_channels, hidden_channels, kernel_size=1),
                 nn.ReLU(),
                 nn.Conv2d(hidden_channels, n_channels, kernel_size=1, bias=False),
-                nn.Dropout(p=0.5) # Apply stochastic mask
+                nn.Dropout(p=0.5) # Apply stochastic mask, 
+                # TODO: update such that this dropout remains in, even when training mode is off
             )
         )
 
@@ -90,14 +95,14 @@ class GCA(nn.Module):
             stride=1,
             padding=0,
             groups=state_grid_padded.size(1),
-        )  # TODO Replace padding with logic to make a grid that wraps around on itself.
+        ) 
         grad_y = f.conv2d(
             state_grid_padded,
             self.SOBEL_Y.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
             stride=1,
             padding=0,
             groups=state_grid_padded.size(1),
-        )  # TODO Replace 16 with a dynamic channels variable?
+        )
 
         perception_grid = torch.cat([state_grid, grad_x, grad_y], dim=1)
 

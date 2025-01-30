@@ -1,3 +1,20 @@
+"""
+PURPOSE: To train the persisting NCA model based off the persisting 
+    stage model in https://distill.pub/2020/growing-ca/.
+FEATURES:
+    - Loads target image from specified file path as well as model if existing model is present
+    - Training the model on specified number of epochs and with 
+        or without CUDA
+    - Uses an adaptive learning rate throughout training (see learning_rate_adjuster.py)
+    - Incorperates pool training (see https://distill.pub/2020/growing-ca/)
+    - Output of loss as plot
+    - Saves final model weights to a second specified model path.
+    - Visualisation of the model and generation of a GIF file 
+        demonstrating model output
+    - Visualisation of the progressive state of the model pool
+"""
+
+
 #### IMPORTS ####
 
 import torch
@@ -111,7 +128,7 @@ def load_image(imagePath: str):
     return img
 
 
-def forward_pass(model: nn.Module, state, updates, record=False):  # TODO
+def forward_pass(model: nn.Module, state, updates, record=False): 
     """
     Run a forward pass consisting of `updates` number of updates
     If `record` is true, then records the state in a tensor to animate and saves the video
@@ -334,7 +351,7 @@ if __name__ == "__main__":
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
-    EPOCHS = 5000  # 100 epochs for best results
+    EPOCHS = 5000  # 5000 recommended epochs 
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     MODEL_PATH = "abc_3.pth"

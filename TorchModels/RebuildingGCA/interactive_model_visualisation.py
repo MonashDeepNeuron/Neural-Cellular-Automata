@@ -1,3 +1,12 @@
+
+"""
+PURPOSE: To visualise the model under an interactive context. 
+FEATURES:
+    - Loads the model and displays it in an interactive
+    - Allows erasure of sections of the produced image, whilst the 
+        model is actively running.
+"""
+
 import torch
 from torchvision.io import read_image
 from torchvision.io.image import ImageReadMode
