@@ -22,12 +22,15 @@ class DiceLoss(nn.Module):
         return 1 - dice_score
     
 class CustomLoss(nn.Module):
-    def __init__(self, dice_weight = 0.005):
+    def __init__(self, dice_weight = 0.001):
         super(CustomLoss, self).__init__()
-        self.part1 = nn.CrossEntropyLoss()
-        self.part2 = DiceLoss()
+        self.cel = nn.CrossEntropyLoss()
+        self.dice = DiceLoss()
+        self.mse = nn.MSELoss()
 
         self.dice_weight = dice_weight
 
-    def forward(self, input, target):
-        return self.part1(input, target) + self.part2(input, target)*self.dice_weight
+    def forward(self, input, target, mse_mode = True):
+        if (mse_mode):
+            return self.mse(input, target) + self.dice(input, target)*self.dice_weight
+        return self.cel(input, target) + self.dice(input, target)*self.dice_weight

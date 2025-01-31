@@ -14,6 +14,7 @@ class GCA(nn.Module):
         ## Hidden channels are the number of channels in the linear layer in network
         super().__init__()
         self.input_channels = input_channels
+        self.n_channels = n_channels
 
         ## Represent the update step as a submodule
         ## Represent the update step as a submodule
@@ -27,13 +28,13 @@ class GCA(nn.Module):
         )
 
         ## Initialise model parameters as much smaller numbers
-        torch.nn.init.normal_(self.update_network[0].weight, mean=0.0, std=0.001)
-        torch.nn.init.normal_(self.update_network[0].bias, mean=0.0, std=0.001)
-        torch.nn.init.normal_(self.update_network[2].weight, mean=0.0, std=0.001)
+        torch.nn.init.normal_(self.update_network[0].weight, mean=0.0, std=0.0001)
+        torch.nn.init.normal_(self.update_network[0].bias, mean=0.0, std=0.0001)
+        torch.nn.init.normal_(self.update_network[2].weight, mean=0.0, std=0.0001)
         ## Initialise model parameters as much smaller numbers
-        torch.nn.init.normal_(self.update_network[0].weight, mean=0.0, std=0.001)
-        torch.nn.init.normal_(self.update_network[0].bias, mean=0.0, std=0.001)
-        torch.nn.init.normal_(self.update_network[2].weight, mean=0.0, std=0.001)
+        torch.nn.init.normal_(self.update_network[0].weight, mean=0.0, std=0.0001)
+        torch.nn.init.normal_(self.update_network[0].bias, mean=0.0, std=0.0001)
+        torch.nn.init.normal_(self.update_network[2].weight, mean=0.0, std=0.0001)
 
     def to(self, device):
         """
@@ -47,7 +48,7 @@ class GCA(nn.Module):
         self.IDENTITY = self.IDENTITY.to(device)
         return super().to(device)
 
-    def forward(self, input_grid):
+    def forward(self, input_grid, pad = True):
         """
         Input_grid is tensor with dims: (batch, in_channels, height, width)
         1. Construct `perception_grid` by replacing each cell in input_grid with its feature vector
@@ -65,36 +66,42 @@ class GCA(nn.Module):
         """
 
         ## Add input grid to the device model parameters are on
-        input_grid = input_grid.to(next(self.parameters()).device)
+        x = input_grid.to(next(self.parameters()).device)
+        x = self.calculate_perception_grid(x, pad = pad)
+        output_grid = x[:, :self.n_channels]
 
-        perception_grid = self.calculate_perception_grid(input_grid)
-        ds_grid = self.calculate_ds_grid(perception_grid)
-        input_grid[:, 3:] = input_grid[:, 3:] + ds_grid
-        return input_grid
+        x = self.calculate_ds_grid(x)
+        output_grid[:, 3:] = output_grid[:, 3:] + x
 
-    def calculate_perception_grid(self, state_grid):
+        return output_grid
+    
+
+    def calculate_perception_grid(self, state_grid, pad = True):
         """
         Calculates 1x48 perception vector for each cell in grid, returns as grid of perception vectors.
         Perception vectors are 4 dimensional. Unsqueeze used to add dimension of size 1 at index
         """
+        if (pad):
+            state_grid_processed = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
+        else: 
+            state_grid_processed = state_grid
+            state_grid = state_grid[:,:, 1:-1, 1:-1]
 
-        state_grid_padded = f.pad(state_grid, (1, 1, 1, 1))
 
         grad_x = f.conv2d(
-            state_grid_padded,
+            state_grid_processed,
             self.SOBEL_X.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
             stride=1,
             padding=0,
-            groups=state_grid_padded.size(1),
-        )  # TODO Replace padding with logic to make a grid that wraps around on itself.
+            groups=state_grid_processed.size(1),
+        )  
         grad_y = f.conv2d(
-            state_grid_padded,
+            state_grid_processed,
             self.SOBEL_Y.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
             stride=1,
             padding=0,
-            groups=state_grid_padded.size(1),
-        )  # TODO Replace 16 with a dynamic channels variable?
-
+            groups=state_grid_processed.size(1),
+        )  
         perception_grid = torch.cat([state_grid, grad_x, grad_y], dim=1)
 
         return perception_grid

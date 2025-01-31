@@ -54,13 +54,17 @@ def run_frames_1(model: nn.Module, state, updates, record=False):
 def run_frames_2(model: nn.Module, state, updates, record=False):
     if record:
         frames_array = Tensor(updates, CHANNELS, GRID_SIZE, GRID_SIZE)
+        state = torch.nn.functional.pad(state, (1, 1, 1, 1), mode="circular")
         for update_no in range(updates):
-            for crops in range(16):
-                i, j, h, w = transforms.RandomCrop.get_params(state, output_size=(GRID_SIZE//4, GRID_SIZE//4))
-                state[:, :, i:i+h, j:j+w] = model(state[:, :, i:i+h, j:j+w])
-
-            frames_array[update_no] = state
+            for patch_i in range(4):
+                for patch_j in range(4):
+                    i, j, h, w = (patch_i* GRID_SIZE//4), (patch_j* GRID_SIZE//4), GRID_SIZE//4 + 2, GRID_SIZE//4 + 2
+                    # print(i,j,h,w)
+                    # print(state[:, :, i:i+h, j:j+w].shape)
+                    state[:, :, i+1:i+h-1, j+1:j+w-1] = model(state[:, :, i:i+h, j:j+w], pad = False)
+            frames_array[update_no] = state[:, :, 1:-1, 1:-1]
         
+        state = state[:, :, 1:-1, 1:-1]
         return state, frames_array
 
     else:
@@ -108,6 +112,16 @@ def forward_pass(model1: nn.Module, model2: nn.Module, batch,
     
     recording = torch.cat((recording1, recording2), dim=0)
     return output_sized, recording
+
+def get_visuals(model1, model2, data, i):
+    output, recording = forward_pass(model1, model2, data, target, updates=UPDATES_RANGE[0], record=True)
+    visualiser.plotRGB(output[:, 3:], filenameBase=f"output{i}")
+    visualiser.plotRGB(data, filenameBase=f"data{i}")
+    visualiser.plotRGB(target, filenameBase=f"target{i}")
+    visualiser.animateRGB(recording[:, 3:], filenameBase=f"recording{i}", alpha=False)
+    visualiser.visualiseHidden(recording, channels_idxs=[3,4,6,7,8,9,10,11], filenameBase=f"hidden{i}")
+
+
 
 def initialiseGPU(model1, model2):
     ## Check if GPU available
@@ -181,17 +195,9 @@ if __name__ == "__main__":
     MODEL1.eval()
     MODEL2.eval()
 
-
     for i, (data, target) in enumerate(dataloader):
         data.to(DEVICE)
         target.to(DEVICE)
-
-        output, recording = forward_pass(MODEL1, MODEL2, data, target, updates=UPDATES_RANGE[0], record=True)
-        visualiser.plotRGB(output[:, 3:], filenameBase=f"output{i}")
-        visualiser.plotRGB(data, filenameBase=f"data{i}")
-        visualiser.plotRGB(target, filenameBase=f"target{i}")
-        visualiser.animateRGB(recording[:, 3:], filenameBase=f"recording{i}", alpha=False)
-        visualiser.visualiseHidden(recording, channels_idxs=[3,4,6,7,8,9,10,11], filenameBase=f"hidden{i}")
-
-
-
+        
+        get_visuals(MODEL1, MODEL2, data, i)
+        

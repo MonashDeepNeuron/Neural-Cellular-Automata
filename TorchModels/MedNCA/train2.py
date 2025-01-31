@@ -1,3 +1,6 @@
+
+
+
 #    images_folder = '/home/labadmin/dev/imagesegment/images'
 #    trimaps_folder = '/home/labadmin/dev/imagesegment/trimaps_colored'
 #    output_folder = '/home/labadmin/dev/imagesegment/outputimages'
@@ -195,7 +198,8 @@ def forward_pass(model1: nn.Module, model2: nn.Module, batch,
     return output_patch, patch_target
     
 
-def update_pass(model1, model2, batch, targets, optimiser1, optimiser2, lower_model_only = False):
+def update_pass(model1, model2, batch, targets, optimiser1, optimiser2, lower_model_only = False,
+                use_mse = True):
     """
     Back calculate gradient and update model paramaters
     """
@@ -208,7 +212,7 @@ def update_pass(model1, model2, batch, targets, optimiser1, optimiser2, lower_mo
     output_patch, patch_target = forward_pass(model1, model2, batch, targets, updates, lower_model_only = lower_model_only)
     
     ## apply pixel-wise MSE loss between RGBA channels in the grid and the target pattern
-    loss = LOSS_FN(output_patch[:, 3:6], patch_target)
+    loss = LOSS_FN(output_patch[:, 3:6], patch_target, mse_mode = use_mse)
     
     optimiser1.zero_grad()
     optimiser2.zero_grad()
@@ -223,7 +227,8 @@ def update_pass(model1, model2, batch, targets, optimiser1, optimiser2, lower_mo
 
 
 def train(model1: nn.Module, model2:nn.Module, optimiser1, optimiser2, 
-train_loader, val_loader, record=False, model_save1 = "MODEL_PATH1.pth", model_save2 = "MODEL_PATH2.pth"):  # TODO
+train_loader, val_loader, record=False, model_save1 = "MODEL_PATH1.pth", model_save2 = "MODEL_PATH2.pth",
+lr_schedulers = None):  # TODO
     """
     TRAINING PROCESS:
         - Define training data storage variables
@@ -257,12 +262,17 @@ train_loader, val_loader, record=False, model_save1 = "MODEL_PATH1.pth", model_s
                 batch = batch.to(device)
                 targets = target.to(device)
                 update_pass(model1, model2, batch, targets, optimiser1, optimiser2, 
-                            lower_model_only=(epoch%2 == 0))
+                            lower_model_only=(epoch%2 == 0), use_mse = (epoch < 1000))
+            
+            if(lr_schedulers):
+               for scheduler in lr_schedulers:
+                   scheduler.step() 
                 
             test, test_target = next(iter(val_loader))
 
             model1.eval()
             model2.eval()
+            
             test_run, test_target_scaled = forward_pass(model1, model2, test, test_target, UPDATES_RANGE[1])
             training_losses.append(
                 LOSS_FN(test_run[:, 3:6, : , :], test_target_scaled).cpu().detach().numpy()
@@ -275,13 +285,20 @@ train_loader, val_loader, record=False, model_save1 = "MODEL_PATH1.pth", model_s
                 torch.save(MODEL1.state_dict(), model_save1)
                 torch.save(MODEL2.state_dict(), model_save2)
                 best_weights = (model1.state_dict(), model2.state_dict())
-
-            if record:
-                if recording == None:
-                    recording = torch.cat((test_run[0, :3].unsqueeze(0).detach(),test_run[0, 3:6].unsqueeze(0).detach(), test_target_scaled[0].unsqueeze(0).detach()), dim=0)
-                else:
-                    recording = torch.cat((recording, test_run[0, :3].unsqueeze(0).detach(),test_run[0, 3:6].unsqueeze(0).detach(), test_target_scaled[0].unsqueeze(0).detach()), dim=0) 
             
+            if (epoch % 10 == 0):
+                visualiser.animateRGB(torch.cat((test_run[0, :3].unsqueeze(0).detach(),test_run[0, 3:6].unsqueeze(0).detach(), test_target_scaled[0].unsqueeze(0).detach()), dim=0),
+                                       filenameBase="view", alpha = False, fps = 2)
+
+            if(epoch % (EPOCHS // 10)== 4):
+                if record:
+                
+                    if recording == None:
+                        recording = torch.cat((test_run[0, :3].unsqueeze(0).detach(),test_run[0, 3:6].unsqueeze(0).detach(), test_target_scaled[0].unsqueeze(0).detach()), dim=0)
+                    else:
+                        recording = torch.cat((recording, test_run[0, :3].unsqueeze(0).detach(),test_run[0, 3:6].unsqueeze(0).detach(), test_target_scaled[0].unsqueeze(0).detach()), dim=0) 
+                    
+
             print("best_loss =", best_loss)
             print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
 
@@ -310,9 +327,8 @@ def initialiseGPU(model1, model2):
 
 
 if __name__ == "__main__":
-    torch.autograd.set_detect_anomaly(True)
 
-    TRAINING = True  # Is our purpose to train or are we just looking rn?
+    TRAINING = False  # Is our purpose to train or are we just looking rn?
 
     GRID_SIZE = 128
     CHANNELS = 64
@@ -321,23 +337,28 @@ if __name__ == "__main__":
     MODEL1 = GCA(n_channels=CHANNELS, input_channels=INPUT_CHANNELS)
     MODEL2 = GCA(n_channels=CHANNELS, input_channels=INPUT_CHANNELS)
     MODEL1, MODEL2, DEVICE = initialiseGPU(MODEL1, MODEL2)
-    EPOCHS = 30  # 100 epochs for best results
+    EPOCHS = 2000  # 100 epochs for best results
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
-    BATCH_SIZE = 6
+    BATCH_SIZE = 1
     UPDATES_RANGE = [64, 96]
 
     LR1 = 1e-3
     LR2 = 1e-3
 
+
     optimiser1 = torch.optim.Adam(MODEL1.parameters(), lr=LR1)
     optimiser2 = torch.optim.Adam(MODEL2.parameters(), lr=LR2)
+    
+    schedulers = (torch.optim.lr_scheduler.ExponentialLR(optimiser1, gamma = 1-2e-3), 
+                  torch.optim.lr_scheduler.ExponentialLR(optimiser2, gamma = 1-2e-3))
+                  
     LOSS_FN = CustomLoss()
 
     # These path weights are the load and save location
     # Old model will be updated with the new training result
-    MODEL_PATH1 = "imgseg_big128.pth"
-    MODEL_PATH2 = "imgseg_small128.pth"
+    MODEL_PATH1 = "imgseg_big_mse_50ep.pth"
+    MODEL_PATH2 = "imgseg_small_mse_50ep.pth"
 
     images_folder = './TorchModels/ImageSegmentation/images'
     trimaps_folder = './TorchModels/ImageSegmentation/trimaps_colored'
@@ -381,19 +402,22 @@ if __name__ == "__main__":
 
     if TRAINING:
         MODEL1, MODEL2, losses, output = train(MODEL1, MODEL2, optimiser1, optimiser2, train_loader, 
-                                               val_loader, record=True, model_save1=MODEL_PATH1, model_save2=MODEL_PATH2)
+                                               val_loader, record=True, 
+                                               model_save1=MODEL_PATH1, model_save2=MODEL_PATH2,
+                                               lr_schedulers = schedulers)
         # losses_file = open("losses.txt", "a")
         # losses_file.write(losses)
         # losses_file.close()
 
-        print(losses)
         ## Plot loss
         plt.plot(range(len(losses)), losses)
+        plt.ylim([0,3])
         plt.savefig("Loss plot.png")
 
         ## Save the model's weights after training
         torch.save(MODEL1.state_dict(), MODEL_PATH1)
         torch.save(MODEL2.state_dict(), MODEL_PATH2)
+        print("Model weights saved")
 
         visualiser.animateRGB(output, filenameBase="recording", alpha = False, fps = 2)
 
@@ -402,20 +426,16 @@ if __name__ == "__main__":
     MODEL2.eval()
 
 
-    data, target = next(iter(val_loader))
-    data.to(DEVICE)
-    target.to(DEVICE)
+    for i, (data, target) in enumerate(train_loader):
+        data.to(DEVICE)
+        target.to(DEVICE)
 
-    patch_output, patch_target = forward_pass(MODEL1, MODEL2, data, target, updates=UPDATES_RANGE[0], full_image = True)
-    visualiser.plotRGB(patch_output[:, 3:], filenameBase="output")
-    visualiser.plotRGB(data, filenameBase="data")
-    visualiser.plotRGB(target, filenameBase="target")
-    visualiser.plotRGB(patch_target, filenameBase="patch_target")
-    visualiser.plotRGB(patch_output, filenameBase="patch")
+        patch_output, patch_target = forward_pass(MODEL1, MODEL2, data, target, updates=UPDATES_RANGE[0], full_image = True)
+        visualiser.plotRGB(patch_output[:, 3:], filenameBase="output")
+        visualiser.plotRGB(data, filenameBase=f"data{i}")
+        visualiser.plotRGB(target, filenameBase=f"target{i}")
+        visualiser.plotRGB(patch_target, filenameBase=f"patch_target{i}")
+        visualiser.plotRGB(patch_output, filenameBase=f"patch{i}")
 
-    # Save model weights
-    torch.save(MODEL1.state_dict(), MODEL_PATH1)
-    torch.save(MODEL2.state_dict(), MODEL_PATH2)
 
-    print("Model weights saved.")
 
