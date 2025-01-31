@@ -1,3 +1,16 @@
+"""
+PURPOSE: To train the growing NCA model based off the growing
+    stage model in https://distill.pub/2020/growing-ca/.
+FEATURES:
+    - Loads target image from specified file path as well as model if existing model is present
+    - Training the model on specified number of epochs and with 
+        or without CUDA at a specified learning rate
+    - Output of loss as plot
+    - Saves final model weights to the model path.
+    - Visualisation of the model and generation of a GIF file 
+        demonstrating model output
+"""
+
 #### IMPORTS ####
 
 import torch
@@ -103,7 +116,7 @@ def load_image(imagePath: str):
     return img
 
 
-def forward_pass(model: nn.Module, state, updates, record=False):  # TODO
+def forward_pass(model: nn.Module, state, updates, record=False):
     """
     Run a forward pass consisting of `updates` number of updates
     If `record` is true, then records the state in a tensor to animate and saves the video
@@ -144,7 +157,7 @@ def update_pass(model, batch, target, optimiser):
     print(f"batch loss = {batch_losses.cpu().numpy()}")  ## print on cpu
 
 
-def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # TODO
+def train(model: nn.Module, target: torch.Tensor, optimiser, record=False): 
     """
     TRAINING PROCESS:
         - Define training data storage variables
@@ -175,7 +188,6 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
             ## Optimisation step
             update_pass(model, batch, target, optimiser)
 
-            ## TODO: Assess accuracy. Can we remove this for faster training?
             test_seed = new_seed(1)
             MODEL.eval()
             test_run = forward_pass(MODEL, test_seed, 64)

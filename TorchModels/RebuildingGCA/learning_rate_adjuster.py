@@ -1,3 +1,10 @@
+"""
+PURPOSE: To calculate compatible learning rates for the training or Growing NCA
+    dependent on recent previous losses.
+FEATURES:
+    - 
+"""
+
 from typing import List
 import torch.nn.functional as f
 import torch as t
@@ -16,7 +23,10 @@ class lradj:
 
     Attributes:
     - SCALING_FACTOR
-    The current scaling_factor highly depends on the source image and the range of loss encountered when training. Training the cat image started off with high losses around 0.5 and converged to losses of 0.02 (very good results visually) so this scaling factor is derived from that.
+    The current scaling_factor highly depends on the source image and the range
+    of loss encountered when training. Training the cat image started off with 
+    high losses around 0.5 and converged to losses of 0.02 (very good results 
+    visually) so this scaling factor is derived from that.
     """
 
     # SCALING_FACTOR: float = 1e-3
