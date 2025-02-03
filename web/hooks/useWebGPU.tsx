@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { type RefObject, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import BufferManager from '../managers/BufferManager';
 import startingPatterns from '../patterns/startingPatterns';
@@ -8,7 +8,7 @@ import { parseRuleString } from '../util/Parse';
 
 const SQUARE_VERTICIES = new Float32Array([-0.8, -0.8, -0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, -0.8, -0.8, -0.8]);
 
-export default function useWebGPU(canvasRef, settings) {
+export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>, settings) {
 	const { workgroupSize, gridSize, ruleString } = settings;
 	const template = useSelector(state => state.webGPU.template);
 	const initialState = startingPatterns[template];
@@ -41,6 +41,11 @@ export default function useWebGPU(canvasRef, settings) {
 				const canvas = canvasRef.current;
 				const context = canvas.getContext('webgpu');
 				const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
+
+				if (!context) {
+					console.error('No context found.');
+					return;
+				}
 
 				context.configure({
 					device,

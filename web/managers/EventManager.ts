@@ -1,7 +1,7 @@
 // static class used to handle and process events
 // it uses the default constructor
 
-import { KeyboardEvent } from "react";
+import type { KeyboardEvent } from 'react';
 
 // NOTE: do not refer to this class as 'this' in this file
 // Many functions are used as event triggered functions and for some reason this
