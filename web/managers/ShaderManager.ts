@@ -8,7 +8,6 @@ import { guiShader } from './guiShader.js';
  * @todo Make the guiShader universal maybe? (probably through this class)
  */
 export default class Shader {
-	constructor() {}
 	static gui = guiShader;
 	static compute = computeShader;
 }

@@ -1,12 +1,15 @@
 // static class used to handle and process events
 // it uses the default constructor
 
+import { KeyboardEvent } from "react";
+
 // NOTE: do not refer to this class as 'this' in this file
 // Many functions are used as event triggered functions and for some reason this
 // does not work well for these applications.
 // I have no idea why but switching to 'EventManager' on these functions solved the issue
 
 export default class EventManager {
+	temp = false;
 	// event related global variables
 	static running = false;
 	static newRuleString = false;
@@ -64,7 +67,7 @@ export default class EventManager {
 		EventManager.moveOneFrame();
 	}
 
-	static keyListener(e) {
+	static keyListener(e: KeyboardEvent) {
 		switch (e.key) {
 			case EventManager.PLAY_PAUSE_KEY:
 				EventManager.playPause();
@@ -121,14 +124,14 @@ export default class EventManager {
 	}
 
 	static bindEvents() {
-		document.getElementById('play').addEventListener('click', EventManager.playPause); // play pause button
-		document.getElementById('next').addEventListener('click', EventManager.moveOneFrame); // move one frame button
-		document.getElementById('randomise').addEventListener('click', EventManager.randomise); //Randomise the grid
+		document.getElementById('play')?.addEventListener('click', EventManager.playPause); // play pause button
+		document.getElementById('next')?.addEventListener('click', EventManager.moveOneFrame); // move one frame button
+		document.getElementById('randomise')?.addEventListener('click', EventManager.randomise); //Randomise the grid
 		document.getElementsByTagName('body')[0].addEventListener('keydown', EventManager.keyListener); // key presses
-		document.getElementById('submitInput').addEventListener('click', EventManager.updateRuleString); // new rule string input button
-		document.getElementById('reset').addEventListener('click', EventManager.resetCanvas);
-		document.getElementById('speedInput').addEventListener('click', EventManager.submitSpeed); // change speed
-		document.getElementById('skipEvenCheckbox').addEventListener('change', EventManager.evenFramesCheckboxClicked);
+		document.getElementById('submitInput')?.addEventListener('click', EventManager.updateRuleString); // new rule string input button
+		document.getElementById('reset')?.addEventListener('click', EventManager.resetCanvas);
+		document.getElementById('speedInput')?.addEventListener('click', EventManager.submitSpeed); // change speed
+		document.getElementById('skipEvenCheckbox')?.addEventListener('change', EventManager.evenFramesCheckboxClicked);
 	}
 
 	static incrementCycleCount() {

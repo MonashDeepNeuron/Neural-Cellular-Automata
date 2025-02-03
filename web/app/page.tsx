@@ -1,4 +1,4 @@
-import WebGPUCanvas from "../components/Canvas.jsx";
+import WebGPUCanvas from "../components/Canvas";
 
 export default function Home() {
 	return (

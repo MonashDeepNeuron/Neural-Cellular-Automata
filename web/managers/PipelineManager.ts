@@ -41,11 +41,11 @@ export default class PipelineManager {
 			targets: [{ format: canvasFormat }]
 		});
 
-		this.pipelines.set(label, pipeline);
+		PipelineManager.pipelines.set(label, pipeline);
 		return pipeline;
 	}
 
 	static getPipeline(label) {
-		return this.pipelines.get(label);
+		return PipelineManager.pipelines.get(label);
 	}
 }

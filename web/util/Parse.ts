@@ -1,4 +1,4 @@
-export const NEIGHBOURHOOD_MAP = {
+export const NEIGHBOURHOOD_MAP: Record<string, number> = {
 	M: 0, // Moore/square
 	N: 1, // Neumann/diamond/radius measured by Manhatten distance
 	C: 2 // Centre of cell within sqrt(dx^2 + dy^2)
@@ -24,7 +24,7 @@ export const NEIGHBOURHOOD_MAP = {
  * @todo BUG - When no given birth or survival cases given, results in error
  * @todo rulestring validation function - pretty much accounted for in current interface setup though
  */
-export function parseRuleString(ruleString) {
+export function parseRuleString(ruleString: string) {
 	ruleString = ruleString.replace(/\s/g, '').toUpperCase(); // Cut out white space and assert uppercase
 
 	// console.log("Getting RULE...");
@@ -43,7 +43,7 @@ export function parseRuleString(ruleString) {
 	const ruleList = [];
 
 	let i = 0;
-	if (ruleString[i] != 'R') {
+	if (ruleString[i] !== 'R') {
 		// console.log("ERROR");
 		return null;
 	}
@@ -73,7 +73,7 @@ export function parseRuleString(ruleString) {
 
 	// Parse survival cases
 
-	while (ruleString[i] != 'S') {
+	while (ruleString[i] !== 'S') {
 		i++;
 	}
 	ruleList.push(0);
@@ -85,11 +85,11 @@ export function parseRuleString(ruleString) {
 	// 2-4, 34-36, B3-4, ...
 	//    ^ -----
 
-	while (ruleString[lastS] != 'B') {
+	while (ruleString[lastS] !== 'B') {
 		lastS++;
 	}
 	lastS -= 3;
-	while (ruleString[lastS] != ',' && ruleString[lastS] != 'S') {
+	while (ruleString[lastS] !== ',' && ruleString[lastS] !== 'S') {
 		lastS--;
 	}
 
@@ -101,12 +101,12 @@ export function parseRuleString(ruleString) {
 		ruleList.push(nextNumber());
 		ruleList[sConditionCountIndex]++;
 
-		while (ruleString[i] != '-' && ruleString[i] != ',') {
+		while (ruleString[i] !== '-' && ruleString[i] !== ',') {
 			//console.log(`Rejected ${ruleString[i]} in survive parse`);
 			i++;
 		}
 
-		if (ruleString[i] == '-') {
+		if (ruleString[i] === '-') {
 			i++; // Exclude dash to prevent misinterpretation as negative
 			ruleList.push(nextNumber());
 			ruleList[sConditionCountIndex]++;
@@ -128,11 +128,11 @@ export function parseRuleString(ruleString) {
 	// 2-4, 34-36, B3-4, ...
 	//    ^ -----
 
-	while (ruleString[lastB] != 'N') {
+	while (ruleString[lastB] !== 'N') {
 		lastB++;
 	}
 	lastB -= 3;
-	while (ruleString[lastB] != ',' && ruleString[lastB] != 'B') {
+	while (ruleString[lastB] !== ',' && ruleString[lastB] != 'B') {
 		lastB--;
 	}
 
@@ -144,11 +144,11 @@ export function parseRuleString(ruleString) {
 		ruleList.push(nextNumber());
 		ruleList[bConditionCountIndex]++;
 
-		while (ruleString[i] != '-' && ruleString[i] != ',') {
+		while (ruleString[i] !== '-' && ruleString[i] != ',') {
 			i++;
 		}
 
-		if (ruleString[i] == '-') {
+		if (ruleString[i] === '-') {
 			ruleList.push(nextNumber());
 			ruleList[bConditionCountIndex]++;
 		} else {
@@ -161,7 +161,7 @@ export function parseRuleString(ruleString) {
 	// from i: ,Nn, S..., B...,
 	// Assume n is a single character
 
-	while (ruleString[i] != 'N') {
+	while (ruleString[i] !== 'N') {
 		i++;
 	}
 	i++;
@@ -197,64 +197,64 @@ export function displayRule(ruleString) {
 	// console.log(`Displaying ${ruleString}`);
 
 	let i = 0;
-	while (ruleString[i] != 'R') {
+	while (ruleString[i] !== 'R') {
 		i++;
 	}
 	i++;
 
 	let R = '';
 
-	while (ruleString[i] != ',') {
+	while (ruleString[i] !== ',') {
 		R += ruleString[i];
 		i++;
 	}
 
 	document.getElementById('simulationInputR').value = R;
 
-	while (ruleString[i] != 'C') {
+	while (ruleString[i] !== 'C') {
 		i++;
 	}
 	i++;
 
 	let C = '';
 
-	while (ruleString[i] != ',') {
+	while (ruleString[i] !== ',') {
 		C += ruleString[i];
 		i++;
 	}
 
 	document.getElementById('simulationInputC').value = C;
 
-	while (ruleString[i] != 'S') {
+	while (ruleString[i] !== 'S') {
 		i++;
 	}
 	i++;
 
 	const sStart = i;
 
-	while (ruleString[i] != 'B') {
+	while (ruleString[i] !== 'B') {
 		i++;
 	}
 
-	while (ruleString[i] != ',') {
+	while (ruleString[i] !== ',') {
 		i--;
 	}
 
 	const S = ruleString.substring(sStart, i);
 	document.getElementById('simulationInputS').value = S;
 
-	while (ruleString[i] != 'B') {
+	while (ruleString[i] !== 'B') {
 		i++;
 	}
 	i++;
 
 	const bStart = i;
 
-	while (ruleString[i] != 'N') {
+	while (ruleString[i] !== 'N') {
 		i++;
 	}
 
-	while (ruleString[i] != ',') {
+	while (ruleString[i] !== ',') {
 		i--;
 	}
 
@@ -262,7 +262,7 @@ export function displayRule(ruleString) {
 
 	document.getElementById('simulationInputB').value = B;
 
-	while (ruleString[i] != 'N') {
+	while (ruleString[i] !== 'N') {
 		i++;
 	}
 	i++;
