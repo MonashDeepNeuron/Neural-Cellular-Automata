@@ -133,13 +133,25 @@ fn computeLinearLayers(perceptionVector: array<f32, 48>, x: i32, y: i32) -> arra
     return h2;
 }
 
-fn createStochasticMask(rand: u32, cellIndex: vec3<u32>) -> bool {
+fn createStochasticMask(rand: u32, cellOffset: u32) -> bool {
     // let randInt = (rand * cellIndex.x * cellIndex.y) % 2u;
-    let value = rand * cellIndex.x * cellIndex.y;
-    let prime = 31
-    let hashval = (value * prime) % (2u ** 32u);
-    //let randInt = ((rand ** cellIndex.x) * cellIndex.y) % 2u;
-    return bool(hashval%2u);
+    // return bool(rand % 2u);
+    // let value = rand * cellIndex.x * cellIndex.y;
+    // let prime = 31u;
+    // let hashval = (value * prime) % 4294967295u;
+    // let randInt = ((rand ** cellIndex.x) * cellIndex.y) % 2u;
+    // return bool(hashval % 2u);
+
+    let prime = 31u;
+    var hashValue = 0u; 
+    var n = rand + cellOffset;
+    while (n > 0u) {
+        hashValue = (hashValue * prime + (n % 10));
+        n = n / 10;
+    }
+
+    return bool(hashValue % 2u);
+
 }
 
 
@@ -153,8 +165,15 @@ fn computeMain(@builtin(global_invocation_id) cell: vec3<u32>) {
     // Apply the update using linear layers
     let output = computeLinearLayers(perceptionVector, i32(cell.x), i32(cell.y));
 
-    // TODO: Apply stochastic mask to the output
-    if (createStochasticMask){
+    if (createStochasticMask(rand, offset)){
+    //     for (var i: u32 = 0u; i < 16u; i = i + 1u) {
+    //         cellStateOut[i + offset] = 1;
+    //     }
+    // } else {
+    //     for (var i: u32 = 0u; i < 16u; i = i + 1u) {
+    //         cellStateOut[i + offset] = 0 ;
+    //     }
+    // }
         // Calculate the final output (add the masked update to the current state)
         var finalState: array<f32, 16> = array<f32, 16>();
     
@@ -175,7 +194,7 @@ fn computeMain(@builtin(global_invocation_id) cell: vec3<u32>) {
     } else {
         // Write the final output to cellStateOut
         for (var i: u32 = 0u; i < 16u; i = i + 1u) {
-            cellStateOut[i + offset] = cellStateIn[i + offset] 
+            cellStateOut[i + offset] = cellStateIn[i + offset] ;
         }
     }
 }
