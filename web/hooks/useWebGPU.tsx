@@ -1,14 +1,12 @@
-import { type RefObject, useEffect, useRef } from "react";
-import BufferManager from "../managers/BufferManager";
-import startingPatterns from "../patterns";
-import { computeShader } from "../shaders/computeShader";
-import { guiShader } from "../shaders/guiShader";
-import { parseRuleString } from "../util/Parse";
-import useTypedSelector from "./useTypedSelector";
+import { type RefObject, useEffect, useRef } from 'react';
+import BufferManager from '../managers/BufferManager';
+import startingPatterns from '../patterns';
+import { computeShader } from '../shaders/computeShader';
+import { guiShader } from '../shaders/guiShader';
+import { parseRuleString } from '../util/Parse';
+import useTypedSelector from './useTypedSelector';
 
-const SQUARE_VERTICIES = new Float32Array([
-	-0.8, -0.8, -0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, -0.8, -0.8, -0.8,
-]);
+const SQUARE_VERTICIES = new Float32Array([-0.8, -0.8, -0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, -0.8, -0.8, -0.8]);
 
 export interface WebGPUSettings {
 	workgroupSize: number;
@@ -32,12 +30,9 @@ export interface WebGPUResources {
 	};
 }
 
-export default function useWebGPU(
-	canvasRef: RefObject<HTMLCanvasElement | null>,
-	settings: WebGPUSettings,
-) {
+export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>, settings: WebGPUSettings) {
 	const { workgroupSize, gridSize, ruleString } = settings;
-	const template = useTypedSelector((state) => state.webGPU.template);
+	const template = useTypedSelector(state => state.webGPU.template);
 	const initialState = startingPatterns[template];
 	const resources = useRef<WebGPUResources>(null);
 
@@ -48,7 +43,7 @@ export default function useWebGPU(
 
 			// Check if WebGPU is supported
 			if (!navigator.gpu) {
-				console.error("WebGPU not supported on this browser.");
+				console.error('WebGPU not supported on this browser.');
 				return;
 			}
 
@@ -58,88 +53,86 @@ export default function useWebGPU(
 				 */
 				const adapter = await navigator.gpu.requestAdapter();
 				if (!adapter) {
-					console.error("No suitable GPUAdapter found.");
+					console.error('No suitable GPUAdapter found.');
 					return;
 				}
 
 				const device = await adapter.requestDevice();
 
 				const canvas = canvasRef.current;
-				const context = canvas.getContext("webgpu");
+				const context = canvas.getContext('webgpu');
 				const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
 
 				if (!context) {
-					console.error("No context found.");
+					console.error('No context found.');
 					return;
 				}
 
 				context.configure({
 					device,
-					format: canvasFormat,
+					format: canvasFormat
 				});
 
-				console.log("WebGPU initialized");
+				console.log('WebGPU initialized');
 
 				/**
 				 * Step 2: Initialize GPU Resources (Pipelines and Buffers)
 				 */
 				const bufferManager = new BufferManager(device);
-				const { vertexBuffer, vertexBufferLayout } =
-					bufferManager.loadShapeVertexBuffer(SQUARE_VERTICIES);
+				const { vertexBuffer, vertexBufferLayout } = bufferManager.loadShapeVertexBuffer(SQUARE_VERTICIES);
 
 				// Create shaders
 				const cellShaderModule = device.createShaderModule({
-					label: "shader that draws",
-					code: guiShader,
+					label: 'shader that draws',
+					code: guiShader
 				});
 
 				const simulationShaderModule = device.createShaderModule({
-					label: "shader that computes next state",
+					label: 'shader that computes next state',
 					code: computeShader,
-					constants: { WORKGROUP_SIZE: workgroupSize },
+					constants: { WORKGROUP_SIZE: workgroupSize }
 				});
 
 				// Create pipeline layout and bind group layout
 				const bindGroupLayout = bufferManager.createBindGroupLayout();
 				const pipelineLayout = device.createPipelineLayout({
-					bindGroupLayouts: [bindGroupLayout],
+					bindGroupLayouts: [bindGroupLayout]
 				});
 
 				// Create render and compute pipelines
 				const renderPipeline = device.createRenderPipeline({
-					label: "Cell pipeline",
+					label: 'Cell pipeline',
 					layout: pipelineLayout,
 					vertex: {
 						module: cellShaderModule,
-						entryPoint: "vertexMain",
-						buffers: [vertexBufferLayout],
+						entryPoint: 'vertexMain',
+						buffers: [vertexBufferLayout]
 					},
 					fragment: {
 						module: cellShaderModule,
-						entryPoint: "fragmentMain",
-						targets: [{ format: canvasFormat }],
-					},
+						entryPoint: 'fragmentMain',
+						targets: [{ format: canvasFormat }]
+					}
 				});
 
 				const simulationPipeline = device.createComputePipeline({
-					label: "Simulation pipeline",
+					label: 'Simulation pipeline',
 					layout: pipelineLayout,
 					compute: {
 						module: simulationShaderModule,
-						entryPoint: "computeMain",
-					},
+						entryPoint: 'computeMain'
+					}
 				});
 
-				console.log("Configured GPU resources");
+				console.log('Configured GPU resources');
 
 				// Initialize buffers and bind groups
-				const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } =
-					bufferManager.initialiseComputeBindgroups(
-						renderPipeline,
-						gridSize,
-						initialState,
-						parseRuleString(ruleString),
-					);
+				const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = bufferManager.initialiseComputeBindgroups(
+					renderPipeline,
+					gridSize,
+					initialState,
+					parseRuleString(ruleString)
+				);
 
 				/**
 				 * Step 3: Update refs to point at WebGPU state
@@ -149,18 +142,18 @@ export default function useWebGPU(
 					context,
 					pipelines: {
 						renderPipeline,
-						simulationPipeline,
+						simulationPipeline
 					},
 					buffers: {
 						bindGroups,
 						uniformBuffer,
 						cellStateStorage,
 						ruleStorage,
-						vertexBuffer,
-					},
+						vertexBuffer
+					}
 				};
 			} catch (error) {
-				console.error("Failed to initialize WebGPU:", error);
+				console.error('Failed to initialize WebGPU:', error);
 			}
 		};
 
