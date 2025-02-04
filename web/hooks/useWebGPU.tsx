@@ -6,7 +6,7 @@ import { guiShader } from '../shaders/guiShader';
 import { parseRuleString } from '../util/Parse';
 import useTypedSelector from './useTypedSelector';
 
-const SQUARE_VERTICIES = new Float32Array([-0.8, -0.8, -0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, -0.8, -0.8, -0.8]);
+const SQUARE_VERTICIES = new Float32Array([-1, -1, -1, 1, 1, 1, 1, 1, 1, -1, -1, -1]);
 
 export interface WebGPUSettings {
 	workgroupSize: number;

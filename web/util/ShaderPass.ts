@@ -1,6 +1,6 @@
 import type { WebGPUResources, WebGPUSettings } from '@/hooks/useWebGPU';
 
-const SQUARE_VERTICIES = new Float32Array([-0.8, -0.8, -0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, -0.8, -0.8, -0.8]);
+const SQUARE_VERTICIES = new Float32Array([-1, -1, -1, 1, 1, 1, 1, 1, 1, -1, -1, -1]);
 
 /**
  * Factory function to create a parameterized renderPass function.
