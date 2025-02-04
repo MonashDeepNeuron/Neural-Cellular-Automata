@@ -17,7 +17,7 @@ export const SpeedSlider = () => {
 	};
 
 	return (
-		<div className='mt-4 flex flex-col items-center rounded-md shadow-lg bg-blue-100 p-8'>
+		<div className='mt-4 flex flex-col items-center rounded-md shadow-lg bg-background p-8'>
 			<label htmlFor='speed-slider' className='text-lg font-semibold mb-2'>
 				Frames Per Second
 			</label>
