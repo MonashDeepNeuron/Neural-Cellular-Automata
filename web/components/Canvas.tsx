@@ -49,7 +49,6 @@ const Canvas = () => {
 	return (
 		<div className='flex flex-col lg:flex-row items-center lg:items-start justify-between w-full h-screen p-4 gap-4 bg-gray-200 overflow-auto p-4'>
 			{/* Controls Panel */}
-
 			<div className='flex flex-col bg-white rounded-md shadow-lg p-4 w-full lg:w-1/3 relative'>
 				<button
 					type='button'
@@ -61,7 +60,6 @@ const Canvas = () => {
 				<h1 className='text-2xl font-bold mb-2'>
 					Simulating <span className='text-pink-500 font-bold'>{startingPatterns[template].name}</span>
 				</h1>
-
 				{toolkitOpen && (
 					<div className='mt-4'>
 						<TemplateDropdown />
@@ -79,7 +77,6 @@ const Canvas = () => {
 				</button>
 				<h2 className='mt-4 text-lg font-medium'>Step: {step}</h2>
 			</div>
-
 			{/* Canvas */}
 			<div className='flex items-center justify-center p-4'>
 				<canvas
