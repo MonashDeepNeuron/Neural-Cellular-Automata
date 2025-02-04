@@ -227,11 +227,11 @@ export default class BufferManager {
         // Write the sliced weights to the buffers
         device.queue.writeBuffer(stochasticMaskBuffer, 0, stochasticMaskArray);
 
-        return { stochasticMaskBuffer };
+        return stochasticMaskBuffer;
     }
 
-    static changeStochasticMaskSeed(device) {
-        stochasticMaskSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER); // TODO: ensure datatype is correct
+    static changeStochasticMaskSeed(device, stochasticMaskBuffer) {
+        let stochasticMaskSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER); // TODO: ensure datatype is correct
         let stochasticMaskArray = new Int32Array([stochasticMaskSeed])
         device.queue.writeBuffer(stochasticMaskBuffer, 0, stochasticMaskArray);    
         return stochasticMaskBuffer

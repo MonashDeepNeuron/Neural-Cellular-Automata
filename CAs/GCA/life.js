@@ -123,7 +123,7 @@ const updateLoop =  () => { //async () => { // TODO: REMOVE ASYNC WHEN REMOVE LO
     //     });
     // }
 
-    stochasticMaskBuffer = BufferManager.changeStochasticMaskSeed(device)
+    stochasticMaskBuffer = BufferManager.changeStochasticMaskSeed(device, stochasticMaskBuffer)
 
     /* Perform multiple updates per render pass */
     if (EventManager.running) {
