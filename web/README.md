@@ -34,3 +34,15 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Linting & Type Checking
+
+[Biome](https://biome.dev) performs linting and type checking is done with [TypeScript](https://www.typescriptlang.org/). It is recommended to open and work on this project folder in [VSCode](https://code.visualstudio.com/) in its own workspace (rather than opening the root folder). This will ensure linting, and TypeScript type checking is works correctly.
+
+You will need to install the `Biome` extension for VSCode. Enabling Biome as a formatter and the `"Format on Save"` option in VSCode settings will make linting on the fly very smooth.
+
+If you ever need to run the linter manually, you can do so with the following command from the root of the repository:
+
+```bash
+pnpm run lint
+```
