@@ -1,27 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import useTypedSelector from '@/hooks/useTypedSelector';
+import { type ChangeEventHandler, type MouseEventHandler, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import startingPatterns from '../patterns/startingPatterns';
 import { changeTemplate, resetStep } from '../store/webGPUSlice';
 
 export default function TemplateDropdown() {
 	const dispatch = useDispatch();
-	const running = useSelector(state => state.webGPU.running);
-	const template = useSelector(state => state.webGPU.template);
+	const template = useTypedSelector(state => state.webGPU.template);
 	const [selectedValue, setSelectedValue] = useState(template);
 
-	const handleChange = event => {
-		setSelectedValue(prev => event.target.value);
+	const handleChange: ChangeEventHandler<HTMLSelectElement> = event => {
+		setSelectedValue(Number(event.target.value));
 	};
-	const handleTemplateChange = event => {
+	const handleTemplateChange: MouseEventHandler<HTMLButtonElement> = event => {
 		event.preventDefault();
 		dispatch(changeTemplate(selectedValue));
 		dispatch(resetStep());
 	};
 	return (
 		<div className='flex rounded-md shadow-lg bg-pink-100 items-center p-8'>
-			<form onSubmit={handleTemplateChange} className='flex flex-col items-center justify-center gap-4'>
+			<form onSubmit={e => e.preventDefault()} className='flex flex-col items-center justify-center gap-4'>
 				<label htmlFor='dropdown' className='text-lg font-semibold'>
 					Starting Pattern
 				</label>

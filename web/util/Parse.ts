@@ -18,14 +18,14 @@ export const NEIGHBOURHOOD_MAP: Record<string, number> = {
  * Cell states greater than 0 are considered alive still.
  *
  * See https://conwaylife.com/wiki/Larger_than_Life
- * @param {String} ruleString
- * @returns {Uint32Array} rule array in format: [r, c, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
+ * @param ruleString
+ * @returns rule array in format: [r, c, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
  * @todo this function returns null with invalid input, needs to be accounted for in other code
  * @todo BUG - When no given birth or survival cases given, results in error
  * @todo rulestring validation function - pretty much accounted for in current interface setup though
  */
-export function parseRuleString(ruleString: string) {
-	ruleString = ruleString.replace(/\s/g, '').toUpperCase(); // Cut out white space and assert uppercase
+export function parseRuleString(raw: string): Uint32Array | null {
+	const ruleString = raw.replace(/\s/g, '').toUpperCase(); // Cut out white space and assert uppercase
 
 	// console.log("Getting RULE...");
 	// ruleString is given by the user. it is a string
@@ -40,7 +40,7 @@ export function parseRuleString(ruleString: string) {
 		return null;
 	}
 
-	const ruleList = [];
+	const ruleList: number[] = [];
 
 	let i = 0;
 	if (ruleString[i] !== 'R') {
@@ -132,7 +132,7 @@ export function parseRuleString(ruleString: string) {
 		lastB++;
 	}
 	lastB -= 3;
-	while (ruleString[lastB] !== ',' && ruleString[lastB] != 'B') {
+	while (ruleString[lastB] !== ',' && ruleString[lastB] !== 'B') {
 		lastB--;
 	}
 
@@ -144,7 +144,7 @@ export function parseRuleString(ruleString: string) {
 		ruleList.push(nextNumber());
 		ruleList[bConditionCountIndex]++;
 
-		while (ruleString[i] !== '-' && ruleString[i] != ',') {
+		while (ruleString[i] !== '-' && ruleString[i] !== ',') {
 			i++;
 		}
 
@@ -193,7 +193,7 @@ export function parseRuleString(ruleString: string) {
  *
  * @param {String} ruleString
  */
-export function displayRule(ruleString) {
+export function displayRule(ruleString: string) {
 	// console.log(`Displaying ${ruleString}`);
 
 	let i = 0;
@@ -209,7 +209,8 @@ export function displayRule(ruleString) {
 		i++;
 	}
 
-	document.getElementById('simulationInputR').value = R;
+	const inputR = document.getElementById('simulationInputR');
+	if (inputR) (inputR as HTMLInputElement).value = R;
 
 	while (ruleString[i] !== 'C') {
 		i++;
@@ -223,7 +224,8 @@ export function displayRule(ruleString) {
 		i++;
 	}
 
-	document.getElementById('simulationInputC').value = C;
+	const inputC = document.getElementById('simulationInputC');
+	if (inputC) (inputC as HTMLInputElement).value = C;
 
 	while (ruleString[i] !== 'S') {
 		i++;
@@ -241,7 +243,8 @@ export function displayRule(ruleString) {
 	}
 
 	const S = ruleString.substring(sStart, i);
-	document.getElementById('simulationInputS').value = S;
+	const inputS = document.getElementById('simulationInputS');
+	if (inputS) (inputS as HTMLInputElement).value = S;
 
 	while (ruleString[i] !== 'B') {
 		i++;
@@ -259,18 +262,19 @@ export function displayRule(ruleString) {
 	}
 
 	const B = ruleString.substring(bStart, i);
-
-	document.getElementById('simulationInputB').value = B;
+	const inputB = document.getElementById('simulationInputB');
+	if (inputB) (inputB as HTMLInputElement).value = B;
 
 	while (ruleString[i] !== 'N') {
 		i++;
 	}
 	i++;
 
-	document.getElementById('simulationInputN').value = ruleString[i];
+	const inputN = document.getElementById('simulationInputN');
+	if (inputN) (inputN as HTMLInputElement).value = ruleString[i];
 }
 
 /** Convenience function, probably exists in a library*/
-function isDigit(c) {
+function isDigit(c: string) {
 	return c >= '0' && c <= '9';
 }

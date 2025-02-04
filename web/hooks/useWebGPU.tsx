@@ -1,21 +1,42 @@
-import { type RefObject, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { type RefObject, useEffect, useRef } from 'react';
 import BufferManager from '../managers/BufferManager';
 import startingPatterns from '../patterns/startingPatterns';
 import { computeShader } from '../shaders/computeShader';
 import { guiShader } from '../shaders/guiShader';
 import { parseRuleString } from '../util/Parse';
+import useTypedSelector from './useTypedSelector';
 
 const SQUARE_VERTICIES = new Float32Array([-0.8, -0.8, -0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, -0.8, -0.8, -0.8]);
 
-export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>, settings) {
+export interface WebGPUSettings {
+	workgroupSize: number;
+	gridSize: number;
+	ruleString: string;
+}
+
+export interface WebGPUResources {
+	device: GPUDevice;
+	context: GPUCanvasContext;
+	pipelines: {
+		renderPipeline: GPURenderPipeline;
+		simulationPipeline: GPUComputePipeline;
+	};
+	buffers: {
+		bindGroups: GPUBindGroup[];
+		uniformBuffer: GPUBuffer;
+		cellStateStorage: GPUBuffer[];
+		ruleStorage: GPUBuffer;
+		vertexBuffer: GPUBuffer;
+	};
+}
+
+export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>, settings: WebGPUSettings) {
 	const { workgroupSize, gridSize, ruleString } = settings;
-	const template = useSelector(state => state.webGPU.template);
+	const template = useTypedSelector(state => state.webGPU.template);
 	const initialState = startingPatterns[template];
+	const resources = useRef<WebGPUResources>(null);
 
-	const [initialised, setInitialised] = useState(false);
-	const resources = useRef(null);
-
+	// biome-ignore lint/correctness/useExhaustiveDependencies: test missing dependencies
 	useEffect(() => {
 		const initializeWebGPU = async () => {
 			if (!canvasRef.current) return;
@@ -57,7 +78,8 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 				/**
 				 * Step 2: Initialize GPU Resources (Pipelines and Buffers)
 				 */
-				const { vertexBuffer, vertexBufferLayout } = BufferManager.loadShapeVertexBuffer(device, SQUARE_VERTICIES);
+				const bufferManager = new BufferManager(device);
+				const { vertexBuffer, vertexBufferLayout } = bufferManager.loadShapeVertexBuffer(SQUARE_VERTICIES);
 
 				// Create shaders
 				const cellShaderModule = device.createShaderModule({
@@ -72,7 +94,7 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 				});
 
 				// Create pipeline layout and bind group layout
-				const bindGroupLayout = BufferManager.createBindGroupLayout(device);
+				const bindGroupLayout = bufferManager.createBindGroupLayout();
 				const pipelineLayout = device.createPipelineLayout({
 					bindGroupLayouts: [bindGroupLayout]
 				});
@@ -105,8 +127,7 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 				console.log('Configured GPU resources');
 
 				// Initialize buffers and bind groups
-				const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = BufferManager.initialiseComputeBindgroups(
-					device,
+				const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = bufferManager.initialiseComputeBindgroups(
 					renderPipeline,
 					gridSize,
 					initialState,
@@ -139,12 +160,7 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 		initializeWebGPU();
 
 		return () => {
-			resources.current = {
-				device: null,
-				context: null,
-				pipelines: null,
-				buffers: null
-			};
+			resources.current = null;
 		};
 	}, [template]);
 	return resources.current;

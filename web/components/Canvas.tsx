@@ -1,9 +1,10 @@
 'use client';
 
+import useTypedSelector from '@/hooks/useTypedSelector';
 import { useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useRenderLoop } from '../hooks/useRenderLoop';
-import useWebGPU from '../hooks/useWebGPU';
+import useWebGPU, { type WebGPUResources } from '../hooks/useWebGPU';
 import startingPatterns from '../patterns/startingPatterns';
 import { toggleRunning } from '../store/webGPUSlice';
 import { SpeedSlider } from './SpeedSlider';
@@ -11,17 +12,17 @@ import TemplateDropdown from './TemplateDropdown';
 
 const Canvas = () => {
 	/**
-	 * Obtain state from webgpu slice of redux store
+	 * Obtain state from WebGPU slice of redux store
 	 */
 	const dispatch = useDispatch();
-	const running = useSelector(state => state.webGPU.running);
-	const template = useSelector(state => state.webGPU.template);
-	const step = useSelector(state => state.webGPU.step);
+	const running = useTypedSelector(state => state.webGPU.running);
+	const template = useTypedSelector(state => state.webGPU.template);
+	const step = useTypedSelector(state => state.webGPU.step);
 
 	const [toolkitOpen, setToolkitOpen] = useState(false);
 
 	/**
-	 * Derived state for configuring webgpu side effects
+	 * Derived state for configuring WebGPU side effects
 	 */
 	const selectedTemplate = template ? startingPatterns[template] : startingPatterns[8];
 	const settings = {
@@ -37,7 +38,7 @@ const Canvas = () => {
 	 * We use ref here for persistence between re-renders
 	 */
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const resourceRef = useRef(null);
+	const resourceRef = useRef<WebGPUResources>(null);
 
 	resourceRef.current = useWebGPU(canvasRef, settings);
 
@@ -89,43 +90,5 @@ const Canvas = () => {
 		</div>
 	);
 };
-
-// <div className="flex flex-col items-center w-full min-h-screen bg-gray-200 overflow-auto">
-//     <div className="p-4 flex flex-col items-center bg-white rounded-md shadow-lg mt-8">
-//         <button
-//             onClick={() => setToolkitOpen(!toolkitOpen)}
-//             className="mt-4 bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
-//         >
-//             {toolkitOpen ? "Collapse" : "Expand"}
-//         </button>
-
-//         {toolkitOpen && (
-//             <div className="mt-4">
-//                 <TemplateDropdown />
-//                 <SpeedSlider />
-//             </div>
-
-//         )}
-//         <button
-//             onClick={() => dispatch(toggleRunning())}
-
-//             className={`mt-4 px-4 py-2 rounded-md shadow ${running
-//                 ? "bg-red-500 text-white hover:bg-red-600"
-//                 : "bg-green-500 text-white hover:bg-green-600"
-//                 }`}
-//         >
-//             {running ? "Pause" : "Start"}
-//         </button>
-//         <h2 className="mt-4 text-lg font-medium">Step: {step}</h2>
-
-//     </div>
-
-//     <canvas
-//         ref={canvasRef}
-//         width={1024}
-//         height={1024}
-//         className={`mt-8 w-1/2 h-1/2 border border-gray-300 rounded-md shadow-lg ${step === 0 ? "hidden" : ""}`} />
-
-// </div>
 
 export default Canvas;

@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import useTypedSelector from '@/hooks/useTypedSelector';
+import { type ChangeEventHandler, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { setFramesPerSecond } from '../store/webGPUSlice';
 
 export const SpeedSlider = () => {
 	const dispatch = useDispatch();
-	const framesPerSecond = useSelector(state => state.webGPU.framesPerSecond);
+	const framesPerSecond = useTypedSelector(state => state.webGPU.framesPerSecond);
 	const [fpsReference, setFpsReference] = useState(framesPerSecond);
 
-	const handleChange = event => {
+	const handleChange: ChangeEventHandler<HTMLInputElement> = event => {
 		const fps = Number(event.target.value);
 		setFpsReference(fps);
 		dispatch(setFramesPerSecond(fps));

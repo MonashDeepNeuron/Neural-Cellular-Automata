@@ -1,4 +1,11 @@
+import type { Pattern } from '@/patterns/startingPatterns';
+
 export default class BufferManager {
+	private device: GPUDevice;
+
+	constructor(device: GPUDevice) {
+		this.device = device;
+	}
 	// Notes for vertex buffer
 	// A square that will be drawn on each cell. Vertexs loaded correspond to
 	// if the cell were a 1x1 square. This will be scaled and positioned by
@@ -6,20 +13,19 @@ export default class BufferManager {
 
 	/**
 	 * Load the verticies to be drawn
-	 * @param {GPUDevice} device
-	 * @param {Float32Array} shapeVerticies Verticies of triangles that form the
+	 * @param shapeVerticies Verticies of triangles that form the
 	 *          shape.
-	 * @returns {GPUBuffer, GPUBuffer} vertexBuffer, vertexBufferLayout
+	 * @returns vertexBuffer, vertexBufferLayout
 	 */
-	static loadShapeVertexBuffer(device, shapeVerticies) {
+	loadShapeVertexBuffer(shapeVerticies: Float32Array) {
 		// load verticies into buffer
 		// This is currently used only for a square
-		const vertexBuffer = device.createBuffer({
+		const vertexBuffer = this.device.createBuffer({
 			label: 'Cell vertices', // Error message label
 			size: shapeVerticies.byteLength,
 			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
 		});
-		device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/ 0, shapeVerticies);
+		this.device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/ 0, shapeVerticies);
 
 		// define layout of loaded binary data
 		const vertexBufferLayout = {
@@ -39,33 +45,31 @@ export default class BufferManager {
 	/**
 	 * Define where and what information can be accessed by the GPU code
 	 * Set and make all required information available to the GPU (for the first time)
-	 * @param {GPUDevice} device the GPU device object
-	 * @param {GPURenderPipeline} renderPipeline
-	 * @param {Number} gridSize sidelength of grid, where the grid is a square array of cells
-	 * @param {Array} initialState the initial state of the grid, filled with floating point values
+	 * @param renderPipeline
+	 * @param gridSize sidelength of grid, where the grid is a square array of cells
+	 * @param initialState the initial state of the grid, filled with floating point values
 	 *      NOTE: This may be null, where null represents a randomised grid. If the pattern
 	 *      is null, this also constitutes a randomised grid.
-	 * @param {Float32Array} rule The numbers from the current rule (kernel)
+	 * @param rule The numbers from the current rule (kernel)
 	 * @returns bindGroups, uniformBuffer, cellStateStorage, ruleStorage
 	 **/
-	static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, rule) {
+	initialiseComputeBindgroups(renderPipeline: GPURenderPipeline, gridSize: number, initialState: Pattern, rule: Float32Array) {
 		// Uniform grid
 		const uniformArray = new Float32Array([gridSize, gridSize]);
-		const uniformBuffer = device.createBuffer({
+		const uniformBuffer = this.device.createBuffer({
 			label: 'Grid Uniforms',
 			size: uniformArray.byteLength,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 		});
-		device.queue.writeBuffer(uniformBuffer, 0, uniformArray);
+		this.device.queue.writeBuffer(uniformBuffer, 0, uniformArray);
 
-		const cellStateStorage = BufferManager.setInitialStateBuffer(device, gridSize, initialState);
+		const cellStateStorage = this.setInitialStateBuffer(gridSize, initialState);
 
-		const ruleStorage = BufferManager.setRuleBuffer(device, rule);
+		const ruleStorage = this.setRuleBuffer(rule);
 
 		// setup bind groups
 		const bindGroups = [
-			BufferManager.createBindGroup(
-				device,
+			this.createBindGroup(
 				renderPipeline,
 				'Cell renderer bind group A',
 				uniformBuffer,
@@ -73,15 +77,7 @@ export default class BufferManager {
 				cellStateStorage[1],
 				ruleStorage
 			),
-			BufferManager.createBindGroup(
-				device,
-				renderPipeline,
-				'Cell render bind group B',
-				uniformBuffer,
-				cellStateStorage[1],
-				cellStateStorage[0],
-				ruleStorage
-			)
+			this.createBindGroup(renderPipeline, 'Cell render bind group B', uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
 		];
 		return { bindGroups, uniformBuffer, cellStateStorage, ruleStorage };
 	}
@@ -89,26 +85,25 @@ export default class BufferManager {
 	/**
 	 * Defines the buffer sizes and sets up the buffers for the cell storages
 	 * Randomises the canvas when the initialState is null
-	 * @param {GPUDevice} device
-	 * @param {Number} gridSize sidelength of grid, where the grid is a square array of cells
-	 * @param {Array} initialState the initial state of the grid
+	 * @param gridSize sidelength of grid, where the grid is a square array of cells
+	 * @param initialState the initial state of the grid
 	 *      NOTE: This may be null, where null represents a randomised grid. If the pattern
 	 *      is null, this also constitutes a randomised grid.
 	 * @returns GPUBuffer[2] cellStateStorage with two buffers.
 	 *      cellStateStorage[0] contains the initial state, cellStateStorage[1] is blank
 	 */
-	static setInitialStateBuffer(device, gridSize, initialState) {
+	setInitialStateBuffer(gridSize: number, initialState: Pattern | null) {
 		// If initial state = null, assign random
 		// Cell state arrays
 		const cellStateArray = new Uint32Array(gridSize * gridSize);
 		const cellStateStorage = [
-			device.createBuffer({
+			this.device.createBuffer({
 				label: 'Cell State A',
 				size: cellStateArray.byteLength,
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			}),
 
-			device.createBuffer({
+			this.device.createBuffer({
 				label: 'Cell State B',
 				size: cellStateArray.byteLength,
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
@@ -116,7 +111,7 @@ export default class BufferManager {
 		];
 
 		// write to buffer A
-		if (initialState == null || initialState.pattern == null) {
+		if (initialState === null || initialState.pattern == null) {
 			for (let i = 0; i < cellStateArray.length; i++) {
 				cellStateArray[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
 			}
@@ -133,13 +128,13 @@ export default class BufferManager {
 			}
 			// console.log(`Implementing ${initialState.name}`);
 		}
-		device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
+		this.device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
 
 		// write to buffer B
 		for (let i = 0; i < cellStateArray.length; i++) {
 			cellStateArray[i] = 0;
 		}
-		device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
+		this.device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
 		return cellStateStorage;
 	}
@@ -148,11 +143,11 @@ export default class BufferManager {
 	 * Convenience function, creates the bindings and sets the accessibility of
 	 * GPU-available resources. Bindgroup layout defines the data visibility and
 	 * permissions
-	 * @param {GPUDevice} device
+	 * @param device
 	 * @returns bindgroup layout with 4 entries (0-3)
 	 */
-	static createBindGroupLayout(device) {
-		return device.createBindGroupLayout({
+	createBindGroupLayout() {
+		return this.device.createBindGroupLayout({
 			label: 'Cell Bind Group Layout',
 			entries: [
 				{
@@ -186,17 +181,23 @@ export default class BufferManager {
 	 * Defines the way that each resource is referenced/accessed from WGSL code
 	 * This function ensures that consistent binding numbers are used throughout
 	 * This must be kept consistent with the bindgroup layout
-	 * @param {GPUDevice} device
-	 * @param {GPURenderPipeline} renderPipeline
-	 * @param {String} label
-	 * @param {GPUBuffer} uniformBuffer
-	 * @param {GPUBuffer} inputStateBuffer
-	 * @param {GPUBuffer} outputStateBuffer
-	 * @param {GPUBuffer} ruleStorage
+	 * @param renderPipeline
+	 * @param label
+	 * @param uniformBuffer
+	 * @param inputStateBuffer
+	 * @param outputStateBuffer
+	 * @param ruleStorage
 	 * @returns GPUBindGroupLayout
 	 */
-	static createBindGroup(device, renderPipeline, label, uniformBuffer, cellStateA, cellStateB, ruleStorage) {
-		return device.createBindGroup({
+	createBindGroup(
+		renderPipeline: GPURenderPipeline,
+		label: string,
+		uniformBuffer: GPUBuffer,
+		cellStateA: GPUBuffer,
+		cellStateB: GPUBuffer,
+		ruleStorage: GPUBuffer
+	) {
+		return this.device.createBindGroup({
 			label: label,
 			layout: renderPipeline.getBindGroupLayout(0), // NOTE: renderpipelne and simulation pipeline use same layout
 			entries: [
@@ -211,18 +212,17 @@ export default class BufferManager {
 	/**
 	 * Convenience function for code organisation.
 	 * Writes out the rule buffer such that it is consistent with expected settings
-	 * @param {GPUDevice} device
-	 * @param {Float32Array} rule The numbers from the current rule (kernel)
+	 * @param rule The numbers from the current rule (kernel)
 	 * @returns rulestorage as GPUBuffer object
 	 */
-	static setRuleBuffer(device, rule) {
+	setRuleBuffer(rule: Float32Array) {
 		const ruleArray = rule;
-		const ruleStorage = device.createBuffer({
+		const ruleStorage = this.device.createBuffer({
 			label: 'Rule Storage',
 			size: ruleArray.byteLength,
 			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 		});
-		device.queue.writeBuffer(ruleStorage, 0, ruleArray);
+		this.device.queue.writeBuffer(ruleStorage, 0, ruleArray);
 		return ruleStorage;
 	}
 }

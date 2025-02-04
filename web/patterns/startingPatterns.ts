@@ -1,3 +1,12 @@
+export interface Pattern {
+	name: string;
+	pattern: number[] | null;
+	width: number;
+	height: number;
+	minGrid: number;
+	rule: string;
+}
+
 const spaceship1 = {
 	name: "Conway's life glider",
 	pattern: [
@@ -227,4 +236,18 @@ const testCircular = {
 	rule: 'R5,C0,S0-79,B80,NC'
 };
 
-export default [spaceship1, littleThings, B29, bug, brick, squircles, kaboom, nmBug, circularBug, testVonNeumann, testCircular];
+const patterns: Pattern[] = [
+	spaceship1,
+	littleThings,
+	B29,
+	bug,
+	brick,
+	squircles,
+	kaboom,
+	nmBug,
+	circularBug,
+	testVonNeumann,
+	testCircular
+];
+
+export default patterns;
