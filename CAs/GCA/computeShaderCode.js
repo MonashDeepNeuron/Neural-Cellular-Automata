@@ -134,8 +134,12 @@ fn computeLinearLayers(perceptionVector: array<f32, 48>, x: i32, y: i32) -> arra
 }
 
 fn createStochasticMask(rand: u32, cellIndex: vec3<u32>) -> bool {
-    let randInt = (rand * cellIndex.x * cellIndex.y) % 2u;
-    return bool(randInt);
+    // let randInt = (rand * cellIndex.x * cellIndex.y) % 2u;
+    let value = rand * cellIndex.x * cellIndex.y;
+    let prime = 31
+    let hashval = (value * prime) % (2u ** 32u);
+    //let randInt = ((rand ** cellIndex.x) * cellIndex.y) % 2u;
+    return bool(hashval%2u);
 }
 
 
