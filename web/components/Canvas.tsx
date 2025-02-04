@@ -1,12 +1,12 @@
 'use client';
 
-import useTypedSelector from '@/hooks/useTypedSelector';
-import { useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useRenderLoop } from '@/hooks/useRenderLoop';
+import useTypedSelector from '@/hooks/useTypedSelector';
 import useWebGPU, { type WebGPUResources } from '@/hooks/useWebGPU';
 import startingPatterns from '@/patterns';
 import { toggleRunning } from '@/store/webGPUSlice';
+import { useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import SpeedSlider from './SpeedSlider';
 import TemplateDropdown from './TemplateDropdown';
 
