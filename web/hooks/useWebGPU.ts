@@ -132,7 +132,7 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 				}
 
 				// Initialize buffers and bind groups
-				const buffers = bufferManager.initialiseComputeBindgroups(renderPipeline, gridSize, initialState, rule);
+				const buffers = bufferManager.initialiseComputeBindGroups(renderPipeline, gridSize, initialState, rule);
 
 				/**
 				 * Step 3: Update refs to point at WebGPU state

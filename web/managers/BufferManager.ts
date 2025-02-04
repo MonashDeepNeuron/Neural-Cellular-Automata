@@ -49,17 +49,14 @@ export default class BufferManager {
 	/**
 	 * Define where and what information can be accessed by the GPU code
 	 * Set and make all required information available to the GPU (for the first time)
-	 * @param renderPipeline
-	 * @param gridSize sidelength of grid, where the grid is a square array of cells
-	 * @param initialState the initial state of the grid, filled with floating point values
-	 *      NOTE: This may be null, where null represents a randomised grid. If the pattern
-	 *      is null, this also constitutes a randomised grid.
-	 * @param rule The numbers from the current rule (kernel)
-	 * @returns bindGroups, uniformBuffer, cellStateBuffers, ruleBuffer
+	 * @param size Size of the square grid.
+	 * @param pattern The initial state pattern. If not defined, the grid will instead be initialised with a random grid.
+	 * @param rule The numbers from the current rule (kernel).
+	 * @returns Bind groups and associated buffers.
 	 **/
-	initialiseComputeBindgroups(renderPipeline: GPURenderPipeline, gridSize: number, initialState: Pattern, rule: Uint32Array) {
+	initialiseComputeBindGroups(renderPipeline: GPURenderPipeline, size: number, pattern: Pattern, rule: Uint32Array) {
 		// Uniform grid
-		const uniformArray = new Float32Array([gridSize, gridSize]);
+		const uniformArray = new Float32Array([size, size]);
 		const uniformBuffer = this.device.createBuffer({
 			label: 'Grid Uniforms',
 			size: uniformArray.byteLength,
@@ -67,7 +64,7 @@ export default class BufferManager {
 		});
 		this.device.queue.writeBuffer(uniformBuffer, 0, uniformArray);
 
-		const cellStateBuffers = this.setInitialStateBuffer(gridSize, initialState);
+		const cellStateBuffers = this.setInitialStateBuffer(size, pattern);
 		const ruleBuffer = this.setRuleBuffer(rule);
 
 		// Setup alternating bind groups
@@ -82,7 +79,7 @@ export default class BufferManager {
 	/**
 	 * Creates and initialises the cell state buffers.
 	 * @param size Size of the square grid.
-	 * @param pattern The initial state pattern.  If not defined, the grid will instead be initialised with a random grid.
+	 * @param pattern The initial state pattern. If not defined, the grid will instead be initialised with a random grid.
 	 * @returns A pair of cell state GPUBuffers.
 	 */
 	setInitialStateBuffer(size: number, pattern: Pattern | null): CellStateBufferPair {
@@ -170,12 +167,6 @@ export default class BufferManager {
 	 * Defines the way that each resource is referenced/accessed from WGSL code
 	 * This function ensures that consistent binding numbers are used throughout
 	 * This must be kept consistent with the bindgroup layout
-	 * @param renderPipeline
-	 * @param label
-	 * @param uniformBuffer
-	 * @param inputStateBuffer
-	 * @param outputStateBuffer
-	 * @param ruleBuffer
 	 * @returns GPUBindGroupLayout
 	 */
 	createBindGroup(
