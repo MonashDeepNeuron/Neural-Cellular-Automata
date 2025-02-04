@@ -48,7 +48,7 @@ export default function Canvas() {
 	});
 
 	return (
-		<div className='flex flex-col lg:flex-row items-center lg:items-start justify-between w-full h-screen p-4 gap-4 bg-background overflow-auto'>
+		<div className='flex flex-col lg:flex-row items-center lg:items-start justify-between w-full h-screen p-4 gap-4 overflow-auto'>
 			{/* Controls Panel */}
 			<div className='flex flex-col bg-white rounded-md shadow-lg p-4 w-full lg:w-1/3 relative'>
 				<button

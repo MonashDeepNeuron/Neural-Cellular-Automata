@@ -6,7 +6,9 @@ export default {
 		extend: {
 			colors: {
 				background: 'var(--background)',
-				foreground: 'var(--foreground)'
+				foreground: 'var(--foreground)',
+				purple: '#7065f9',
+				'dark-purple': '#5a4ce9'
 			}
 		}
 	},
