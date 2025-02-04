@@ -95,8 +95,10 @@ let weights = await loadWeights('/model_weights_logo.bin');
 console.log(weights)
 
 
+let stochasticMaskSeed = 0;
+
 /* Set buffers*/
-let { bindGroups, uniformBuffer, cellStateStorage, w1, b1, w2 } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, weights);
+let { bindGroups, uniformBuffer, cellStateStorage, w1, b1, w2, stochasticMaskBuffer } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, weights, stochasticMaskSeed); // TODO: Update this function
 
 
 /* First render pass to initalise canvas*/
@@ -107,18 +109,21 @@ device.queue.submit([encoder.finish()]);
 
 
 /* Animation rendering and calculation instructions*/
-const updateLoop = async () => { // TODO: REMOVE ASYNC WHEN REMOVE LOGGING
+const updateLoop =  () => { //async () => { // TODO: REMOVE ASYNC WHEN REMOVE LOGGING
     const encoder = device.createCommandEncoder();
 
     renderPass(encoder);
-    console.log(step)
+    // Console logging for state if needed for debugging
+    // console.log(step)
     // Log cell state storage
     // Only log every 10 frames (or adjust the interval)
-    if (step % 10 === 0) {
-        logCellStateStorage(device, cellStateStorage, GRID_SIZE).then(() => {
-            console.log("Logged cell state storage");
-        });
-    }
+    // if (step % 10 === 0) {
+    //     logCellStateStorage(device, cellStateStorage, GRID_SIZE).then(() => {
+    //         console.log("Logged cell state storage");
+    //     });
+    // }
+
+    BufferManager.changeStochasticMaskSeed(device)
 
     /* Perform multiple updates per render pass */
     if (EventManager.running) {

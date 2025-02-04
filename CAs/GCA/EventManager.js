@@ -5,7 +5,7 @@
 // Many functions are used as event triggered functions and for some reason this
 // does not work well for these applications.
 // I have no idea why but switching to 'EventManager' on these functions solved the issue
-// Potentially a script language thing (as opposed to complied)
+// Potentially a script language thing
 
 export default class EventManager {
     // event related global variables
