@@ -31,7 +31,7 @@ export interface WebGPUResources {
 }
 
 export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>, settings: WebGPUSettings) {
-	const { workgroupSize, gridSize, ruleString } = settings;
+	const { gridSize, ruleString } = settings;
 	const template = useTypedSelector(state => state.webGPU.template);
 	const initialState = startingPatterns[template];
 	const resources = useRef<WebGPUResources>(null);
@@ -90,7 +90,6 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 				const simulationShaderModule = device.createShaderModule({
 					label: 'shader that computes next state',
 					code: computeShader,
-					constants: { WORKGROUP_SIZE: workgroupSize }
 				});
 
 				// Create pipeline layout and bind group layout
@@ -126,12 +125,18 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 
 				console.log('Configured GPU resources');
 
+				const rule = parseRuleString(ruleString);
+				if (!rule) {
+					console.error('Failed to parse valid rule string.');
+					return;
+				}
+
 				// Initialize buffers and bind groups
 				const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = bufferManager.initialiseComputeBindgroups(
 					renderPipeline,
 					gridSize,
 					initialState,
-					parseRuleString(ruleString)
+					rule
 				);
 
 				/**

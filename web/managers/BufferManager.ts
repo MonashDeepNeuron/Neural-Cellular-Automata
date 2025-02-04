@@ -32,7 +32,7 @@ export default class BufferManager {
 			arrayStride: 8, // 32bit = 4 bytes, 4x2 = 8 bytes to skip to find next vertex
 			attributes: [
 				{
-					format: 'float32x2', // two 32 bit floats per vertex
+					format: 'float32x2' as const, // two 32 bit floats per vertex
 					offset: 0,
 					shaderLocation: 0 // Position, see vertex shader
 				}
@@ -53,7 +53,7 @@ export default class BufferManager {
 	 * @param rule The numbers from the current rule (kernel)
 	 * @returns bindGroups, uniformBuffer, cellStateStorage, ruleStorage
 	 **/
-	initialiseComputeBindgroups(renderPipeline: GPURenderPipeline, gridSize: number, initialState: Pattern, rule: Float32Array) {
+	initialiseComputeBindgroups(renderPipeline: GPURenderPipeline, gridSize: number, initialState: Pattern, rule: Uint32Array) {
 		// Uniform grid
 		const uniformArray = new Float32Array([gridSize, gridSize]);
 		const uniformBuffer = this.device.createBuffer({
@@ -215,7 +215,7 @@ export default class BufferManager {
 	 * @param rule The numbers from the current rule (kernel)
 	 * @returns rulestorage as GPUBuffer object
 	 */
-	setRuleBuffer(rule: Float32Array) {
+	setRuleBuffer(rule: Uint32Array) {
 		const ruleArray = rule;
 		const ruleStorage = this.device.createBuffer({
 			label: 'Rule Storage',
