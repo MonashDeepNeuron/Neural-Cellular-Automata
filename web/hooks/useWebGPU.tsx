@@ -89,7 +89,7 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 
 				const simulationShaderModule = device.createShaderModule({
 					label: 'shader that computes next state',
-					code: computeShader,
+					code: computeShader
 				});
 
 				// Create pipeline layout and bind group layout

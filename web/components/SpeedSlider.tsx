@@ -5,7 +5,7 @@ import { type ChangeEventHandler, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setFramesPerSecond } from '../store/webGPUSlice';
 
-export const SpeedSlider = () => {
+export default function SpeedSlider() {
 	const dispatch = useDispatch();
 	const framesPerSecond = useTypedSelector(state => state.webGPU.framesPerSecond);
 	const [fpsReference, setFpsReference] = useState(framesPerSecond);
@@ -29,4 +29,4 @@ export const SpeedSlider = () => {
 			</div>
 		</div>
 	);
-};
+}

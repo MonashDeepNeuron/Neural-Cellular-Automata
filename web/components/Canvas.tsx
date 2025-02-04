@@ -3,11 +3,11 @@
 import useTypedSelector from '@/hooks/useTypedSelector';
 import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useRenderLoop } from '../hooks/useRenderLoop';
-import useWebGPU, { type WebGPUResources } from '../hooks/useWebGPU';
-import startingPatterns from '../patterns';
-import { toggleRunning } from '../store/webGPUSlice';
-import { SpeedSlider } from './SpeedSlider';
+import { useRenderLoop } from '@/hooks/useRenderLoop';
+import useWebGPU, { type WebGPUResources } from '@/hooks/useWebGPU';
+import startingPatterns from '@/patterns';
+import { toggleRunning } from '@/store/webGPUSlice';
+import SpeedSlider from './SpeedSlider';
 import TemplateDropdown from './TemplateDropdown';
 
 export default function Canvas() {
