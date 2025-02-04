@@ -232,7 +232,6 @@ export default class BufferManager {
 
     static changeStochasticMaskSeed(device, stochasticMaskBuffer) {
         let stochasticMaskSeed = Math.floor(Math.random() * 1000000); // TODO: ensure datatype is correct
-        console.log(stochasticMaskSeed)
         let stochasticMaskArray = new Int32Array([stochasticMaskSeed])
         device.queue.writeBuffer(stochasticMaskBuffer, 0, stochasticMaskArray);    
         return stochasticMaskBuffer
