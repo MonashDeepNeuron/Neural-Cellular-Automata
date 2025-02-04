@@ -1,12 +1,12 @@
 import { type RefObject, useEffect, useRef } from 'react';
-import BufferManager from '../managers/BufferManager';
+import BufferManager, { type CellStateBindGroupPair, type CellStateBufferPair } from '../managers/BufferManager';
 import startingPatterns from '../patterns';
 import { computeShader } from '../shaders/computeShader';
 import { guiShader } from '../shaders/guiShader';
 import { parseRuleString } from '../util/Parse';
 import useTypedSelector from './useTypedSelector';
 
-const SQUARE_VERTICIES = new Float32Array([-1, -1, -1, 1, 1, 1, 1, 1, 1, -1, -1, -1]);
+const SQUARE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, 1, 1, 1, 1, -1, -1, -1]);
 
 export interface WebGPUSettings {
 	workgroupSize: number;
@@ -22,10 +22,10 @@ export interface WebGPUResources {
 		simulationPipeline: GPUComputePipeline;
 	};
 	buffers: {
-		bindGroups: GPUBindGroup[];
+		bindGroups: CellStateBindGroupPair;
 		uniformBuffer: GPUBuffer;
-		cellStateStorage: GPUBuffer[];
-		ruleStorage: GPUBuffer;
+		cellStateBuffers: CellStateBufferPair;
+		ruleBuffer: GPUBuffer;
 		vertexBuffer: GPUBuffer;
 	};
 }
@@ -79,7 +79,7 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 				 * Step 2: Initialize GPU Resources (Pipelines and Buffers)
 				 */
 				const bufferManager = new BufferManager(device);
-				const { vertexBuffer, vertexBufferLayout } = bufferManager.loadShapeVertexBuffer(SQUARE_VERTICIES);
+				const { vertexBuffer, vertexBufferLayout } = bufferManager.loadShapeVertexBuffer(SQUARE_VERTICES);
 
 				// Create shaders
 				const cellShaderModule = device.createShaderModule({
@@ -132,12 +132,7 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 				}
 
 				// Initialize buffers and bind groups
-				const { bindGroups, uniformBuffer, cellStateStorage, ruleStorage } = bufferManager.initialiseComputeBindgroups(
-					renderPipeline,
-					gridSize,
-					initialState,
-					rule
-				);
+				const buffers = bufferManager.initialiseComputeBindgroups(renderPipeline, gridSize, initialState, rule);
 
 				/**
 				 * Step 3: Update refs to point at WebGPU state
@@ -150,10 +145,7 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 						simulationPipeline
 					},
 					buffers: {
-						bindGroups,
-						uniformBuffer,
-						cellStateStorage,
-						ruleStorage,
+						...buffers,
 						vertexBuffer
 					}
 				};

@@ -1,6 +1,6 @@
 import type { WebGPUResources, WebGPUSettings } from '@/hooks/useWebGPU';
 
-const SQUARE_VERTICIES = new Float32Array([-1, -1, -1, 1, 1, 1, 1, 1, 1, -1, -1, -1]);
+const SQUARE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, 1, 1, 1, 1, -1, -1, -1]);
 
 /**
  * Factory function to create a parameterized renderPass function.
@@ -21,7 +21,7 @@ export const createRenderPass = ({ gridSize }: WebGPUSettings, { context, pipeli
 		renderPass.setPipeline(pipelines.renderPipeline);
 		renderPass.setVertexBuffer(0, buffers.vertexBuffer);
 		renderPass.setBindGroup(0, buffers.bindGroups[step % 2]);
-		renderPass.draw(SQUARE_VERTICIES.length / 2, gridSize * gridSize);
+		renderPass.draw(SQUARE_VERTICES.length / 2, gridSize * gridSize);
 		renderPass.end();
 	};
 };
