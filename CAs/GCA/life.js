@@ -95,10 +95,10 @@ let weights = await loadWeights('/model_weights_logo.bin');
 console.log(weights)
 
 
-let stochasticMaskSeed = 0;
 
-/* Set buffers*/
-let { bindGroups, uniformBuffer, cellStateStorage, w1, b1, w2, stochasticMaskBuffer } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, weights, stochasticMaskSeed); // TODO: Update this function
+let stochasticMaskSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER); // TODO: ensure datatype is correct
+let stochasticMaskArray = new Int32Array([stochasticMaskSeed])
+let { bindGroups, uniformBuffer, cellStateStorage, w1, b1, w2, stochasticMaskBuffer } = BufferManager.initialiseComputeBindgroups(device, renderPipeline, GRID_SIZE, INITIAL_STATE, weights, stochasticMaskArray);
 
 
 /* First render pass to initalise canvas*/
@@ -123,7 +123,7 @@ const updateLoop =  () => { //async () => { // TODO: REMOVE ASYNC WHEN REMOVE LO
     //     });
     // }
 
-    BufferManager.changeStochasticMaskSeed(device)
+    stochasticMaskBuffer = BufferManager.changeStochasticMaskSeed(device)
 
     /* Perform multiple updates per render pass */
     if (EventManager.running) {

@@ -171,7 +171,7 @@ export default class BufferManager {
                 { binding: 3, resource: { buffer: w1 } },
                 { binding: 4, resource: { buffer: b1 } },
                 { binding: 5, resource: { buffer: w2 } },
-                { binding: 6, resource: { buffer: stochasticMaskBuffer}}
+                { binding: 6, resource: { buffer: stochasticMaskBuffer }}
             ],
         });
     }
@@ -234,6 +234,7 @@ export default class BufferManager {
         stochasticMaskSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER); // TODO: ensure datatype is correct
         let stochasticMaskArray = new Int32Array([stochasticMaskSeed])
         device.queue.writeBuffer(stochasticMaskBuffer, 0, stochasticMaskArray);    
+        return stochasticMaskBuffer
     }
 
 }
