@@ -1,4 +1,4 @@
-import type { Pattern } from '@/patterns/startingPatterns';
+import type { Pattern } from "@/patterns";
 
 export default class BufferManager {
 	private device: GPUDevice;
@@ -21,22 +21,26 @@ export default class BufferManager {
 		// load verticies into buffer
 		// This is currently used only for a square
 		const vertexBuffer = this.device.createBuffer({
-			label: 'Cell vertices', // Error message label
+			label: "Cell vertices", // Error message label
 			size: shapeVerticies.byteLength,
-			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+			usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
 		});
-		this.device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/ 0, shapeVerticies);
+		this.device.queue.writeBuffer(
+			vertexBuffer,
+			/*bufferOffset=*/ 0,
+			shapeVerticies,
+		);
 
 		// define layout of loaded binary data
 		const vertexBufferLayout = {
 			arrayStride: 8, // 32bit = 4 bytes, 4x2 = 8 bytes to skip to find next vertex
 			attributes: [
 				{
-					format: 'float32x2', // two 32 bit floats per vertex
+					format: "float32x2", // two 32 bit floats per vertex
 					offset: 0,
-					shaderLocation: 0 // Position, see vertex shader
-				}
-			]
+					shaderLocation: 0, // Position, see vertex shader
+				},
+			],
 		};
 
 		return { vertexBuffer, vertexBufferLayout };
@@ -53,13 +57,18 @@ export default class BufferManager {
 	 * @param rule The numbers from the current rule (kernel)
 	 * @returns bindGroups, uniformBuffer, cellStateStorage, ruleStorage
 	 **/
-	initialiseComputeBindgroups(renderPipeline: GPURenderPipeline, gridSize: number, initialState: Pattern, rule: Float32Array) {
+	initialiseComputeBindgroups(
+		renderPipeline: GPURenderPipeline,
+		gridSize: number,
+		initialState: Pattern,
+		rule: Float32Array,
+	) {
 		// Uniform grid
 		const uniformArray = new Float32Array([gridSize, gridSize]);
 		const uniformBuffer = this.device.createBuffer({
-			label: 'Grid Uniforms',
+			label: "Grid Uniforms",
 			size: uniformArray.byteLength,
-			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		});
 		this.device.queue.writeBuffer(uniformBuffer, 0, uniformArray);
 
@@ -71,13 +80,20 @@ export default class BufferManager {
 		const bindGroups = [
 			this.createBindGroup(
 				renderPipeline,
-				'Cell renderer bind group A',
+				"Cell renderer bind group A",
 				uniformBuffer,
 				cellStateStorage[0],
 				cellStateStorage[1],
-				ruleStorage
+				ruleStorage,
 			),
-			this.createBindGroup(renderPipeline, 'Cell render bind group B', uniformBuffer, cellStateStorage[1], cellStateStorage[0], ruleStorage)
+			this.createBindGroup(
+				renderPipeline,
+				"Cell render bind group B",
+				uniformBuffer,
+				cellStateStorage[1],
+				cellStateStorage[0],
+				ruleStorage,
+			),
 		];
 		return { bindGroups, uniformBuffer, cellStateStorage, ruleStorage };
 	}
@@ -98,16 +114,16 @@ export default class BufferManager {
 		const cellStateArray = new Uint32Array(gridSize * gridSize);
 		const cellStateStorage = [
 			this.device.createBuffer({
-				label: 'Cell State A',
+				label: "Cell State A",
 				size: cellStateArray.byteLength,
-				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 			}),
 
 			this.device.createBuffer({
-				label: 'Cell State B',
+				label: "Cell State B",
 				size: cellStateArray.byteLength,
-				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-			})
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+			}),
 		];
 
 		// write to buffer A
@@ -123,7 +139,8 @@ export default class BufferManager {
 			const centreOffset = Math.floor((gridSize - initialState.width) / 2);
 			for (let i = 0; i < initialState.width; i++) {
 				for (let j = 0; j < initialState.height; j++) {
-					cellStateArray[i + centreOffset + (j + centreOffset) * gridSize] = initialState.pattern[i + j * initialState.width];
+					cellStateArray[i + centreOffset + (j + centreOffset) * gridSize] =
+						initialState.pattern[i + j * initialState.width];
 				}
 			}
 			// console.log(`Implementing ${initialState.name}`);
@@ -148,32 +165,41 @@ export default class BufferManager {
 	 */
 	createBindGroupLayout() {
 		return this.device.createBindGroupLayout({
-			label: 'Cell Bind Group Layout',
+			label: "Cell Bind Group Layout",
 			entries: [
 				{
 					binding: 0,
-					visibility: GPUShaderStage.VERTEX | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
-					buffer: {} // Grid uniform buffer
+					visibility:
+						GPUShaderStage.VERTEX |
+						GPUShaderStage.COMPUTE |
+						GPUShaderStage.FRAGMENT,
+					buffer: {}, // Grid uniform buffer
 				},
 
 				{
 					binding: 1,
-					visibility: GPUShaderStage.VERTEX | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
-					buffer: { type: 'read-only-storage' } // Cell state input buffer
+					visibility:
+						GPUShaderStage.VERTEX |
+						GPUShaderStage.COMPUTE |
+						GPUShaderStage.FRAGMENT,
+					buffer: { type: "read-only-storage" }, // Cell state input buffer
 				},
 
 				{
 					binding: 2,
 					visibility: GPUShaderStage.COMPUTE,
-					buffer: { type: 'storage' } // Cell state output buffer
+					buffer: { type: "storage" }, // Cell state output buffer
 				},
 
 				{
 					binding: 3,
-					visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
-					buffer: { type: 'read-only-storage' } // Ruleset
-				}
-			]
+					visibility:
+						GPUShaderStage.COMPUTE |
+						GPUShaderStage.COMPUTE |
+						GPUShaderStage.FRAGMENT,
+					buffer: { type: "read-only-storage" }, // Ruleset
+				},
+			],
 		});
 	}
 
@@ -195,7 +221,7 @@ export default class BufferManager {
 		uniformBuffer: GPUBuffer,
 		cellStateA: GPUBuffer,
 		cellStateB: GPUBuffer,
-		ruleStorage: GPUBuffer
+		ruleStorage: GPUBuffer,
 	) {
 		return this.device.createBindGroup({
 			label: label,
@@ -204,8 +230,8 @@ export default class BufferManager {
 				{ binding: 0, resource: { buffer: uniformBuffer } },
 				{ binding: 1, resource: { buffer: cellStateA } },
 				{ binding: 2, resource: { buffer: cellStateB } },
-				{ binding: 3, resource: { buffer: ruleStorage } }
-			]
+				{ binding: 3, resource: { buffer: ruleStorage } },
+			],
 		});
 	}
 
@@ -218,9 +244,9 @@ export default class BufferManager {
 	setRuleBuffer(rule: Float32Array) {
 		const ruleArray = rule;
 		const ruleStorage = this.device.createBuffer({
-			label: 'Rule Storage',
+			label: "Rule Storage",
 			size: ruleArray.byteLength,
-			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+			usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 		});
 		this.device.queue.writeBuffer(ruleStorage, 0, ruleArray);
 		return ruleStorage;
