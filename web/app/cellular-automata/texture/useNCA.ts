@@ -19,6 +19,8 @@ export interface GPUResources {
 export interface NCASettings {
 	size: number;
 	channels: number;
+	hiddenChannels: number;
+	convolutions: number;
 	weightsURL: string;
 	shaders: {
 		simulation: string;
@@ -27,6 +29,8 @@ export interface NCASettings {
 
 export type CellStateBufferPair = [GPUBuffer, GPUBuffer];
 export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
+
+const SHAPE_VERTICES = new Float32Array([-1, 2, -1, -1, 2, -1])
 
 export default function useNCA({ size, channels, shaders, weightsURL }: NCASettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
@@ -97,11 +101,11 @@ export default function useNCA({ size, channels, shaders, weightsURL }: NCASetti
 
 			// Create vertex buffer
 			const vertexBuffer = device.createBuffer({
-				label: 'Cell vertices', // Error message label
-				size: shapeVertices.byteLength,
+				label: 'Cell Vertices',
+				size: SHAPE_VERTICES.byteLength,
 				usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
 			});
-			device.queue.writeBuffer(vertexBuffer, 0, shapeVertices);
+			device.queue.writeBuffer(vertexBuffer, 0, SHAPE_VERTICES);
 
 			const vertexBufferLayout = {
 				arrayStride: 8,
@@ -144,17 +148,17 @@ export default function useNCA({ size, channels, shaders, weightsURL }: NCASetti
 						buffer: { type: 'storage' }
 					},
 					{
-						binding: 3, // Stage 1 Weights
+						binding: 3, // Layer 1 Weights
 						visibility: GPUShaderStage.COMPUTE,
 						buffer: { type: 'read-only-storage' }
 					},
 					{
-						binding: 4, // Stage 1 Biases
+						binding: 4, // Layer 1 Biases
 						visibility: GPUShaderStage.COMPUTE,
 						buffer: { type: 'read-only-storage' }
 					},
 					{
-						binding: 5, // Stage 2 Biases
+						binding: 5, // Layer 2 Biases
 						visibility: GPUShaderStage.COMPUTE,
 						buffer: { type: 'read-only-storage' }
 					}
@@ -208,6 +212,11 @@ export default function useNCA({ size, channels, shaders, weightsURL }: NCASetti
 			];
 
 			// Write buffers
+			const sizeArray = new Float32Array([channels, size, size]);
+			const sizeBuffer = device.createBuffer({
+				label: 'Size Buffer',
+				size: 3 * 4
+			})
 
 			// All done!
 			setStatus(NCAStatus.READY);

@@ -4,14 +4,15 @@ import clsx from 'clsx';
 import useNCA from './useNCA';
 
 const SIZE = 512;
-const CHANNELS = 16;
 
 export default function Texture() {
 	const { error, status, play, setPlay, step, canvasRef } = useNCA({
 		size: SIZE,
-		channels: CHANNELS,
+		channels: 16,
+		hiddenChannels: 96,
+		convolutions: 4,
+		weightsURL: '/weights/texture.bin',
 		shaders: {
-			cell: '',
 			simulation: ''
 		}
 	});
