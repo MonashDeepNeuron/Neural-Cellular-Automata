@@ -2,35 +2,69 @@ import Link from 'next/link';
 
 export default function About() {
 	return (
-		<div className='centre'>
-			<h1>About Us</h1>
-			<h2>Who are we?</h2>
-			<p>
-				We are a project team under Monash DeepNeuron, an Engineering/IT student team, run by Monash University students. NCA is one of many
-				research projects, which you can read more about{' '}
-				<a href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer'>
-					here
+		<div className="max-w-3xl mx-auto px-6 py-10 text-gray-800">
+			{/* Title */}
+			<h1 className="text-4xl font-bold text-purple-700 mb-6 text-center">About Us</h1>
+
+			{/* Who Are We Section */}
+			<section className="mb-8">
+				<h2 className="text-2xl font-semibold text-purple-600 mb-2">Who Are We?</h2>
+				<p className="leading-7 text-lg">
+					We are a project team under <strong>Monash DeepNeuron</strong>, an Engineering/IT student team run by Monash University students. 
+					NCA is one of many research projects, which you can read more about{' '}
+					<a
+						href="https://www.deepneuron.org/"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-purple-500 font-semibold hover:underline"
+					>
+						here
+					</a>
+					!
+				</p>
+			</section>
+
+			{/* Project Objectives */}
+			<section className="mb-8">
+				<h2 className="text-2xl font-semibold text-purple-600 mb-2">Project Objectives</h2>
+				<ol className="list-decimal list-inside space-y-2 text-lg">
+					<li>What are NCA? How is NCA different from other CA and Neural Networks?</li>
+					<li>What can NCA be used for? Does NCA provide an advantage over other similar architectures?</li>
+					<li>How can NCA be improved?</li>
+				</ol>
+				<p className="mt-4 text-lg">
+					As a result of answering these questions, we aim to produce a comprehensive research paper.
+				</p>
+			</section>
+
+			{/* Project Updates */}
+			<section className="mb-8">
+				<h2 className="text-2xl font-semibold text-purple-600 mb-2">Project Updates</h2>
+				<p className="text-lg">
+					Stay up-to-date with our latest progress by visiting the{' '}
+					<Link href="/keeping-up" className="text-purple-500 font-semibold hover:underline">
+						Project Updates
+					</Link>{' '}
+					page!
+				</p>
+			</section>
+
+			{/* Join Us Section */}
+			<section>
+				<h2 className="text-2xl font-semibold text-purple-600 mb-2">Join Us!</h2>
+				<p className="text-lg">
+					Are you a Monash Engineering or IT student interested in working on this project? Register your email to receive updates when new
+					positions open up. First-year or Master's students — all are welcome!
+				</p>
+				<a
+					href="https://www.deepneuron.org/join"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="inline-block mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-md shadow-md hover:bg-purple-700 transition duration-300"
+				>
+					Join the Team
 				</a>
-				!
-			</p>
-			<h2>Project Objectives</h2>
-			<ol>
-				<li>What are NCA? How is NCA different from other CA and Neural Networks?</li>
-				<li>What can NCA be used for? Does NCA provide an advantage over other similar architectures?</li>
-				<li>How can NCA be improved?</li>
-			</ol>
-			<p>As a result of answering these questions, we aim to produce a research paper.</p>
-
-			<h2>Project Updates</h2>
-			<p>
-				Watch <Link href='/keeping-up'>this</Link> page for project updates!
-			</p>
-
-			<h2>Join Us!</h2>
-			<p>
-				Are you a Monash Engineering or IT student, interested in working on this project? Register your email here to receive emails about
-				when new positions open up! First-year or Masters, all are welcome.
-			</p>
+			</section>
 		</div>
 	);
 }

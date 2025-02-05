@@ -2,117 +2,113 @@ import Link from 'next/link';
 
 export default function Troubleshooting() {
 	return (
-		<>
-			{/* Title */}
-			<div className='text-column'>
-				<h1>Potential Issues</h1>
-			</div>
+		<div className="max-w-4xl mx-auto px-6 py-10 text-gray-800">
+			{/* Page Title */}
+			<h1 className="text-4xl font-bold text-purple-700 mb-6 text-center">Simulation Troubleshooting</h1>
 
-			<div className='centre'>
-				<h1>Simulation Troubleshooting</h1>
+			{/* Issue 1 */}
+			<section className="mb-8">
+				<h2 className="text-2xl font-semibold text-purple-600 mb-2">🛠️ All I See Is a White Box / No Simulation</h2>
 
-				{/* Issue 1 */}
-				<h2>All I See Is a White Box / I Don’t See the Simulation</h2>
-				<h3>
-					<i>Browser Does Not Support WebGPU</i>
-				</h3>
-				<p>
-					Our project relies on WebGPU, a cutting-edge graphics computing tool for web development. Unfortunately, not all browsers support
-					WebGPU yet.
+				<h3 className="text-lg font-semibold text-purple-500 italic">1️⃣ Browser Does Not Support WebGPU</h3>
+				<p className="leading-7 text-lg mt-2">
+					Our project relies on WebGPU, a cutting-edge graphics computing tool for web development. Unfortunately, not all browsers support WebGPU yet.
+				</p>
+				<p className="mt-2">
+					<strong>Unsupported Browsers:</strong> Safari (including all browsers on iPhone/iPad) and Firefox.
 				</p>
 				<p>
-					<b>Unsupported Browsers:</b> Safari (including all browsers on iPhone/iPad) and Firefox.
+					<strong>Supported Browsers:</strong> Chrome for Windows, Microsoft Edge, and Chrome for Android.
 				</p>
-				<p>
-					<b>Supported Browsers:</b> Chrome for Windows, Microsoft Edge, and Chrome for Android.
-				</p>
-				<p>
-					href check if your browser supports WebGPU, visit
-					<a href='https://caniuse.com/webgpu' target='_blank' rel='noopener noreferrer'>
-						{' '}
+				<p className="mt-2">
+					To check if your browser supports WebGPU, visit{' '}
+					<a
+						href="https://caniuse.com/webgpu"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-purple-500 font-semibold hover:underline"
+					>
 						Can I Use WebGPU?
 					</a>
-					.
 				</p>
 
-				<h3>
-					<i>JavaScript Is Turned Off</i>
-				</h3>
-				<p>Our website requires JavaScript href function. Please enable JavaScript in your browser settings and refresh the page.</p>
+				<h3 className="text-lg font-semibold text-purple-500 italic mt-4">2️⃣ JavaScript Is Turned Off</h3>
+				<p className="leading-7 text-lg mt-2">
+					Our website requires JavaScript to function. Please enable JavaScript in your browser settings and refresh the page.
+				</p>
+			</section>
 
-				{/* Issue 2 */}
-				<h2>I Changed the Settings and Now I See Nothing</h2>
-				<h3>
-					<i>Rule String/Kernel Is Not Producing Interesting Behavior</i>
-				</h3>
-				<p>
-					Patterns depend on a delicate balance of life and death, and small changes can destabilize them. They also require variation in
-					grid values href work effectively.
-				</p>
-				<p>
-					<b>Solution:</b> Try different combinations and use the "Randomize" button href reset the grid with varied values.
-				</p>
+			{/* Issue 2 */}
+			<section className="mb-8">
+				<h2 className="text-2xl font-semibold text-purple-600 mb-2">⚙️ I Changed Settings and Now I See Nothing</h2>
 
-				<h3>
-					<i>Activation Function Changes</i>
-				</h3>
-				<p>
-					If you modified the activation function, there might be a bug in the code. The activation function must follow WGSL syntax (WebGPU
-					code) and return a single `float32` value.
+				<h3 className="text-lg font-semibold text-purple-500 italic">1️⃣ Rule String/Kernel Issue</h3>
+				<p className="leading-7 text-lg mt-2">
+					Patterns depend on a delicate balance of life and death, and small changes can destabilize them.
 				</p>
 				<p>
-					<b>Solution:</b> Use your browser's developer tools (inspect element) href identify and fix the issue.
+					<strong>Solution:</strong> Try different combinations and use the "Randomize" button to reset the grid with varied values.
 				</p>
 
-				{/* Issue 3 */}
-				<h2>My Screen Freezes When Running Continuous CA</h2>
-				<h3>
-					<i>Speed Setting Is Too High for Your Device</i>
-				</h3>
-				<p>Devices have varying capacities href handle high frame rates. If you experience lag, reduce the speed setting.</p>
-				<p>
-					<b>Device Frame Rate Recommendations:</b>
+				<h3 className="text-lg font-semibold text-purple-500 italic mt-4">2️⃣ Activation Function Changes</h3>
+				<p className="leading-7 text-lg mt-2">
+					If you modified the activation function, there might be a bug in the code. Ensure the activation function follows WGSL syntax and returns a single `float32` value.
 				</p>
-				<ul>
+				<p>
+					<strong>Solution:</strong> Use your browser’s developer tools (Inspect Element) to identify and fix issues.
+				</p>
+			</section>
+
+			{/* Issue 3 */}
+			<section className="mb-8">
+				<h2 className="text-2xl font-semibold text-purple-600 mb-2">🖥️ My Screen Freezes When Running Continuous CA</h2>
+
+				<h3 className="text-lg font-semibold text-purple-500 italic">Device Performance Issue</h3>
+				<p className="leading-7 text-lg mt-2">
+					Devices have varying capacities to handle high frame rates. If you experience lag, reduce the speed setting.
+				</p>
+				<p>
+					<strong>Device Frame Rate Recommendations:</strong>
+				</p>
+				<ul className="list-disc list-inside ml-4 space-y-1 mt-2 text-lg">
 					<li>400 fps: New laptops with i7 Iris Xe graphics</li>
 					<li>200 fps: Samsung Flip 4</li>
 					<li>40 fps: Motorola Edge 30 (browser limitations may apply)</li>
 					<li>0 fps: Apple devices (no WebGPU support)</li>
 				</ul>
+			</section>
 
-				{/* Issue 4 */}
-				<h2>Continuous CA Is Really Flickery for Some Frame Rates</h2>
-				<h3>
-					<i>Try Selecting 'Skip Every Second Frame'</i>
-				</h3>
-				<p>Patterns like "worms" and "mitosis" often alternate between two states, which can cause flickering.</p>
+			{/* Issue 4 */}
+			<section className="mb-8">
+				<h2 className="text-2xl font-semibold text-purple-600 mb-2">🔄 Continuous CA Is Flickering at Certain Frame Rates</h2>
+
+				<h3 className="text-lg font-semibold text-purple-500 italic">1️⃣ Try Selecting "Skip Every Second Frame"</h3>
+				<p className="leading-7 text-lg mt-2">
+					Patterns like "worms" and "mitosis" often alternate between two states, causing flickering.
+				</p>
 				<p>
-					<b>Solution:</b> Skipping every second frame reduces this effect and helps you observe long-term changes.
+					<strong>Solution:</strong> Skipping every second frame reduces this effect and helps you observe long-term changes.
 				</p>
 
-				<h3>
-					<i>Why Does It Run Smoothly at Certain Frame Rates?</i>
-				</h3>
-				<p>href prevent freezes, the display update rate is capped at 50fps.</p>
-				<p>
-					<b>Behavior:</b>
+				<h3 className="text-lg font-semibold text-purple-500 italic mt-4">2️⃣ Why Does It Run Smoothly at Certain Frame Rates?</h3>
+				<p className="leading-7 text-lg mt-2">
+					To prevent freezes, the display update rate is capped at 50 fps.
 				</p>
-				<ul>
+				<ul className="list-disc list-inside ml-4 space-y-1 mt-2 text-lg">
 					<li>At 1-50, 101-150 fps, etc., you see odd frames.</li>
 					<li>At 51-100, 151-200 fps, etc., you see even frames.</li>
 				</ul>
-				<p>
-					<b>Using 'Skip Every Second Frame':</b> This ensures only even frames are displayed, doubling updates between frames for a
-					smoother experience.
+				<p className="mt-2">
+					<strong>Tip:</strong> Using "Skip Every Second Frame" ensures only even frames are displayed, providing smoother visuals.
 				</p>
+			</section>
 
-				{/* Contact Us Link */}
-				<p style={{ textAlign: 'center', marginTop: '20px' }}>
-					<Link href='/contact' style={{ fontWeight: 'bold' }}>
-						See Next: Contact Us
-					</Link>
-				</p>
+			{/* Contact Us Link */}
+			<div className="text-center mt-8">
+				<Link href="/contact" className="text-purple-600 font-bold hover:underline hover:text-purple-800 transition duration-300">
+					📩 See Next: Contact Us
+				</Link>
 			</div>
-		</>
+		</div>
 	);
 }
