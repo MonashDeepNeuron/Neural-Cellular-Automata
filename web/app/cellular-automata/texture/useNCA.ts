@@ -1,6 +1,7 @@
 'use client';
 
 import cell from '@/shaders/nca/cell';
+import loadWeights from '@/util/loadWeights';
 import { useEffect, useRef, useState } from 'react';
 
 export enum NCAStatus {
@@ -18,8 +19,8 @@ export interface GPUResources {
 export interface NCASettings {
 	size: number;
 	channels: number;
+	weightsURL: string;
 	shaders: {
-		cell: string;
 		simulation: string;
 	};
 }
@@ -27,7 +28,7 @@ export interface NCASettings {
 export type CellStateBufferPair = [GPUBuffer, GPUBuffer];
 export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 
-export default function useNCA({ size, channels, shaders }: NCASettings) {
+export default function useNCA({ size, channels, shaders, weightsURL }: NCASettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources>({
@@ -66,8 +67,8 @@ export default function useNCA({ size, channels, shaders }: NCASettings) {
 			} catch (error) {
 				setStatus(NCAStatus.FAILED);
 				setError(`Failed to get a GPU device: ${(error as Error).message}`);
+				return;
 			}
-			if (!device) return;
 			setResources(prev => ({ ...prev, device }));
 
 			// Configure canvas context
@@ -83,6 +84,16 @@ export default function useNCA({ size, channels, shaders }: NCASettings) {
 				format: navigator.gpu.getPreferredCanvasFormat(),
 				alphaMode: 'premultiplied'
 			});
+
+			// Load weights
+			let weights: Float32Array | null = null;
+			try {
+				weights = await loadWeights(weightsURL);
+			} catch (error) {
+				setStatus(NCAStatus.FAILED);
+				setError(`Failed to load weights from URL: ${(error as Error).message}`);
+				return;
+			}
 
 			// Create vertex buffer
 			const vertexBuffer = device.createBuffer({
@@ -135,23 +146,24 @@ export default function useNCA({ size, channels, shaders }: NCASettings) {
 					{
 						binding: 3, // Stage 1 Weights
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: "read-only-storage" }
+						buffer: { type: 'read-only-storage' }
 					},
 					{
 						binding: 4, // Stage 1 Biases
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: "read-only-storage" }
+						buffer: { type: 'read-only-storage' }
 					},
 					{
 						binding: 5, // Stage 2 Biases
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: "read-only-storage" }
+						buffer: { type: 'read-only-storage' }
 					}
 				]
 			});
 
 			// Create pipeline layout
 			const pipelineLayout = device.createPipelineLayout({
+				label: 'Global Pipeline Layout',
 				bindGroupLayouts: [bindGroupLayout]
 			});
 
@@ -194,6 +206,8 @@ export default function useNCA({ size, channels, shaders }: NCASettings) {
 					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				})
 			];
+
+			// Write buffers
 
 			// All done!
 			setStatus(NCAStatus.READY);
