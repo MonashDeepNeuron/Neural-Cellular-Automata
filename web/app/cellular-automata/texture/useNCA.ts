@@ -1,6 +1,5 @@
 'use client';
 
-import type { CellStateBufferPair } from '@/managers/BufferManager';
 import cell from '@/shaders/nca/cell';
 import { useEffect, useRef, useState } from 'react';
 
@@ -24,6 +23,9 @@ export interface NCASettings {
 		simulation: string;
 	};
 }
+
+export type CellStateBufferPair = [GPUBuffer, GPUBuffer];
+export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 
 export default function useNCA({ size, channels, shaders }: NCASettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
@@ -90,9 +92,8 @@ export default function useNCA({ size, channels, shaders }: NCASettings) {
 			});
 			device.queue.writeBuffer(vertexBuffer, 0, shapeVertices);
 
-			// define layout of loaded binary data
 			const vertexBufferLayout = {
-				arrayStride: 8, // 32bit = 4 bytes, 4x2 = 8 bytes to skip to find next vertex
+				arrayStride: 8,
 				attributes: [
 					{
 						format: 'float32x2' as const, // x, y
@@ -113,33 +114,51 @@ export default function useNCA({ size, channels, shaders }: NCASettings) {
 				code: shaders.simulation
 			});
 
-			// Create Bind Group Layout
-			const cellBindGroupLayout = device.createBindGroupLayout({
+			// Create Global Binding Layout
+			const bindGroupLayout = device.createBindGroupLayout({
 				entries: [
 					{
 						binding: 0, // Grid size
-						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-						buffer: {}
+						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+						buffer: { type: 'read-only-storage' }
 					},
 					{
-						binding: 1, // State
-						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-						buffer: {}
+						binding: 1, // State / Input State (Compute)
+						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+						buffer: { type: 'storage' }
+					},
+					{
+						binding: 2, // Output State (Compute)
+						visibility: GPUShaderStage.COMPUTE,
+						buffer: { type: 'storage' }
+					},
+					{
+						binding: 3, // Stage 1 Weights
+						visibility: GPUShaderStage.COMPUTE,
+						buffer: { type: "read-only-storage" }
+					},
+					{
+						binding: 4, // Stage 1 Biases
+						visibility: GPUShaderStage.COMPUTE,
+						buffer: { type: "read-only-storage" }
+					},
+					{
+						binding: 5, // Stage 2 Biases
+						visibility: GPUShaderStage.COMPUTE,
+						buffer: { type: "read-only-storage" }
 					}
 				]
 			});
 
 			// Create pipeline layout
-			const cellPipelineLayout = device.createPipelineLayout({
-				bindGroupLayouts: [
-					cellBindGroupLayout
-				]
+			const pipelineLayout = device.createPipelineLayout({
+				bindGroupLayouts: [bindGroupLayout]
 			});
 
 			// Create pipelines
-			const renderPipeline = device.createRenderPipeline({
+			const cellPipeline = device.createRenderPipeline({
 				label: 'Cell Pipeline',
-				layout: cellPipelineLayout,
+				layout: pipelineLayout,
 				vertex: {
 					module: cellShader,
 					entryPoint: 'vertex_main',
@@ -162,7 +181,7 @@ export default function useNCA({ size, channels, shaders }: NCASettings) {
 			});
 
 			// Initialise buffers
-			const cellState = new Float32Array(size * size * channels).fill(0);
+			const cellState = new Float32Array(channels * size * size).fill(0);
 			const cellStateBuffers: CellStateBufferPair = [
 				device.createBuffer({
 					label: 'Cell State A',
@@ -187,7 +206,7 @@ export default function useNCA({ size, channels, shaders }: NCASettings) {
 			// Destroy device & buffers
 			resources.device?.destroy();
 		};
-	}, [size]);
+	}, [size, channels]);
 
 	return { play, setPlay, step, setStep, error, setError, status, setStatus, canvasRef };
 }
