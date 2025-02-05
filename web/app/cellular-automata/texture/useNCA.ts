@@ -1,0 +1,193 @@
+'use client';
+
+import type { CellStateBufferPair } from '@/managers/BufferManager';
+import cell from '@/shaders/nca/cell';
+import { useEffect, useRef, useState } from 'react';
+
+export enum NCAStatus {
+	ALLOCATING_RESOURCES = 'Allocating Resources',
+	READY = 'Ready',
+	FAILED = 'Failed'
+}
+
+export interface GPUResources {
+	device: GPUDevice | null;
+	context: GPUCanvasContext | null;
+	encoder: GPUCommandEncoder | null;
+}
+
+export interface NCASettings {
+	size: number;
+	channels: number;
+	shaders: {
+		cell: string;
+		simulation: string;
+	};
+}
+
+export default function useNCA({ size, channels, shaders }: NCASettings) {
+	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
+	const [error, setError] = useState('');
+	const [resources, setResources] = useState<GPUResources>({
+		device: null,
+		context: null,
+		encoder: null
+	});
+	const [play, setPlay] = useState(false);
+	const [step, setStep] = useState(0);
+
+	const canvasRef = useRef<HTMLCanvasElement>(null);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: depending upon `resources.device?.destroy` would cause an infinite loop
+	useEffect(() => {
+		async function init() {
+			// Check for WebGPU support
+			if (!navigator.gpu) {
+				setStatus(NCAStatus.FAILED);
+				setError('WebGPU is not supported on this browser.');
+			}
+
+			// Request GPU Adapter
+			let adapter: GPUAdapter | null = null;
+			try {
+				adapter = await navigator.gpu.requestAdapter();
+			} catch (error) {
+				setStatus(NCAStatus.FAILED);
+				setError(`Failed to get a GPU adapter: ${(error as Error).message}`);
+			}
+			if (!adapter) return;
+
+			// Request GPU Device
+			let device: GPUDevice | null = null;
+			try {
+				device = await adapter.requestDevice();
+			} catch (error) {
+				setStatus(NCAStatus.FAILED);
+				setError(`Failed to get a GPU device: ${(error as Error).message}`);
+			}
+			if (!device) return;
+			setResources(prev => ({ ...prev, device }));
+
+			// Configure canvas context
+			const context = canvasRef.current?.getContext('webgpu');
+			if (!context) {
+				setStatus(NCAStatus.FAILED);
+				setError('Failed to get canvas context.');
+				return;
+			}
+			setResources(prev => ({ ...prev, context }));
+			context.configure({
+				device,
+				format: navigator.gpu.getPreferredCanvasFormat(),
+				alphaMode: 'premultiplied'
+			});
+
+			// Create vertex buffer
+			const vertexBuffer = device.createBuffer({
+				label: 'Cell vertices', // Error message label
+				size: shapeVertices.byteLength,
+				usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
+			});
+			device.queue.writeBuffer(vertexBuffer, 0, shapeVertices);
+
+			// define layout of loaded binary data
+			const vertexBufferLayout = {
+				arrayStride: 8, // 32bit = 4 bytes, 4x2 = 8 bytes to skip to find next vertex
+				attributes: [
+					{
+						format: 'float32x2' as const, // x, y
+						offset: 0,
+						shaderLocation: 0
+					}
+				]
+			};
+
+			// Create shaders
+			const cellShader = device.createShaderModule({
+				label: 'Cell Shader',
+				code: cell
+			});
+
+			const simulationShader = device.createShaderModule({
+				label: 'Simulation Shader',
+				code: shaders.simulation
+			});
+
+			// Create Bind Group Layout
+			const cellBindGroupLayout = device.createBindGroupLayout({
+				entries: [
+					{
+						binding: 0, // Grid size
+						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+						buffer: {}
+					},
+					{
+						binding: 1, // State
+						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+						buffer: {}
+					}
+				]
+			});
+
+			// Create pipeline layout
+			const cellPipelineLayout = device.createPipelineLayout({
+				bindGroupLayouts: [
+					cellBindGroupLayout
+				]
+			});
+
+			// Create pipelines
+			const renderPipeline = device.createRenderPipeline({
+				label: 'Cell Pipeline',
+				layout: cellPipelineLayout,
+				vertex: {
+					module: cellShader,
+					entryPoint: 'vertex_main',
+					buffers: [vertexBufferLayout]
+				},
+				fragment: {
+					module: cellShader,
+					entryPoint: 'fragment_main',
+					targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }]
+				}
+			});
+
+			const simulationPipeline = device.createComputePipeline({
+				label: 'Simulation Pipeline',
+				layout: pipelineLayout,
+				compute: {
+					module: simulationShader,
+					entryPoint: 'compute_main'
+				}
+			});
+
+			// Initialise buffers
+			const cellState = new Float32Array(size * size * channels).fill(0);
+			const cellStateBuffers: CellStateBufferPair = [
+				device.createBuffer({
+					label: 'Cell State A',
+					size: cellState.byteLength,
+					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+				}),
+				device.createBuffer({
+					label: 'Cell State B',
+					size: cellState.byteLength,
+					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+				})
+			];
+
+			// All done!
+			setStatus(NCAStatus.READY);
+		}
+
+		init();
+
+		// Cleanup
+		return () => {
+			// Destroy device & buffers
+			resources.device?.destroy();
+		};
+	}, [size]);
+
+	return { play, setPlay, step, setStep, error, setError, status, setStatus, canvasRef };
+}

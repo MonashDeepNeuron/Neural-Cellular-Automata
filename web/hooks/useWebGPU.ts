@@ -1,8 +1,8 @@
 import { type RefObject, useEffect, useRef } from 'react';
 import BufferManager, { type CellStateBindGroupPair, type CellStateBufferPair } from '../managers/BufferManager';
 import startingPatterns from '../patterns';
-import { computeShader } from '../shaders/computeShader';
-import { guiShader } from '../shaders/guiShader';
+import { computeShader } from '../shaders/discrete/computeShader';
+import { guiShader } from '../shaders/discrete/guiShader';
 import { parseRuleString } from '../util/Parse';
 import useTypedSelector from './useTypedSelector';
 

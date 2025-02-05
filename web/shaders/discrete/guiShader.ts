@@ -21,8 +21,7 @@ export const guiShader = /*wgsl*/ `
     };
 
     @vertex
-    fn vertexMain(input: VertexInput) -> 
-        VertexOutput{
+    fn vertexMain(input: VertexInput) -> VertexOutput {
 
         let i = f32(input.instance);
         let state = f32(cellState[input.instance]);

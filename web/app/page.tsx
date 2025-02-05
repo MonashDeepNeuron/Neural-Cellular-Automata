@@ -1,4 +1,4 @@
-import WebGPUCanvas from '@/components/Canvas';
+import WebGPUCanvas from '@/components/GPUCanvas';
 import Link from 'next/link';
 
 export default function Home() {
