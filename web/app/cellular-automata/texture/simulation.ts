@@ -24,12 +24,12 @@ fn ReLU(x: f32) -> f32 {
 }
 
 fn convolve(i: u32, kernel: mat3x3f) -> f32 {
-
+  return 0f;
 }
 
 fn index(i: vec2u) -> u32 {
   // TODO: Complete with convention in terms or r,c
-  return (i.x % shape.size) + (i.y % shape.size)
+  return (i.x % shape.size) + (i.y % shape.size);
 }
 `;
 
