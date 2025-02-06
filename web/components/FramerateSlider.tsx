@@ -13,9 +13,9 @@ export default function FramerateSlider({ state, setState, min = 1, max = 120 }:
 	const id = useId();
 
 	return (
-		<div className='mt-4 flex flex-col items-center bg-background p-8 w-96'>
-			<label htmlFor={id} className='text-md font-semibold mb-2'>
-				Frames Per Second
+		<div className='w-96 max-w-full'>
+			<label htmlFor={id} className='text-md mb-2'>
+				<b>Framerate</b>:
 			</label>
 			<input
 				id={id}
@@ -24,9 +24,9 @@ export default function FramerateSlider({ state, setState, min = 1, max = 120 }:
 				max={max}
 				value={state}
 				onChange={e => setState(Number(e.target.value))}
-				className='w-full max-w-md'
+				className='w-full'
 			/>
-			<div className='flex justify-between w-full max-w-md text-sm mt-2'>
+			<div className='flex justify-between w-full text-sm mt-2'>
 				<span>{min} FPS</span>
 				<span>{state} FPS</span>
 				<span>{max} FPS</span>
