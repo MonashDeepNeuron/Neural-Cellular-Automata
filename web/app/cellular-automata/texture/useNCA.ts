@@ -38,6 +38,7 @@ export type CellStateBufferPair = [GPUBuffer, GPUBuffer];
 export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 
 const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1]);
+const WORKGROUP_SIZE = 8;
 
 export default function useNCA({ size, channels, hiddenChannels, convolutions, shaders, weightsURL }: NCASettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
@@ -261,24 +262,24 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 					label: 'Bind Group A',
 					layout: bindGroupLayout,
 					entries: [
-						{ binding: 0, resource: { buffer: shapeBuffer } }, // Shape Buffer
-						{ binding: 1, resource: { buffer: cellStateBuffers[0] } }, // Input State A
-						{ binding: 2, resource: { buffer: cellStateBuffers[1] } }, // Output State B
-						{ binding: 3, resource: { buffer: weightBuffers[0] } }, // Layer 1 Weights
-						{ binding: 4, resource: { buffer: weightBuffers[1] } }, // Layer 1 Biases
-						{ binding: 5, resource: { buffer: weightBuffers[2] } } // Layer 2 Weights
+						{ binding: 0, resource: { buffer: shapeBuffer } },
+						{ binding: 1, resource: { buffer: cellStateBuffers[0] } },
+						{ binding: 2, resource: { buffer: cellStateBuffers[1] } },
+						{ binding: 3, resource: { buffer: weightBuffers[0] } },
+						{ binding: 4, resource: { buffer: weightBuffers[1] } },
+						{ binding: 5, resource: { buffer: weightBuffers[2] } }
 					]
 				}),
 				device.createBindGroup({
 					label: 'Bind Group B',
 					layout: bindGroupLayout,
 					entries: [
-						{ binding: 0, resource: { buffer: shapeBuffer } }, // Shape Buffer
-						{ binding: 1, resource: { buffer: cellStateBuffers[1] } }, // Input State B (Swapped)
-						{ binding: 2, resource: { buffer: cellStateBuffers[0] } }, // Output State A (Swapped)
-						{ binding: 3, resource: { buffer: weightBuffers[0] } }, // Layer 1 Weights
-						{ binding: 4, resource: { buffer: weightBuffers[1] } }, // Layer 1 Biases
-						{ binding: 5, resource: { buffer: weightBuffers[2] } } // Layer 2 Weights
+						{ binding: 0, resource: { buffer: shapeBuffer } },
+						{ binding: 1, resource: { buffer: cellStateBuffers[1] } },
+						{ binding: 2, resource: { buffer: cellStateBuffers[0] } },
+						{ binding: 3, resource: { buffer: weightBuffers[0] } },
+						{ binding: 4, resource: { buffer: weightBuffers[1] } },
+						{ binding: 5, resource: { buffer: weightBuffers[2] } }
 					]
 				})
 			];
@@ -328,11 +329,18 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				lastFrameTime = now - (deltaTime % frameTime);
 
 				// Create command encoder
-				const commandEncoder = resources.device.createCommandEncoder();
+				const encoder = resources.device.createCommandEncoder();
 				const textureView = resources.context.getCurrentTexture().createView();
 
+				const computePass = encoder.beginComputePass();
+				computePass.setPipeline(resources.pipelines.simulation);
+				computePass.setBindGroup(0, resources.bindGroups[step % 2]);
+				const workgroupCount = Math.ceil(size / WORKGROUP_SIZE);
+				computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
+				computePass.end();
+
 				// Begin render pass
-				const renderPass = commandEncoder.beginRenderPass({
+				const renderPass = encoder.beginRenderPass({
 					colorAttachments: [
 						{
 							view: textureView,
@@ -349,9 +357,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				renderPass.end();
 
 				// Submit commands
-				resources.device.queue.submit([commandEncoder.finish()]);
-
-				// Increment step count for swapping bind groups
+				resources.device.queue.submit([encoder.finish()]);
 				setStep(prev => prev + 1);
 			}
 
