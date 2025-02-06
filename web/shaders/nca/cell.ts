@@ -4,7 +4,7 @@ struct ParameterShape {
   convolutions: u32,
   hidden_channels: u32,
   size: u32
-}
+};
 
 @group(0) @binding(0) var<uniform> shape: ParameterShape;
 @group(0) @binding(1) var<storage> state: array<f32>;
@@ -21,24 +21,22 @@ struct VertexOutput {
 
 @vertex
 fn vertex_main(input: VertexInput) -> VertexOutput {
-  let cell = vec2f(f32(input.index % shape.size), floor(f32(input.index / shape.size)));
-  let cellOffset = cell / f32(shape.size) * 2;
-  let gridPos = (input.pos + 1) / f32(shape.size) - 1 + cellOffset;
-  
-  var output: VertexOutput;
-  output.pos = vec4f(gridPos, 0, 1);
-  output.index = input.index;
-  return output; 
+  let invSize = 1.0 / f32(shape.size);
+  let cell = vec2f(f32(input.index % shape.size), f32(input.index / shape.size));
+  let gridPos = (input.pos + 1.0) * invSize - 1.0 + cell * 2.0 * invSize;
+
+  return VertexOutput(vec4f(gridPos, 0.0, 1.0), input.index);
 }
 
 @fragment
 fn fragment_main(input: VertexOutput) -> @location(0) vec4f {
   let square = shape.size * shape.size;
-  var colour: vec4f;
-  colour[0] = clamp(state[input.index + square], 0f, 1f);
-  colour[1] = clamp(state[input.index + square], 0f, 1f);
-  colour[2] = clamp(state[input.index + square * 2], 0f, 1f);
-  colour[3] = 1f;
+  let colour = clamp(
+    vec4f(state[input.index], state[input.index + square], state[input.index + square * 2], 1.0),
+    vec4f(0.0),
+    vec4f(1.0)
+);
+
   return colour;
 }
 `;
