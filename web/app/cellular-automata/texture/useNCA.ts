@@ -11,9 +11,16 @@ export enum NCAStatus {
 }
 
 export interface GPUResources {
-	device: GPUDevice | null;
-	context: GPUCanvasContext | null;
-	encoder: GPUCommandEncoder | null;
+	device: GPUDevice;
+	context: GPUCanvasContext;
+	bindGroups: CellStateBindGroupPair;
+	pipelines: {
+		cell: GPURenderPipeline;
+		simulation: GPUComputePipeline;
+	};
+	buffers: {
+		vertex: GPUBuffer;
+	};
 }
 
 export interface NCASettings {
@@ -35,19 +42,18 @@ const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -
 export default function useNCA({ size, channels, hiddenChannels, convolutions, shaders, weightsURL }: NCASettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
-	const [resources, setResources] = useState<GPUResources>({
-		device: null,
-		context: null,
-		encoder: null
-	});
+	const [resources, setResources] = useState<GPUResources | null>(null);
 	const [play, setPlay] = useState(false);
 	const [step, setStep] = useState(0);
+	const [FPS, setFPS] = useState(60);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: depending upon `resources.device?.destroy` would cause an infinite loop
 	useEffect(() => {
 		async function init() {
+			if (resources) return;
+			console.log('Initialising Shaders');
+
 			// Check for WebGPU support
 			if (!navigator.gpu) {
 				setStatus(NCAStatus.FAILED);
@@ -73,7 +79,6 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				setError(`Failed to get a GPU device: ${(error as Error).message}`);
 				return;
 			}
-			setResources(prev => ({ ...prev, device }));
 
 			// Configure canvas context
 			const context = canvasRef.current?.getContext('webgpu');
@@ -82,7 +87,6 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				setError('Failed to get canvas context.');
 				return;
 			}
-			setResources(prev => ({ ...prev, context }));
 			context.configure({
 				device,
 				format: navigator.gpu.getPreferredCanvasFormat(),
@@ -265,7 +269,6 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 						{ binding: 5, resource: { buffer: weightBuffers[2] } } // Layer 2 Weights
 					]
 				}),
-
 				device.createBindGroup({
 					label: 'Bind Group B',
 					layout: bindGroupLayout,
@@ -280,31 +283,19 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				})
 			];
 
-			// Create command encoder
-			const commandEncoder = device.createCommandEncoder();
-
-			// Get current swap chain texture view
-			const textureView = context.getCurrentTexture().createView();
-
-			// Begin render pass
-			const renderPass = commandEncoder.beginRenderPass({
-				colorAttachments: [
-					{
-						view: textureView,
-						clearValue: [0, 0, 0, 1], // Black background
-						loadOp: 'clear',
-						storeOp: 'store'
-					}
-				]
-			});
-			renderPass.setPipeline(cellPipeline);
-			renderPass.setVertexBuffer(0, vertexBuffer);
-			renderPass.setBindGroup(0, bindGroups[0]);
-			renderPass.draw(SHAPE_VERTICES.length / 2, size * size);
-			renderPass.end();
-			device.queue.submit([commandEncoder.finish()]);
-
 			// All done!
+			setResources({
+				device,
+				context,
+				bindGroups,
+				pipelines: {
+					cell: cellPipeline,
+					simulation: simulationPipeline
+				},
+				buffers: {
+					vertex: vertexBuffer
+				}
+			});
 			setStatus(NCAStatus.READY);
 		}
 
@@ -312,10 +303,68 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 
 		// Cleanup
 		return () => {
-			// Destroy device & buffers
-			resources.device?.destroy();
+			// Destroy device & associated buffers
+			resources?.device.destroy();
 		};
-	}, [size, channels]);
+	}, [size, channels, hiddenChannels, convolutions, weightsURL, shaders.simulation, resources]);
+
+	useEffect(() => {
+		if (status !== NCAStatus.READY || !resources) return;
+
+		let animationFrameId: number;
+		let lastFrameTime = performance.now();
+
+		const renderLoop = () => {
+			if (!(play && resources)) {
+				animationFrameId = requestAnimationFrame(renderLoop);
+				return;
+			}
+
+			const now = performance.now();
+			const deltaTime = now - lastFrameTime;
+			const frameTime = 1000 / FPS;
+
+			if (deltaTime >= frameTime) {
+				lastFrameTime = now - (deltaTime % frameTime);
+
+				// Create command encoder
+				const commandEncoder = resources.device.createCommandEncoder();
+				const textureView = resources.context.getCurrentTexture().createView();
+
+				// Begin render pass
+				const renderPass = commandEncoder.beginRenderPass({
+					colorAttachments: [
+						{
+							view: textureView,
+							clearValue: [1, 1, 1, 1],
+							loadOp: 'clear',
+							storeOp: 'store'
+						}
+					]
+				});
+				renderPass.setPipeline(resources.pipelines.cell);
+				renderPass.setVertexBuffer(0, resources.buffers.vertex);
+				renderPass.setBindGroup(0, resources.bindGroups[step % 2]);
+				renderPass.draw(SHAPE_VERTICES.length / 2, size * size);
+				renderPass.end();
+
+				// Submit commands
+				resources.device.queue.submit([commandEncoder.finish()]);
+
+				// Increment step count for swapping bind groups
+				setStep(prev => prev + 1);
+			}
+
+			animationFrameId = requestAnimationFrame(renderLoop);
+		};
+
+		// Start render loop
+		animationFrameId = requestAnimationFrame(renderLoop);
+
+		return () => {
+			cancelAnimationFrame(animationFrameId);
+		};
+	}, [play, FPS, resources, status, size, step]);
 
 	return {
 		play,
@@ -326,6 +375,8 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 		setError,
 		status,
 		setStatus,
+		FPS,
+		setFPS,
 		canvasRef
 	};
 }
