@@ -43,7 +43,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources | null>(null);
-	const [play, setPlay] = useState(false);
+	const [play, setPlay] = useState(true);
 	const [step, setStep] = useState(0);
 	const [FPS, setFPS] = useState(60);
 
