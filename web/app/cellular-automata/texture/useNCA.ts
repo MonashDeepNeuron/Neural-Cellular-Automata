@@ -30,8 +30,7 @@ export interface NCASettings {
 export type CellStateBufferPair = [GPUBuffer, GPUBuffer];
 export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 
-// Optimise drawing of square to 1 large triangle that will be constrained to clip space
-const SHAPE_VERTICES = new Float32Array([-1, 2, -1, -1, 2, -1]);
+const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1]);
 
 export default function useNCA({ size, channels, hiddenChannels, convolutions, shaders, weightsURL }: NCASettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
@@ -87,7 +86,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			context.configure({
 				device,
 				format: navigator.gpu.getPreferredCanvasFormat(),
-				alphaMode: 'premultiplied'
+				alphaMode: 'opaque'
 			});
 
 			// Load weights
@@ -148,27 +147,27 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 					{
 						binding: 1, // State / Input State (Compute)
 						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
-						buffer: { type: 'uniform' }
+						buffer: { type: 'read-only-storage' }
 					},
 					{
 						binding: 2, // Output State (Compute)
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'uniform' }
+						buffer: { type: 'storage' }
 					},
 					{
 						binding: 3, // Layer 1 Weights
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'uniform' }
+						buffer: { type: 'storage' }
 					},
 					{
 						binding: 4, // Layer 1 Biases
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'uniform' }
+						buffer: { type: 'storage' }
 					},
 					{
 						binding: 5, // Layer 2 Weights
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'uniform' }
+						buffer: { type: 'storage' }
 					}
 				]
 			});
@@ -205,24 +204,24 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			});
 
 			// Initialise buffers
-			const shapeArray = new Float32Array([channels, convolutions, hiddenChannels, size]);
+			const shapeArray = new Uint32Array([channels, convolutions, hiddenChannels, size]);
 			const shapeBuffer = device.createBuffer({
 				label: 'Size Buffer',
 				size: shapeArray.byteLength,
 				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 			});
 
-			const cellState = new Float32Array(channels * size * size).fill(0);
+			const cellState = new Float32Array(channels * size * size).fill(0.9);
 			const cellStateBuffers: CellStateBufferPair = [
 				device.createBuffer({
 					label: 'Cell State A',
 					size: cellState.byteLength,
-					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				}),
 				device.createBuffer({
 					label: 'Cell State B',
 					size: cellState.byteLength,
-					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				})
 			];
 
@@ -230,17 +229,17 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				device.createBuffer({
 					label: 'Layer 1 Weights',
 					size: parameters[0] * Float32Array.BYTES_PER_ELEMENT,
-					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				}),
 				device.createBuffer({
 					label: 'Layer 1 Biases',
 					size: parameters[1] * Float32Array.BYTES_PER_ELEMENT,
-					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				}),
 				device.createBuffer({
 					label: 'Layer 2 Weights',
 					size: parameters[2] * Float32Array.BYTES_PER_ELEMENT,
-					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 				})
 			];
 
@@ -251,6 +250,59 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			device.queue.writeBuffer(weightBuffers[0], 0, weights.slice(0, parameters[0]));
 			device.queue.writeBuffer(weightBuffers[1], 0, weights.slice(parameters[0], parameters[0] + parameters[1]));
 			device.queue.writeBuffer(weightBuffers[2], 0, weights.slice(parameters[0] + parameters[1]));
+
+			// Create Bind Group
+			const bindGroups: CellStateBindGroupPair = [
+				device.createBindGroup({
+					label: 'Bind Group A',
+					layout: bindGroupLayout,
+					entries: [
+						{ binding: 0, resource: { buffer: shapeBuffer } }, // Shape Buffer
+						{ binding: 1, resource: { buffer: cellStateBuffers[0] } }, // Input State A
+						{ binding: 2, resource: { buffer: cellStateBuffers[1] } }, // Output State B
+						{ binding: 3, resource: { buffer: weightBuffers[0] } }, // Layer 1 Weights
+						{ binding: 4, resource: { buffer: weightBuffers[1] } }, // Layer 1 Biases
+						{ binding: 5, resource: { buffer: weightBuffers[2] } } // Layer 2 Weights
+					]
+				}),
+
+				device.createBindGroup({
+					label: 'Bind Group B',
+					layout: bindGroupLayout,
+					entries: [
+						{ binding: 0, resource: { buffer: shapeBuffer } }, // Shape Buffer
+						{ binding: 1, resource: { buffer: cellStateBuffers[1] } }, // Input State B (Swapped)
+						{ binding: 2, resource: { buffer: cellStateBuffers[0] } }, // Output State A (Swapped)
+						{ binding: 3, resource: { buffer: weightBuffers[0] } }, // Layer 1 Weights
+						{ binding: 4, resource: { buffer: weightBuffers[1] } }, // Layer 1 Biases
+						{ binding: 5, resource: { buffer: weightBuffers[2] } } // Layer 2 Weights
+					]
+				})
+			];
+
+			// Create command encoder
+			const commandEncoder = device.createCommandEncoder();
+
+			// Get current swap chain texture view
+			const textureView = context.getCurrentTexture().createView();
+
+			// Begin render pass
+			const renderPass = commandEncoder.beginRenderPass({
+				colorAttachments: [
+					{
+						view: textureView,
+						clearValue: [0, 0, 0, 1], // Black background
+						loadOp: 'clear',
+						storeOp: 'store'
+					}
+				]
+			});
+			renderPass.setPipeline(cellPipeline);
+			renderPass.setVertexBuffer(0, vertexBuffer);
+			renderPass.setBindGroup(0, bindGroups[0]);
+			renderPass.draw(SHAPE_VERTICES.length / 2, size * size);
+			renderPass.end();
+			device.queue.submit([commandEncoder.finish()]);
 
 			// All done!
 			setStatus(NCAStatus.READY);
