@@ -1,6 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
+import simulation from './simulation';
 import useNCA from './useNCA';
 
 const SIZE = 512;
@@ -8,12 +9,12 @@ const SIZE = 512;
 export default function Texture() {
 	const { error, status, play, setPlay, step, canvasRef } = useNCA({
 		size: SIZE,
-		channels: 16,
+		channels: 12,
 		hiddenChannels: 96,
 		convolutions: 4,
 		weightsURL: '/weights/texture.bin',
 		shaders: {
-			simulation: ''
+			simulation
 		}
 	});
 
@@ -31,7 +32,7 @@ export default function Texture() {
 			<p>Step: {step}</p>
 			<div className='relative inline-block'>
 				<div className='absolute top-0 left-0 flex items-center justify-center overflow-hidden w-full h-full'>
-					{error && <p className='text-red-500 px-4'>{error}</p>}
+					{error && <p className='text-red-500 px-4 text-center'>{error}</p>}
 				</div>
 				<canvas height={SIZE} width={SIZE} ref={canvasRef} />
 			</div>

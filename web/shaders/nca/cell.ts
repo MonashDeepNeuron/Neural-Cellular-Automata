@@ -1,10 +1,12 @@
 const cell = /* wgsl */ `
-struct GridSize {
-  channels: f32;
-  rows: f32;
-  cols: f32;
+struct ParameterShape {
+  channels: f32,
+  convolutions: f32,
+  hidden_channels: f32,
+  size: f32
 }
-@group(0) @binding(0) var<uniform> size: GridSize; // channels, rows, cols
+
+@group(0) @binding(0) var<uniform> shape: ParameterShape;
 @group(0) @binding(1) var<uniform> state: array<f32>;
 
 struct VertexInput {

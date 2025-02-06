@@ -30,9 +30,10 @@ export interface NCASettings {
 export type CellStateBufferPair = [GPUBuffer, GPUBuffer];
 export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 
-const SHAPE_VERTICES = new Float32Array([-1, 2, -1, -1, 2, -1])
+// Optimise drawing of square to 1 large triangle that will be constrained to clip space
+const SHAPE_VERTICES = new Float32Array([-1, 2, -1, -1, 2, -1]);
 
-export default function useNCA({ size, channels, shaders, weightsURL }: NCASettings) {
+export default function useNCA({ size, channels, hiddenChannels, convolutions, shaders, weightsURL }: NCASettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources>({
@@ -98,6 +99,13 @@ export default function useNCA({ size, channels, shaders, weightsURL }: NCASetti
 				setError(`Failed to load weights from URL: ${(error as Error).message}`);
 				return;
 			}
+			const parameters = [channels * convolutions * hiddenChannels, hiddenChannels, hiddenChannels * channels];
+			const total = parameters.reduce((acc, p) => acc + p, 0);
+			if (total !== weights.length) {
+				setStatus(NCAStatus.FAILED);
+				setError(`Loaded weights do not match provided model shape. Expected (${parameters.join(', ')})`);
+				return;
+			}
 
 			// Create vertex buffer
 			const vertexBuffer = device.createBuffer({
@@ -135,32 +143,32 @@ export default function useNCA({ size, channels, shaders, weightsURL }: NCASetti
 					{
 						binding: 0, // Grid size
 						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
-						buffer: { type: 'read-only-storage' }
+						buffer: { type: 'uniform' }
 					},
 					{
 						binding: 1, // State / Input State (Compute)
 						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
-						buffer: { type: 'storage' }
+						buffer: { type: 'uniform' }
 					},
 					{
 						binding: 2, // Output State (Compute)
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'storage' }
+						buffer: { type: 'uniform' }
 					},
 					{
 						binding: 3, // Layer 1 Weights
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'read-only-storage' }
+						buffer: { type: 'uniform' }
 					},
 					{
 						binding: 4, // Layer 1 Biases
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'read-only-storage' }
+						buffer: { type: 'uniform' }
 					},
 					{
-						binding: 5, // Layer 2 Biases
+						binding: 5, // Layer 2 Weights
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'read-only-storage' }
+						buffer: { type: 'uniform' }
 					}
 				]
 			});
@@ -197,26 +205,52 @@ export default function useNCA({ size, channels, shaders, weightsURL }: NCASetti
 			});
 
 			// Initialise buffers
+			const shapeArray = new Float32Array([channels, convolutions, hiddenChannels, size]);
+			const shapeBuffer = device.createBuffer({
+				label: 'Size Buffer',
+				size: shapeArray.byteLength,
+				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+			});
+
 			const cellState = new Float32Array(channels * size * size).fill(0);
 			const cellStateBuffers: CellStateBufferPair = [
 				device.createBuffer({
 					label: 'Cell State A',
 					size: cellState.byteLength,
-					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 				}),
 				device.createBuffer({
 					label: 'Cell State B',
 					size: cellState.byteLength,
-					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+				})
+			];
+
+			const weightBuffers = [
+				device.createBuffer({
+					label: 'Layer 1 Weights',
+					size: parameters[0] * Float32Array.BYTES_PER_ELEMENT,
+					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+				}),
+				device.createBuffer({
+					label: 'Layer 1 Biases',
+					size: parameters[1] * Float32Array.BYTES_PER_ELEMENT,
+					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+				}),
+				device.createBuffer({
+					label: 'Layer 2 Weights',
+					size: parameters[2] * Float32Array.BYTES_PER_ELEMENT,
+					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 				})
 			];
 
 			// Write buffers
-			const sizeArray = new Float32Array([channels, size, size]);
-			const sizeBuffer = device.createBuffer({
-				label: 'Size Buffer',
-				size: 3 * 4
-			})
+			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
+			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
+			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
+			device.queue.writeBuffer(weightBuffers[0], 0, weights.slice(0, parameters[0]));
+			device.queue.writeBuffer(weightBuffers[1], 0, weights.slice(parameters[0], parameters[0] + parameters[1]));
+			device.queue.writeBuffer(weightBuffers[2], 0, weights.slice(parameters[0] + parameters[1]));
 
 			// All done!
 			setStatus(NCAStatus.READY);
@@ -231,5 +265,15 @@ export default function useNCA({ size, channels, shaders, weightsURL }: NCASetti
 		};
 	}, [size, channels]);
 
-	return { play, setPlay, step, setStep, error, setError, status, setStatus, canvasRef };
+	return {
+		play,
+		setPlay,
+		step,
+		setStep,
+		error,
+		setError,
+		status,
+		setStatus,
+		canvasRef
+	};
 }
