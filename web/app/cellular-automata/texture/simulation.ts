@@ -58,7 +58,7 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3<u32>) {
 
     // Copy identity convolution directly from state
     for (var c = 0u; c < CHANNELS; c++) {
-        perceptions[c * 4 + 0] = state[index(vec3u(c, x, y), size, CHANNELS)];
+        perceptions[c * 4 + 0] = state[index(vec3u(c, x, y))];
     }
 
     // Compute convolutions (SOBEL_X, SOBEL_Y, LAPLACIAN)
@@ -85,7 +85,7 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3<u32>) {
             sum += l2_w[c * HIDDEN_CHANNELS + h] * hidden[h];
         }
 
-        let i = index(vec3u(c, x, y), size, CHANNELS);
+        let i = index(vec3u(c, x, y));
         next_state[i] = state[i] + sum * mask(i);
     }
 }
@@ -99,7 +99,7 @@ fn convolve(coord: vec2u, kernel: mat3x3f, channel: u32) -> f32 {
         for (var kx = 0u; kx < 3u; kx++) {
             let x = (coord.x + kx - 1 + size) % size; // Circular padding
             let y = (coord.y + ky - 1 + size) % size;
-            let state_idx = index(vec3u(channel, x, y), size, CHANNELS);
+            let state_idx = index(vec3u(channel, x, y));
             sum += state[state_idx] * kernel[ky][kx];
         }
     }
@@ -108,8 +108,8 @@ fn convolve(coord: vec2u, kernel: mat3x3f, channel: u32) -> f32 {
 }
 
 // Helper function to compute 1D index for a 3D grid (channels, size, size)
-fn index(coord: vec3u, size: u32, channels: u32) -> u32 {
-    return (coord.x * size * size) + (coord.y * size) + coord.z;
+fn index(coord: vec3u) -> u32 {
+    return (coord.x * shape.size * shape.size) + (coord.y * shape.size) + coord.z;
 }
 
 // Random 0 or 1
