@@ -12,6 +12,7 @@ struct ParameterShape {
 @group(0) @binding(3) var<storage> l1_w: array<f32>;
 @group(0) @binding(4) var<storage> l1_b: array<f32>;
 @group(0) @binding(5) var<storage> l2_w: array<f32>;
+@group(0) @binding(6) var<uniform> seed: u32;
 
 // Constants
 const CHANNELS = 12;
@@ -84,7 +85,8 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3<u32>) {
             sum += l2_w[c * HIDDEN_CHANNELS + h] * hidden_out[h];
         }
 
-        next_state[index(vec3u(c, x, y), size, CHANNELS)] = state[index(vec3u(c, x, y), size, CHANNELS)] + sum;
+        let mask = rand(vec3u(c, x, y));
+        next_state[index(vec3u(c, x, y), size, CHANNELS)] = state[index(vec3u(c, x, y), size, CHANNELS)] + sum * mask;
     }
 }
 
@@ -108,6 +110,13 @@ fn convolve(coord: vec2u, kernel: mat3x3f, channel: u32) -> f32 {
 // Helper function to compute 1D index for a 3D grid (channels, size, size)
 fn index(coord: vec3u, size: u32, channels: u32) -> u32 {
     return (coord.x * size * size) + (coord.y * size) + coord.z;
+}
+
+// Random value
+fn rand(coord: vec3u) -> f32 {
+    var hash: u32 = (coord.x * 73856093u) ^ (coord.y * 19349663u) ^ (coord.z * 83492791u) ^ seed;
+    hash = (hash >> 13) ^ hash;
+    return f32((hash * (hash * hash * 15731u + 789221u) + 1376312589u) & 0x7fffffff) / f32(0x7fffffff);
 }
 
 // ReLU activation function

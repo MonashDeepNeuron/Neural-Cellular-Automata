@@ -20,6 +20,7 @@ export interface GPUResources {
 	};
 	buffers: {
 		vertex: GPUBuffer;
+		seed: GPUBuffer;
 	};
 }
 
@@ -173,6 +174,11 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 						binding: 5, // Layer 2 Weights
 						visibility: GPUShaderStage.COMPUTE,
 						buffer: { type: 'read-only-storage' }
+					},
+					{
+						binding: 6,
+						visibility: GPUShaderStage.COMPUTE,
+						buffer: { type: 'uniform' }
 					}
 				]
 			});
@@ -248,6 +254,11 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				})
 			];
 
+			const seedBuffer = device.createBuffer({
+				size: Int32Array.BYTES_PER_ELEMENT,
+				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+			});
+
 			// Write buffers
 			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
 			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
@@ -267,7 +278,8 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 						{ binding: 2, resource: { buffer: cellStateBuffers[1] } },
 						{ binding: 3, resource: { buffer: weightBuffers[0] } },
 						{ binding: 4, resource: { buffer: weightBuffers[1] } },
-						{ binding: 5, resource: { buffer: weightBuffers[2] } }
+						{ binding: 5, resource: { buffer: weightBuffers[2] } },
+						{ binding: 6, resource: { buffer: seedBuffer } }
 					]
 				}),
 				device.createBindGroup({
@@ -279,7 +291,8 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 						{ binding: 2, resource: { buffer: cellStateBuffers[0] } },
 						{ binding: 3, resource: { buffer: weightBuffers[0] } },
 						{ binding: 4, resource: { buffer: weightBuffers[1] } },
-						{ binding: 5, resource: { buffer: weightBuffers[2] } }
+						{ binding: 5, resource: { buffer: weightBuffers[2] } },
+						{ binding: 6, resource: { buffer: seedBuffer } }
 					]
 				})
 			];
@@ -294,7 +307,8 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 					simulation: simulationPipeline
 				},
 				buffers: {
-					vertex: vertexBuffer
+					vertex: vertexBuffer,
+					seed: seedBuffer
 				}
 			});
 			setStatus(NCAStatus.READY);
@@ -328,10 +342,15 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			if (deltaTime >= frameTime) {
 				lastFrameTime = now - (deltaTime % frameTime);
 
+				// Generate a new seed each frame
+				const seed = step % 10_000;
+				resources.device.queue.writeBuffer(resources.buffers.seed, 0, new Uint32Array([seed]));
+
 				// Create command encoder
 				const encoder = resources.device.createCommandEncoder();
 				const textureView = resources.context.getCurrentTexture().createView();
 
+				// Compute Pass
 				const computePass = encoder.beginComputePass();
 				computePass.setPipeline(resources.pipelines.simulation);
 				computePass.setBindGroup(0, resources.bindGroups[step % 2]);
@@ -339,7 +358,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
 				computePass.end();
 
-				// Begin render pass
+				// Render pass
 				const renderPass = encoder.beginRenderPass({
 					colorAttachments: [
 						{
