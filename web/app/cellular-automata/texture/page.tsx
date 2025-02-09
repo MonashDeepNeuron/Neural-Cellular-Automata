@@ -31,7 +31,7 @@ export default function Texture() {
 					<p>
 						<b>Step</b>: {step}
 					</p>
-					<FramerateSlider state={FPS} setState={setFPS} />
+					<FramerateSlider state={FPS} setState={setFPS} max={240} />
 					<button
 						type='button'
 						disabled={status !== NCAStatus.READY}
