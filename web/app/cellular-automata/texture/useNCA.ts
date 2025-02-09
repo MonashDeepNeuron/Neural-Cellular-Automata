@@ -222,7 +222,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 			});
 
-			const cellState = new Float32Array(channels * size * size).fill(0.9);
+			const cellState = new Float32Array(channels * size * size).fill(0);
 			const cellStateBuffers: CellStateBufferPair = [
 				device.createBuffer({
 					label: 'Cell State A',
