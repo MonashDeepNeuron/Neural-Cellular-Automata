@@ -162,17 +162,17 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 					{
 						binding: 3, // Layer 1 Weights
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'storage' }
+						buffer: { type: 'read-only-storage' }
 					},
 					{
 						binding: 4, // Layer 1 Biases
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'storage' }
+						buffer: { type: 'read-only-storage' }
 					},
 					{
 						binding: 5, // Layer 2 Weights
 						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'storage' }
+						buffer: { type: 'read-only-storage' }
 					}
 				]
 			});
