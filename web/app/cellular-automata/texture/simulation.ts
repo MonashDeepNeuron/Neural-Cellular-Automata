@@ -54,39 +54,39 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3<u32>) {
     }
 
     // Perception convolution
-    var perception_out: array<f32, PERCEPTION_VECTOR>;
+    var perceptions: array<f32, PERCEPTION_VECTOR>;
 
     // Copy identity convolution directly from state
     for (var c = 0u; c < CHANNELS; c++) {
-        perception_out[c * 4 + 0] = state[index(vec3u(c, x, y), size, CHANNELS)];
+        perceptions[c * 4 + 0] = state[index(vec3u(c, x, y), size, CHANNELS)];
     }
 
     // Compute convolutions (SOBEL_X, SOBEL_Y, LAPLACIAN)
     for (var c = 0u; c < CHANNELS; c++) {
-        perception_out[c * 4 + 1] = convolve(vec2u(x, y), SOBEL_X, c);
-        perception_out[c * 4 + 2] = convolve(vec2u(x, y), SOBEL_Y, c);
-        perception_out[c * 4 + 3] = convolve(vec2u(x, y), LAPLACIAN, c);
+        perceptions[c * 4 + 1] = convolve(vec2u(x, y), SOBEL_X, c);
+        perceptions[c * 4 + 2] = convolve(vec2u(x, y), SOBEL_Y, c);
+        perceptions[c * 4 + 3] = convolve(vec2u(x, y), LAPLACIAN, c);
     }
 
     // Fully connected layers
-    var hidden_out: array<f32, HIDDEN_CHANNELS>;  // Hidden layer output
+    var hidden: array<f32, HIDDEN_CHANNELS>;  // Hidden layer output
     for (var h = 0u; h < HIDDEN_CHANNELS; h++) {
         var sum: f32 = 0.0;
         for (var p = 0u; p < PERCEPTION_VECTOR; p++) {
-            sum += l1_w[h * PERCEPTION_VECTOR + p] * perception_out[p];
+            sum += l1_w[h * PERCEPTION_VECTOR + p] * perceptions[p];
         }
-        hidden_out[h] = ReLU(sum + l1_b[h]);
+        hidden[h] = ReLU(sum + l1_b[h]);
     }
 
     // Output layer (next state computation)
     for (var c = 0u; c < CHANNELS; c++) {
         var sum: f32 = 0.0;
         for (var h = 0u; h < HIDDEN_CHANNELS; h++) {
-            sum += l2_w[c * HIDDEN_CHANNELS + h] * hidden_out[h];
+            sum += l2_w[c * HIDDEN_CHANNELS + h] * hidden[h];
         }
 
-        let mask = select(0f, 1f, rand(vec3u(c, x, y)) > 0.5f);
-        next_state[index(vec3u(c, x, y), size, CHANNELS)] = state[index(vec3u(c, x, y), size, CHANNELS)] + sum * mask;
+        let i = index(vec3u(c, x, y), size, CHANNELS);
+        next_state[i] = state[i] + sum * mask(i);
     }
 }
 
@@ -112,11 +112,13 @@ fn index(coord: vec3u, size: u32, channels: u32) -> u32 {
     return (coord.x * size * size) + (coord.y * size) + coord.z;
 }
 
-// Random value
-fn rand(coord: vec3u) -> f32 {
-    var hash: u32 = (coord.x * 73856093u) ^ (coord.y * 19349663u) ^ (coord.z * 83492791u) ^ seed;
-    hash = (hash >> 13) ^ hash;
-    return f32((hash * (hash * hash * 15731u + 789221u) + 1376312589u) & 0x7fffffff) / f32(0x7fffffff);
+// Random 0 or 1
+fn mask(index: u32) -> f32 {
+    var hash: u32 = index ^ seed;
+    hash = hash * 0x45d9f3bu;         // Prime multiplier
+    hash = hash ^ (hash >> 13);       // Additional bit mixing
+    hash = hash * 0x27d4eb2du;        // Another prime multiplier for variability
+    return f32((hash >> 16) & 1u);    // Extract 0 or 1 as f32
 }
 
 // ReLU activation function
