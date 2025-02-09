@@ -85,7 +85,7 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3<u32>) {
             sum += l2_w[c * HIDDEN_CHANNELS + h] * hidden_out[h];
         }
 
-        let mask = rand(vec3u(c, x, y));
+        let mask = select(0f, 1f, rand(vec3u(c, x, y)) > 0.5f);
         next_state[index(vec3u(c, x, y), size, CHANNELS)] = state[index(vec3u(c, x, y), size, CHANNELS)] + sum * mask;
     }
 }
