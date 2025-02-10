@@ -2,9 +2,9 @@
 
 import Card from '@/components/Card';
 import FramerateSlider from '@/components/FramerateSlider';
+import useNCA, { NCAStatus } from '@/hooks/useNCA';
+import simulation from '@/shaders/nca/simulation';
 import clsx from 'clsx';
-import simulation from './simulation';
-import useNCA, { NCAStatus } from './useNCA';
 
 const SIZE = 512;
 
