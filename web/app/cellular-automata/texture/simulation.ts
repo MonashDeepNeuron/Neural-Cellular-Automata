@@ -63,9 +63,9 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3u) {
 
   // Compute convolutions (SOBEL_X, SOBEL_Y, LAPLACIAN)
   for (var c = 0u; c < CHANNELS; c++) {
-    perceptions[c * 4 + 1] = convolve(vec2u(x, y), SOBEL_X, c);
-    perceptions[c * 4 + 2] = convolve(vec2u(x, y), SOBEL_Y, c);
-    perceptions[c * 4 + 3] = convolve(vec2u(x, y), LAPLACIAN, c);
+    perceptions[c * 4 + 1] = convolve(c, x, y, SOBEL_X);
+    perceptions[c * 4 + 2] = convolve(c, x, y, SOBEL_Y);
+    perceptions[c * 4 + 3] = convolve(c, x, y, LAPLACIAN);
   }
 
   // Fully connected layers
@@ -92,17 +92,17 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3u) {
 }
 
 // Helper function to perform convolution with a 3x3 kernel for a specific channel
-fn convolve(coord: vec2u, kernel: mat3x3f, channel: u32) -> f32 {
-  var sum: f32 = 0.0;
+fn convolve(c: u32, x: u32, y: u32, kernel: mat3x3f) -> f32 {
   let size = shape.size;
+  var sum: f32 = 0.0;
 
   for (var ky = 0u; ky < 3u; ky++) {
     for (var kx = 0u; kx < 3u; kx++) {
       // Find neighbours with circular padding
-      let x = (coord.x + kx - 1 + size) % size;
-      let y = (coord.y + ky - 1 + size) % size;
-      let state_idx = index(channel, x, y);
-      sum += state[state_idx] * kernel[ky][kx];
+      let dx = (x + kx - 1 + size) % size;
+      let dy = (y + ky - 1 + size) % size;
+      let i = index(c, dx, dy);
+      sum += state[i] * kernel[ky][kx];
     }
   }
 
@@ -111,7 +111,8 @@ fn convolve(coord: vec2u, kernel: mat3x3f, channel: u32) -> f32 {
 
 // Helper function to compute 1D index for a 3D grid (channels, size, size)
 fn index(c: u32, x: u32, y: u32) -> u32 {
-  return (c * shape.size * shape.size) + (x * shape.size) + y;
+  let size = shape.size;
+  return (c * size * size) + (x * size) + y;
 }
 
 // Random 0 or 1
