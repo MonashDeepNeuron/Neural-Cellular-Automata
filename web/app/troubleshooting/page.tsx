@@ -27,7 +27,7 @@ export default function Troubleshooting() {
 					<b>Supported Browsers:</b> Chrome for Windows, Microsoft Edge, and Chrome for Android.
 				</p>
 				<p>
-					href check if your browser supports WebGPU, visit
+					to check if your browser supports WebGPU, visit
 					<a href='https://caniuse.com/webgpu' target='_blank' rel='noopener noreferrer'>
 						{' '}
 						Can I Use WebGPU?
@@ -38,7 +38,7 @@ export default function Troubleshooting() {
 				<h3>
 					<i>JavaScript Is Turned Off</i>
 				</h3>
-				<p>Our website requires JavaScript href function. Please enable JavaScript in your browser settings and refresh the page.</p>
+				<p>Our website requires JavaScript to function. Please enable JavaScript in your browser settings and refresh the page.</p>
 
 				{/* Issue 2 */}
 				<h2>I Changed the Settings and Now I See Nothing</h2>
@@ -47,10 +47,10 @@ export default function Troubleshooting() {
 				</h3>
 				<p>
 					Patterns depend on a delicate balance of life and death, and small changes can destabilize them. They also require variation in
-					grid values href work effectively.
+					grid values to work effectively.
 				</p>
 				<p>
-					<b>Solution:</b> Try different combinations and use the "Randomize" button href reset the grid with varied values.
+					<b>Solution:</b> Try different combinations and use the "Randomize" button to reset the grid with varied values.
 				</p>
 
 				<h3>
@@ -61,7 +61,7 @@ export default function Troubleshooting() {
 					code) and return a single `float32` value.
 				</p>
 				<p>
-					<b>Solution:</b> Use your browser's developer tools (inspect element) href identify and fix the issue.
+					<b>Solution:</b> Use your browser's developer tools (inspect element) to identify and fix the issue.
 				</p>
 
 				{/* Issue 3 */}
@@ -69,7 +69,7 @@ export default function Troubleshooting() {
 				<h3>
 					<i>Speed Setting Is Too High for Your Device</i>
 				</h3>
-				<p>Devices have varying capacities href handle high frame rates. If you experience lag, reduce the speed setting.</p>
+				<p>Devices have varying capacities to handle high frame rates. If you experience lag, reduce the speed setting.</p>
 				<p>
 					<b>Device Frame Rate Recommendations:</b>
 				</p>
@@ -93,7 +93,7 @@ export default function Troubleshooting() {
 				<h3>
 					<i>Why Does It Run Smoothly at Certain Frame Rates?</i>
 				</h3>
-				<p>href prevent freezes, the display update rate is capped at 50fps.</p>
+				<p>to prevent freezes, the display update rate is capped at 50fps.</p>
 				<p>
 					<b>Behavior:</b>
 				</p>
