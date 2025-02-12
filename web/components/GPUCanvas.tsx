@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import SpeedSlider from './SpeedSlider';
 import TemplateDropdown from './TemplateDropdown';
 
-export default function Canvas() {
+export default function GPUCanvas() {
 	/**
 	 * Obtain state from WebGPU slice of redux store
 	 */
