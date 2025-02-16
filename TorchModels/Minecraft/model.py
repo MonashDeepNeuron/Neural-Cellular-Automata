@@ -68,7 +68,7 @@ class NCA_3D(nn.Module):
 
         y = x.reshape(batches * channels, 1, height, width, depth)
         # Circular pad the input to avoid losing information at the edges
-        y = f.pad(y, [1, 1, 1, 1, 1, 1], "circular")
+        y = f.pad(y, [1, 1,  1, 1, 1, 1], "circular")
 
         # Apply each perception convolution
         y = f.conv3d(y, PERCEPTIONS[:, None])

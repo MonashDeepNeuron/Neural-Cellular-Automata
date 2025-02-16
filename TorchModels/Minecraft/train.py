@@ -88,9 +88,9 @@ def new_seed(batch_size=1):
     seed is like a cube map that sets a singular pixel activated
     """
     seed = torch.zeros(
-        batch_size, CHANNELS, 15, 11, 13
+        batch_size, CHANNELS, 6, 8, 6
     )  # create a cube map 15 = depth, 11 is width, 13 height
-    seed[:, 3, 15 // 2, 11 // 2, 0] = 1  # Alpha channel = 1
+    seed[:, 3, 4, 3, 0] = 1  # Alpha channel = 1
     return seed
 
 
@@ -106,7 +106,7 @@ def load_image(imagePath: str):
     HIDDEN_CHANNELS = 9
 
     mesh_path = imagePath
-    mesh = trimesh.load(mesh_path)
+    mesh = trimesh.load(mesh_path, force = "mesh")
 
     if mesh.is_empty:
         raise ValueError("The mesh is empty and cannot be voxelized.")
@@ -114,9 +114,26 @@ def load_image(imagePath: str):
     print("Mesh loaded successfully with vertices:", mesh.vertices.shape)
     print("Mesh loaded successfully with faces:", mesh.faces.shape)
 
-    ## voxelize mesh with resolution 1 (dist between two most adjacent vertices is one)
-    # voxel = mesh.voxelized(pitch=mesh.extents.max())
-    voxel = mesh.voxelized(2)
+## voxelize mesh with resolution 1 (dist between two most adjacent vertices is one)
+    # pitch=mesh.extents.min()
+    # pitch = 2/5
+    
+    # Calculate the pitch to match the bounding box dimensions
+    # In this case, we'll use the mesh dimension as the number of voxels.
+    #pitch = np.float64(0.14284999999999992) # This ensures 1 voxel per unit dimension (simplified example)
+
+    bounding_box = mesh.bounds
+    # Calculate the bounding box size (length along each axis)
+    bbox_size = bounding_box[1] - bounding_box[0]
+
+    # Desired number of voxels along each axis (you can adjust this to match the mesh dimensions)
+    desired_voxels = (5, 7, 5)
+
+    # Calculate the pitch for each axis to match the desired number of voxels
+    pitch = tuple(bbox_size[i] / desired_voxels[i] for i in range(3))
+
+    voxel = mesh.voxelized(pitch=min(pitch))
+    # voxel = mesh.voxelized(mesh.min)
 
     ## convert texture information into colours
     colours = mesh.visual.to_color().vertex_colors
@@ -156,14 +173,14 @@ def load_image(imagePath: str):
     return voxel_tensor
 
 
-def forward_pass(model: nn.Module, state, updates, record=False):  # TODO
+def forward_pass(model: nn.Module, state, updates, target, record=False):  # TODO
     """
     Run a forward pass consisting of `updates` number of updates
     If `record` is true, then records the state in a tensor to animate and saves the video
     Returns the final state
     """
     if record:
-        frames_array = Tensor(updates, CHANNELS, 15, 11, 13)
+        frames_array = Tensor(updates, CHANNELS, targetVoxel.shape[0], targetVoxel.shape[1], targetVoxel.shape[2])
         for i in range(updates):
             state = model(state)
             frames_array[i] = state
@@ -185,11 +202,12 @@ def update_pass(model, batch, target, optimiser):
     for batch_idx in range(BATCH_SIZE):
         optimiser.zero_grad()
         updates = random.randrange(UPDATES_RANGE[0], UPDATES_RANGE[1])
-        output = forward_pass(model, batch[batch_idx].unsqueeze(0), updates)
+        output = forward_pass(model, batch[batch_idx].unsqueeze(0), updates, target=target)
 
         ## apply pixel-wise MSE loss between RGBA channels in the grid and the target pattern
         output = output.squeeze(0).permute(1, 2, 3, 0)
         print(output.shape)
+        print(target.shape)
         loss = LOSS_FN(
             output[:, :, :, 0:4], target
         )  # FLAG, indexation may need to be changed here
@@ -215,6 +233,7 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
     """
     ## Obtain device of model, and send all related data to device
     device = next(model.parameters()).device
+    
     target = target.to(device)
 
     try:
@@ -231,7 +250,7 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
 
             test_seed = new_seed(1)
             MODEL.eval()
-            test_run = forward_pass(MODEL, test_seed, 32)
+            test_run = forward_pass(MODEL, test_seed, 32, target)
             # training_losses.append(
             #     LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
             # )
@@ -266,7 +285,7 @@ if __name__ == "__main__":
 
     MODEL = NCA_3D()
     # MODEL = initialiseGPU(MODEL)
-    EPOCHS = 10  # 50  # 100 epochs for best results
+    EPOCHS = 15  # 50  # 100 epochs for best results
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     BATCH_SIZE = 32
@@ -277,7 +296,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    targetVoxel = load_image("./voxel-trees/source/moreTrees/moreTrees.obj")
+    targetVoxel = load_image("./TorchModels/Minecraft/source/tree.obj")
 
     if TRAINING:
         MODEL, losses = train(MODEL, targetVoxel, optimizer)
@@ -294,5 +313,5 @@ if __name__ == "__main__":
 
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
-    video = forward_pass(MODEL, img, 200, record=True)
+    video = forward_pass(MODEL, img, 200, record=True, target=targetVoxel)
     anim = visualise(video, anim=True)
