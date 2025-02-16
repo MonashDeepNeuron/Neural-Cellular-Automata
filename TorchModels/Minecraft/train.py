@@ -16,6 +16,7 @@ import numpy as np
 import os
 import trimesh
 
+SHAPE = (8, 8, 8)
 # Use GPU if available
 if torch.cuda.is_available():
     torch.set_default_device("cuda")
@@ -88,9 +89,11 @@ def new_seed(batch_size=1):
     seed is like a cube map that sets a singular pixel activated
     """
     seed = torch.zeros(
-        batch_size, CHANNELS, 6, 8, 6
-    )  # create a cube map 15 = depth, 11 is width, 13 height
-    seed[:, 3, 4, 3, 0] = 1  # Alpha channel = 1
+        batch_size, CHANNELS, SHAPE[0], SHAPE[1], SHAPE[2]
+        )
+    
+    ## Batch, channels, x, y, z
+    seed[:, 3, SHAPE[0]//2, SHAPE[1]//2, 0] = 1  # Alpha channel = 1
     return seed
 
 
@@ -100,10 +103,7 @@ def load_image(imagePath: str):
     1. Obtain mesh
     2. Obtain the vertices from the mesh
     3. Convert colours to mesh
-
     """
-    RESOLUTION = 16
-    HIDDEN_CHANNELS = 9
 
     mesh_path = imagePath
     mesh = trimesh.load(mesh_path, force = "mesh")
@@ -114,26 +114,11 @@ def load_image(imagePath: str):
     print("Mesh loaded successfully with vertices:", mesh.vertices.shape)
     print("Mesh loaded successfully with faces:", mesh.faces.shape)
 
-## voxelize mesh with resolution 1 (dist between two most adjacent vertices is one)
-    # pitch=mesh.extents.min()
-    # pitch = 2/5
-    
-    # Calculate the pitch to match the bounding box dimensions
-    # In this case, we'll use the mesh dimension as the number of voxels.
-    #pitch = np.float64(0.14284999999999992) # This ensures 1 voxel per unit dimension (simplified example)
-
-    bounding_box = mesh.bounds
-    # Calculate the bounding box size (length along each axis)
-    bbox_size = bounding_box[1] - bounding_box[0]
-
     # Desired number of voxels along each axis (you can adjust this to match the mesh dimensions)
-    desired_voxels = (5, 7, 5)
+    desired_shape = (8, 8, 8)
 
     # Calculate the pitch for each axis to match the desired number of voxels
-    pitch = tuple(bbox_size[i] / desired_voxels[i] for i in range(3))
-
-    voxel = mesh.voxelized(pitch=min(pitch))
-    # voxel = mesh.voxelized(mesh.min)
+    voxel = mesh.voxelized(pitch = 1).revoxelized(shape = desired_shape)
 
     ## convert texture information into colours
     colours = mesh.visual.to_color().vertex_colors
@@ -162,13 +147,6 @@ def load_image(imagePath: str):
     # The tensor will have shape (X, Y, Z, 4), where 4 corresponds to RGBA channels
     voxel_tensor = torch.tensor(cube_colour, dtype=torch.float32)
 
-    # ## this breaks if tensor not of shaep 15, 13, 11
-    # padding = (0, 0, 1, 0, 1, 0, 1, 0)
-
-    # voxel_tensor = torch.nn.functional.pad(
-    #     voxel_tensor, padding, mode="constant", value=0
-    # )
-    # print("Shape of the resultant tensor:", voxel_tensor.shape)
 
     return voxel_tensor
 
@@ -206,8 +184,7 @@ def update_pass(model, batch, target, optimiser):
 
         ## apply pixel-wise MSE loss between RGBA channels in the grid and the target pattern
         output = output.squeeze(0).permute(1, 2, 3, 0)
-        print(output.shape)
-        print(target.shape)
+ 
         loss = LOSS_FN(
             output[:, :, :, 0:4], target
         )  # FLAG, indexation may need to be changed here
@@ -279,7 +256,6 @@ def initialiseGPU(model):
 if __name__ == "__main__":
 
     TRAINING = True  # Is our purpose to train or are we just looking rn?
-
     GRID_SIZE = 32
     CHANNELS = 16
 
@@ -289,7 +265,7 @@ if __name__ == "__main__":
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     BATCH_SIZE = 32
-    UPDATES_RANGE = [30, 48]
+    UPDATES_RANGE = [64, 96]
 
     LR = 1e-3
 
@@ -300,12 +276,8 @@ if __name__ == "__main__":
 
     if TRAINING:
         MODEL, losses = train(MODEL, targetVoxel, optimizer)
-
         print(losses)
-        ## Plot loss
         plt.plot(range(len(losses)), losses)
-
-        ## Save the model's weights after training
         torch.save(MODEL.state_dict(), "Minecraft.pth")
 
     ## Switch state to evaluation to disable dropout e.g.
