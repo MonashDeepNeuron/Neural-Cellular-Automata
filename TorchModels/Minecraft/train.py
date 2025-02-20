@@ -11,40 +11,29 @@ if torch.cuda.is_available():
     torch.set_default_device("cuda")
 
 
-def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
+def visualise(imgTensor, isNCAVoxel = False, filenameBase="test", anim=False, save=True, show=True):
     """
     Visualise a designated snapshot of the grid specified by idx and axis.
 
-    Input in form (channels, x,y,z)
+    - isNCAVoxel: If True, the input tensor is in the format of NCA (batch, channel, x, y, z)
+    If False, the input tensor is in the format of target_voxel (x, y, z, channel)
     """
 
-    ## Check if the image tensor is in the right format
-    if len(imgTensor.shape) < 4:
-        for i in range(4- len(imgTensor.shape)):
-            imgTensor = imgTensor.unsqueeze(0)
-    imgTensor = imgTensor.permute(1, 2, 3, 0).cpu().detach().numpy()
-
+    if isNCAVoxel:
+        imgTensor = imgTensor[0, :, :, :, :]
+        imgTensor = imgTensor.permute(1, 2, 3, 0)
+    
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
-
-    ## define references to vectors of each colour
-    colours = np.zeros_like(imgTensor)
-    colours[..., 0] = imgTensor[..., 0]  # red
-    colours[..., 1] = imgTensor[..., 1]
-    colours[..., 2] = imgTensor[..., 2]
-
-    imgTensor = imgTensor[:, :, :, :]
-    ## x, y, z
-    ax.voxels(imgTensor[:, :, :, :], edgecolor="k")
-
-    # End animation update
+    ax.set_box_aspect([1, 1, 1])
+    ax.voxels(imgTensor[:, :, :, 0], edgecolor="k")
     plt.show()
 
-def new_seed(targetVoxel, batch_size=1):
+def new_seed(target_voxel, batch_size=1):
     """
     seed is like a cube map that sets a singular pixel activated
     """
-    SHAPE = [targetVoxel.shape[i] for i in range(len(targetVoxel.shape))]
+    SHAPE = [target_voxel.shape[i] for i in range(len(target_voxel.shape))]
     seed = torch.zeros(
         batch_size, CHANNELS, SHAPE[0], SHAPE[1], SHAPE[2]
         )
@@ -71,10 +60,10 @@ def load_image(imagePath: str):
     print("Mesh loaded successfully with faces:", mesh.faces.shape)
 
     # Calculate the pitch for each axis to match the desired number of voxels
-    voxel = mesh.voxelized(pitch = 0.01) 
-    ## convert texture information into colours
-    colours = mesh.visual.to_color().vertex_colors
-    colours = np.asarray(colours)
+    voxel = mesh.voxelized(pitch = 0.15) 
+    ## TODO: convert texture information into colours
+    # colours = mesh.visual.to_color().vertex_colors
+    # colours = np.asarray(colours)
 
     ## get vertices from mesh
     mesh_vertices = mesh.vertices
@@ -100,7 +89,7 @@ def forward_pass(model: nn.Module, state, updates, target, record=False):  # TOD
     Returns the final state
     """
     if record:
-        frames_array = Tensor(updates, CHANNELS, targetVoxel.shape[0], targetVoxel.shape[1], targetVoxel.shape[2])
+        frames_array = Tensor(updates, CHANNELS, target_voxel.shape[0], target_voxel.shape[1], target_voxel.shape[2])
         for i in range(updates):
             state = model(state)
             frames_array[i] = state
@@ -149,12 +138,12 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
             if record:
                 outputs = torch.zeros_like(batch)
 
-            batch = new_seed(targetVoxel=targetVoxel, batch_size=BATCH_SIZE)
+            batch = new_seed(target_voxel=target_voxel, batch_size=BATCH_SIZE)
             batch = batch.to(device)
 
             update_pass(model, batch, target, optimiser)
 
-            # test_seed = new_seed(targetVoxel=targetVoxel, batch_size=BATCH_SIZE)
+            # test_seed = new_seed(target_voxel=target_voxel, batch_size=BATCH_SIZE)
             MODEL.eval()
             # test_run = forward_pass(MODEL, test_seed, 32, target)
            
@@ -185,7 +174,7 @@ if __name__ == "__main__":
     CHANNELS = 16
 
     MODEL = NCA_3D()
-    EPOCHS = 15  
+    EPOCHS = 20
     BATCH_SIZE = 32
     UPDATES_RANGE = [64, 96]
 
@@ -194,18 +183,16 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    targetVoxel = load_image("./fuze.obj")
+    target_voxel = load_image("./tree.obj")
 
     if TRAINING:
-        MODEL, losses = train(MODEL, targetVoxel, optimizer)
+        MODEL, losses = train(MODEL, target_voxel, optimizer)
         torch.save(MODEL.state_dict(), "Minecraft.pth")
 
     ## Switch state to evaluation to disable dropout e.g.
     MODEL.eval()
 
     ## Plot final state of evaluation OR evaluation animation
-    img = new_seed(targetVoxel=targetVoxel, batch_size=1)
-    video = forward_pass(MODEL, img, 200, record=True, target=targetVoxel)
-    
-    # anim = visualise(video, anim=True)
-    anim = visualise(targetVoxel, anim=True)
+    img = new_seed(target_voxel=target_voxel, batch_size=1)
+    model_generated_voxel = forward_pass(MODEL, img, 200, record=True, target=target_voxel)
+    anim = visualise(model_generated_voxel, isNCAVoxel=True, anim=True)
