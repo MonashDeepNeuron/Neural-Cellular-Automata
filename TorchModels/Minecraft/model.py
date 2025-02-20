@@ -31,7 +31,7 @@ class NCA_3D(nn.Module):
 
         self.channels = channels
 
-        # Define dense layers (2D convolutions with kernel size of 1)
+        # Define dense layers (3D convolutions with kernel size of 1)
         self.layers = nn.Sequential(
             # Input channels = channels * # of perceptions
             nn.Conv3d(channels * PERCEPTION_COUNT, hidden_channels, 1),
@@ -68,7 +68,7 @@ class NCA_3D(nn.Module):
 
         y = x.reshape(batches * channels, 1, height, width, depth)
         # Circular pad the input to avoid losing information at the edges
-        y = f.pad(y, [1, 1,  1, 1, 1, 1], "circular")
+        y = f.pad(y, [1, 1, 1, 1, 1, 1], "circular")
 
         # Apply each perception convolution
         y = f.conv3d(y, PERCEPTIONS[:, None])
@@ -85,23 +85,13 @@ class NCA_3D(nn.Module):
         # Apply mask
         return x * mask
 
-    '''
-    def seed(self, n=256, size=128):
-        """Creates an initial state for the model."""
-        return torch.zeros(n, self.channels, size, size)'''
-
-    def rgb(self, x):
-        """Converts the model output to an RGB image."""
-        # Return the first 3 channels, clamped between 0 and 1
-        return x[:, :3].clamp(0, 1)
-
     def alive_mask(self, x):
         """Applies alive mask to state_grid
         Does not use GPU to generate alive mask as doing max pooling
         A cell is considered empty (set rgba : 0) if there is no mature (alpha > 0.1) cell in its 3x3 neighbourhood
         """
         mask = (
-            f.max_pool3d(x[:, 3:4, :, :, :], kernel_size=3, stride=1, padding=1) > 0.1
+            f.max_pool3d(x[:, 0:1, :, :, :], kernel_size=3, stride=1, padding=1) > 0.1
         )
 
         # Apply mask

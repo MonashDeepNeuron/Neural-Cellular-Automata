@@ -1,24 +1,12 @@
-#### IMPORTS ####
-
 import torch
-from torchvision.io import read_image
-from torchvision.io.image import ImageReadMode
-import torchvision
 from torch import Tensor
 import torch.nn as nn
-from trimesh.visual import texture, TextureVisuals
-from trimesh import Trimesh
 from model import NCA_3D
 import random
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import argparse
 import numpy as np
-import os
 import trimesh
 
-SHAPE = (8, 8, 8)
-# Use GPU if available
 if torch.cuda.is_available():
     torch.set_default_device("cuda")
 
@@ -30,23 +18,14 @@ def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     Input in form (channels, x,y,z)
     """
 
+    ## Check if the image tensor is in the right format
     if len(imgTensor.shape) < 4:
         for i in range(4- len(imgTensor.shape)):
             imgTensor = imgTensor.unsqueeze(0)
-        # imgTensor.unsqueeze(0)
     imgTensor = imgTensor.permute(1, 2, 3, 0).cpu().detach().numpy()
-
-    # imgTensor = imgTensor.squeeze(0).permute(1, 2, 3, 4, 0).cpu().detach().numpy()
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
-
-    # def update(imgIdx):
-    # We're only interested in the RGBalpha channels, and need numpy representation for plt
-    # img = imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 3, 0)
-
-    # if anim:
-    #     plt.suptitle("Update " + str(imgIdx))
 
     ## define references to vectors of each colour
     colours = np.zeros_like(imgTensor)
@@ -55,9 +34,8 @@ def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     colours[..., 2] = imgTensor[..., 2]
 
     imgTensor = imgTensor[:, :, :, :]
-    print(imgTensor.shape)
     ## x, y, z
-    ax.voxels(imgTensor[:, :, :, 3], edgecolor="k")
+    ax.voxels(imgTensor[:, :, :, :], edgecolor="k")
 
     # End animation update
     plt.show()
@@ -94,7 +72,6 @@ def load_image(imagePath: str):
 
     # Calculate the pitch for each axis to match the desired number of voxels
     voxel = mesh.voxelized(pitch = 0.01) 
-    # voxel.show()
     ## convert texture information into colours
     colours = mesh.visual.to_color().vertex_colors
     colours = np.asarray(colours)
@@ -103,8 +80,7 @@ def load_image(imagePath: str):
     mesh_vertices = mesh.vertices
     _, vertex_idx = trimesh.proximity.ProximityQuery(mesh).vertex(voxel.points)
 
-    # we initialize a array of zeros of size X,Y,Z,4 to contain the colors for each voxel of the voxelized mesh in the grid
-    # cube_colour = np.zeros([voxel.shape[0], voxel.shape[1], voxel.shape[2], 4])
+    # we initialize a array of zeros of size X,Y,Z,1 to contain the colors for each voxel of the voxelized mesh in the grid
 
     alpha_values = np.zeros([voxel.shape[0], voxel.shape[1], voxel.shape[2], 1])
     ## map vertices to grid coordinates
@@ -113,7 +89,6 @@ def load_image(imagePath: str):
         alpha_values[vox_verts[0], vox_verts[1], vox_verts[2]] = 1
     
     voxel_tensor = torch.tensor(alpha_values, dtype=torch.float32)
-
 
     return voxel_tensor
 
@@ -153,9 +128,8 @@ def update_pass(model, batch, target, optimiser):
         output = output.squeeze(0).permute(1, 2, 3, 0)
  
         loss = LOSS_FN(
-            output[:, :, :, :], target
-        )  # FLAG, indexation may need to be changed here
-        ## .item() removes computational graph for memory efficiency
+            output[:, :, :, 0:1], target
+        )  
         batch_losses[batch_idx] = loss.item()
         loss.backward()
         optimiser.step()
@@ -164,18 +138,6 @@ def update_pass(model, batch, target, optimiser):
 
 
 def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # TODO
-    """
-    TRAINING PROCESS:
-        - Define training data storage variables
-        - For each epoch:
-            - Initialise batch
-            - Forward pass (runs the model on the batch)
-            - Backward pass (calculates loss and updates params)
-            - SANITY CHECK: check current loss and record loss
-            - Save model if this is the best model TODO
-        - Return the trained model
-    """
-    ## Obtain device of model, and send all related data to device
     device = next(model.parameters()).device
     
     target = target.to(device)
@@ -192,13 +154,10 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
 
             update_pass(model, batch, target, optimiser)
 
-            test_seed = new_seed(targetVoxel=targetVoxel, batch_size=BATCH_SIZE)
+            # test_seed = new_seed(targetVoxel=targetVoxel, batch_size=BATCH_SIZE)
             MODEL.eval()
-            test_run = forward_pass(MODEL, test_seed, 32, target)
-            # training_losses.append(
-            #     LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
-            # )
-            # print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
+            # test_run = forward_pass(MODEL, test_seed, 32, target)
+           
 
     except KeyboardInterrupt:
         pass
@@ -221,16 +180,12 @@ def initialiseGPU(model):
 
 
 if __name__ == "__main__":
-
-    TRAINING = True  # Is our purpose to train or are we just looking rn?
+    TRAINING = True 
     GRID_SIZE = 32
     CHANNELS = 16
 
     MODEL = NCA_3D()
-    # MODEL = initialiseGPU(MODEL)
-    EPOCHS = 15  # 50  # 100 epochs for best results
-    ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
-
+    EPOCHS = 15  
     BATCH_SIZE = 32
     UPDATES_RANGE = [64, 96]
 
@@ -243,8 +198,6 @@ if __name__ == "__main__":
 
     if TRAINING:
         MODEL, losses = train(MODEL, targetVoxel, optimizer)
-        print(losses)
-        plt.plot(range(len(losses)), losses)
         torch.save(MODEL.state_dict(), "Minecraft.pth")
 
     ## Switch state to evaluation to disable dropout e.g.
