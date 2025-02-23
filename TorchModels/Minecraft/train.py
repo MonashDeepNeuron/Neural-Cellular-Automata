@@ -6,28 +6,58 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 import trimesh
+import os
+import matplotlib.animation as animation
 
 if torch.cuda.is_available():
     torch.set_default_device("cuda")
 
 
-def visualise(imgTensor, isNCAVoxel = False, filenameBase="test", anim=False, save=True, show=True):
+def visualise(imgTensor, isNCAVoxel=True, filenameBase="minecraft", save=True, show=False):
     """
     Visualise a designated snapshot of the grid specified by idx and axis.
 
     - isNCAVoxel: If True, the input tensor is in the format of NCA (batch, channel, x, y, z)
-    If False, the input tensor is in the format of target_voxel (x, y, z, channel)
+      and the batch dimension is assumed to represent time.
+      If False, the input tensor is in the format of target_voxel (x, y, z, channel)
     """
-
-    if isNCAVoxel:
-        imgTensor = imgTensor[0, :, :, :, :]
-        imgTensor = imgTensor.permute(1, 2, 3, 0)
     
+    if isNCAVoxel:
+        # For a time series, assume the batch dimension is time.
+        # Permute to (time, channel, x, y, z)
+        imgTensor = imgTensor.permute(0, 2, 3, 4, 1)
+    else:
+        # If not NCA, assume there's no time dimension.
+        # If you want a time series from a static voxel grid, you may need to add an extra dimension.
+        pass
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
-    ax.set_box_aspect([1, 1, 1])
-    ax.voxels(imgTensor[:, :, :, 0], edgecolor="k")
-    plt.show()
+    # ax.set_box_aspect([1, 1, 1])
+
+    def update(imgIdx):
+        # ax.cla()  # Clear axis to prevent overlaying plots
+        # Extract the current frame and select the first channel.
+        # Ensure that imgTensor has a time dimension in position 0.
+        ax.cla()
+        current_frame = imgTensor[imgIdx, :, :, :, 0]
+        current_frame = current_frame.detach().cpu().numpy()
+        ax.voxels(current_frame, edgecolor="k")
+
+    # Create an animation with the number of frames equal to the time dimension
+    ani = animation.FuncAnimation(fig, update, frames=len(imgTensor), repeat=False)
+
+    if save:
+        writer = animation.PillowWriter(fps=15,
+                                        metadata=dict(artist='Me'),
+                                        bitrate=1800)
+        ani.save(filenameBase + '.gif', writer=writer)
+
+    if show:
+        # plt.show()
+        plt.close('all')
+
+    return ani
 
 def new_seed(target_voxel, batch_size=1):
     """
@@ -111,9 +141,12 @@ def update_pass(model, batch, target, optimiser):
     for batch_idx in range(BATCH_SIZE):
         optimiser.zero_grad()
         updates = random.randrange(UPDATES_RANGE[0], UPDATES_RANGE[1])
-        output = forward_pass(model, batch[batch_idx].unsqueeze(0), updates, target=target)
+        # def forward_pass(model: nn.Module, state, updates, target, record=True):  # TODO
+
+        output = forward_pass(model = model, state = batch[batch_idx].unsqueeze(0), updates = updates, target=target)
 
         ## apply pixel-wise MSE loss between RGBA channels in the grid and the target pattern
+        ## XYZ CHANNELS
         output = output.squeeze(0).permute(1, 2, 3, 0)
  
         loss = LOSS_FN(
@@ -140,7 +173,7 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):  # T
 
             batch = new_seed(target_voxel=target_voxel, batch_size=BATCH_SIZE)
             batch = batch.to(device)
-
+    
             update_pass(model, batch, target, optimiser)
 
             # test_seed = new_seed(target_voxel=target_voxel, batch_size=BATCH_SIZE)
@@ -174,7 +207,7 @@ if __name__ == "__main__":
     CHANNELS = 16
 
     MODEL = NCA_3D()
-    EPOCHS = 20
+    EPOCHS = 15
     BATCH_SIZE = 32
     UPDATES_RANGE = [64, 96]
 
@@ -186,6 +219,8 @@ if __name__ == "__main__":
     target_voxel = load_image("./tree.obj")
 
     if TRAINING:
+        if os.path.exists("Minecraft.pth"):
+            MODEL.load_state_dict(torch.load("Minecraft.pth"))
         MODEL, losses = train(MODEL, target_voxel, optimizer)
         torch.save(MODEL.state_dict(), "Minecraft.pth")
 
@@ -194,5 +229,5 @@ if __name__ == "__main__":
 
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(target_voxel=target_voxel, batch_size=1)
-    model_generated_voxel = forward_pass(MODEL, img, 200, record=True, target=target_voxel)
-    anim = visualise(model_generated_voxel, isNCAVoxel=True, anim=True)
+    model_generated_voxel = forward_pass(MODEL, img, 32, record=True, target=target_voxel)
+    anim = visualise(model_generated_voxel, isNCAVoxel=True, save=True, show=False)
