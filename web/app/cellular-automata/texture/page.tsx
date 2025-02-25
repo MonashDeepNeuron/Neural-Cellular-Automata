@@ -3,7 +3,7 @@
 import Card from '@/components/Card';
 import FramerateSlider from '@/components/FramerateSlider';
 import useNCA, { NCAStatus } from '@/hooks/useNCA';
-import simulation from '@/shaders/nca/simulation';
+import { texture as simulation } from '@/shaders/nca/simulation';
 import clsx from 'clsx';
 
 const SIZE = 512;

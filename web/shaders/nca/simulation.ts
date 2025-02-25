@@ -120,20 +120,24 @@ fn mask(index: u32) -> f32 {
 }
 
 // Alive masking
-fn alive_mask(x: u32, y: u32) -> void {
+fn alive_mask(x: u32, y: u32) {
+  let size = shape.size;
+
   for (var ky = 0u; ky < 3u; ky++) {
     for (var kx = 0u; kx < 3u; kx++) {
       // Find neighbours with circular padding
       let dx = (x + kx - 1 + size) % size;
       let dy = (y + ky - 1 + size) % size;
       let i = index(4, dx, dy);
-      if (state[i] > 0.1) return;
+      if (next_state[i] > 0.1) {
+        return;
+      }
     }
   }
 
   // Write zeros
   for (var c = 0u; c < 16; c++) {
-    state[index(c, x, y)] = 0;
+    next_state[index(c, x, y)] = 0;
   }
 }
 `;
