@@ -1,4 +1,14 @@
-const simulation = /* wgsl */ `
+export type Convolution = [number, number, number, number, number, number, number, number, number];
+
+interface NCAParameters {
+	convolutions: Convolution[];
+	channels: number;
+	hiddenChannels: number;
+  aliveMasking: boolean;
+}
+
+function nca({ convolutions, channels, hiddenChannels, aliveMasking }: NCAParameters) {
+	const simulation = /* wgsl */ `
 struct ParameterShape {
   channels: u32,
   convolutions: u32,
@@ -15,29 +25,13 @@ struct ParameterShape {
 @group(0) @binding(6) var<uniform> seed: u32;
 
 // Constants
-const CHANNELS = 12;
-const CONVOLUTIONS = 4;
-const HIDDEN_CHANNELS = 96;
+const CHANNELS = ${channels};
+const CONVOLUTIONS = ${convolutions.length + 1};
+const HIDDEN_CHANNELS = ${hiddenChannels};
 const PERCEPTION_VECTOR = CHANNELS * CONVOLUTIONS;
 
 // Perception kernels
-const SOBEL_X: mat3x3f = mat3x3f(
-  -1.0, 0.0, 1.0,
-  -2.0, 0.0, 2.0,
-  -1.0, 0.0, 1.0
-);
-
-const SOBEL_Y: mat3x3f = mat3x3f(
-  -1.0, -2.0, -1.0,
-   0.0,  0.0,  0.0,
-   1.0,  2.0,  1.0
-);
-
-const LAPLACIAN: mat3x3f = mat3x3f(
-   1.0,  2.0,  1.0,
-   2.0, -12.0, 2.0,
-   1.0,  2.0,  1.0
-);
+${convolutions.map((conv, i) => `const PERCEPTION_${i}: mat3x3f = mat3x3f(${conv.map(v => v.toFixed(1)).join(', ')});`).join('\n')}
 
 @workgroup_size(8, 8)
 @compute
@@ -61,11 +55,9 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3u) {
     perceptions[c * 4 + 0] = state[index(c, x, y)];
   }
 
-  // Compute convolutions (SOBEL_X, SOBEL_Y, LAPLACIAN)
+  // Compute convolutions
   for (var c = 0u; c < CHANNELS; c++) {
-    perceptions[c * 4 + 1] = convolve(c, x, y, SOBEL_X);
-    perceptions[c * 4 + 2] = convolve(c, x, y, SOBEL_Y);
-    perceptions[c * 4 + 3] = convolve(c, x, y, LAPLACIAN);
+    ${convolutions.map((_, i) => `perceptions[c * CONVOLUTIONS + ${i + 1}] = convolve(c, x, y, PERCEPTION_${i});`).join('\n')}
   }
 
   // Fully connected layers
@@ -89,6 +81,9 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3u) {
     let i = index(c, x, y);
     next_state[i] = state[i] + sum * mask(i);
   }
+
+  // Alive masking
+  ${aliveMasking ? 'alive_mask(x, y);' : ''}
 }
 
 // Helper function to perform convolution with a 3x3 kernel for a specific channel
@@ -123,6 +118,45 @@ fn mask(index: u32) -> f32 {
   hash = hash * 0x27d4eb2du;     // Another prime multiplier for variability
   return f32((hash >> 16) & 1u); // Extract 0 or 1 as f32
 }
+
+// Alive masking
+fn alive_mask(x: u32, y: u32) -> void {
+  for (var ky = 0u; ky < 3u; ky++) {
+    for (var kx = 0u; kx < 3u; kx++) {
+      // Find neighbours with circular padding
+      let dx = (x + kx - 1 + size) % size;
+      let dy = (y + ky - 1 + size) % size;
+      let i = index(4, dx, dy);
+      if (state[i] > 0.1) return;
+    }
+  }
+
+  // Write zeros
+  for (var c = 0u; c < 16; c++) {
+    state[index(c, x, y)] = 0;
+  }
+}
 `;
 
-export default simulation;
+	return simulation;
+}
+
+const SOBEL_X: Convolution = [-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0];
+const SOBEL_Y: Convolution = [-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0];
+const LAPLACIAN: Convolution = [1.0, 2.0, 1.0, 2.0, -12.0, 2.0, 1.0, 2.0, 1.0];
+
+export const texture = nca({
+  convolutions: [SOBEL_X, SOBEL_Y, LAPLACIAN],
+  channels: 12,
+  hiddenChannels: 96,
+  aliveMasking: false
+})
+
+export const gca = nca({
+  convolutions: [SOBEL_X, SOBEL_Y],
+  channels: 16,
+  hiddenChannels: 128,
+  aliveMasking: true
+})
+
+export default nca;
