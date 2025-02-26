@@ -28,25 +28,28 @@ export default function Home() {
 						<h2 className='text-2xl font-semibold text-gray-700'>🌐 Explore More:</h2>
 						<ul className='space-y-2 mt-2'>
 							<li>
-								<Link href='/nca-intro' className='text-blue-500 hover:underline hover:text-blue-700 transition'>
+								<Link href="/intro" className="text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition">
 									📘 What is Neural Cellular Automata?
 								</Link>
 							</li>
 							<li>
-								<Link href='/nca-research' className='text-blue-500 hover:underline hover:text-blue-700 transition'>
+								<Link href="/research" className="text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition">
 									🔬 Our Research & Latest Findings
 								</Link>
 							</li>
 							<li>
-								<Link href='/simulator-home' className='text-blue-500 hover:underline hover:text-blue-700 transition'>
+								<Link href="/simulator" className="text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition">
 									🧪 Try the NCA Simulator
 								</Link>
 							</li>
-							<li>
-								<Link href='/keeping-up' className='text-blue-500 hover:underline hover:text-blue-700 transition'>
+
+
+							{/* TODO: re-write keeping up */}
+							{/* <li>
+								<Link href="/keeping-up" className="text-blue-500 hover:underline hover:text-blue-700 transition">
 									📰 Project Updates
 								</Link>
-							</li>
+							</li> */}
 						</ul>
 					</div>
 
@@ -55,10 +58,10 @@ export default function Home() {
 						<h2 className='text-2xl font-semibold text-gray-700'>🤝 Join Us!</h2>
 						<p className='text-gray-600 mt-1'>Interested in working on this project? We'd love to hear from you!</p>
 						<a
-							href='https://www.deepneuron.org/contact-us'
-							target='_blank'
-							rel='noopener noreferrer'
-							className='inline-block bg-blue-600 text-white px-6 py-2 rounded-md mt-3 hover:bg-blue-700 transition'
+							href="https://www.deepneuron.org/contact-us"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-block bg-purple-mdn text-white px-6 py-2 rounded-md mt-3 hover:bg-purple-mdn-dark transition"
 						>
 							Get in Touch
 						</a>

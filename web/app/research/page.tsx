@@ -1,18 +1,24 @@
+import Image from 'next/image';
+
 export default function Research() {
 	return (
 		<div className='max-w-4xl mx-auto px-6 py-10 text-gray-800'>
 			{/* Main Content */}
-			<h1 className='text-4xl font-bold text-purple-700 mb-4 text-center'>Neural Cellular Automata</h1>
-			<h3 className='text-lg text-purple-500 text-center mb-2'>- Top 5 Papers, Summarised!</h3>
-			<p className='text-center italic'>Last updated Dec 2024</p>
+			<h1 className='text-4xl font-bold mb-4 text-center'>Neural Cellular Automata</h1>
+			<h3 className='text-lg text-gray-600 text-center mb-2'>- Top 5 Papers, Summarised!</h3>
+			<p className='text-center text-gray-400 italic'>Last updated Dec 2024</p>
 
 			{/* Paper 1 */}
 			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-600 mt-6'>Growing Neural Cellular Automata</h2>
+				<h2 className='text-2xl font-semibold text-purple-mdn mt-6'>Growing Neural Cellular Automata</h2>
 				<p>
-					Differentiable Model of Morphogenesis, <i>Feb. 11, 2020</i>. doi:
-					<a href='https://doi.org/10.23915/distill.00023' className='text-purple-500 hover:underline'>
-						{' '}
+					Differentiable Model of Morphogenesis, <i>Feb. 11, 2020</i>. doi:{' '}
+					<a 
+						href='https://doi.org/10.23915/distill.00023' 
+						target='_blank'
+						rel='noopener noreferrer'
+						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
+					> 
 						10.23915/distill.00023
 					</a>
 				</p>
@@ -40,41 +46,49 @@ export default function Research() {
 
 			{/* Paper 2 */}
 			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-600'>Self-Organising Textures</h2>
+				<h2 className='text-2xl font-semibold text-purple-mdn'>Self-Organising Textures</h2>
 				<p>
-					Neural Cellular Automata Model of Pattern Formation, <i>Feb. 11, 2021</i>. doi:
-					<a href='https://doi.org/10.23915/distill.00027.003' className='text-purple-500 hover:underline'>
-						{' '}
+					Neural Cellular Automata Model of Pattern Formation, <i>Feb. 11, 2021</i>. doi:{' '}
+					<a 
+						href='https://doi.org/10.23915/distill.00027.003' 
+						target='_blank'
+						rel='noopener noreferrer'
+						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
+					> 
 						10.23915/distill.00027.003
 					</a>
 				</p>
 				<h4 className='italic text-gray-600'>Eyvind Niklasson, Alexander Mordvintsev, Ettore Randazzo, Michael Levin</h4>
 				<p>
 					This paper advances NCA by focusing on local, small-scale features rather than generating entire images, allowing models to
-					generate cohesive patterns across any grid size.
+					generate cohesive patterns across any grid size. Below are the results from our re-implementation:
 				</p>
-				<p>Below are the results from our re-implementation:</p>
 
-				<div className='flex flex-wrap gap-4'>
+				<div className='grid grid-cols-2 overflow-y-auto gap-4'>
 					<div>
 						<video className='w-full rounded-md shadow' loop autoPlay muted>
-							<source src='/Pages/Images/nca_output.mp4' type='video/mp4' />
+							<source src='/images/nca_output.mp4' type='video/mp4' />
 						</video>
 						<p className='text-sm text-center italic'>NCA algorithm in live operation after training.</p>
 					</div>
 					<div>
-						<img src='/Pages/Images/knit.jpg' className='w-full rounded-md shadow' alt='Target Knitted Texture' />
+						<Image src='/images/knit.jpg' alt='Target Knitted Texture' height={60} width={50} className='w-full rounded-md shadow' />
+						<p className='text-sm text-center italic'>Targeted texture pattern for the NCA to replicate.</p>
 					</div>
 				</div>
 			</section>
 
 			{/* Paper 3 */}
 			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-600'>Mesh Neural Cellular Automata</h2>
+				<h2 className='text-2xl font-semibold text-purple-mdn'>Mesh Neural Cellular Automata</h2>
 				<p>
-					<i>Jul. 19, 2024</i>. doi:
-					<a href='https://doi.org/10.1145/3658127' className='text-purple-500 hover:underline'>
-						{' '}
+					<i>Jul. 19, 2024</i>. doi:{' '}
+					<a 
+						href='https://doi.org/10.1145/3658127' 
+						target='_blank'
+						rel='noopener noreferrer'
+						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
+					> 
 						10.1145/3658127
 					</a>
 				</p>
@@ -89,24 +103,14 @@ export default function Research() {
 
 			{/* Further Work */}
 			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-600'>Further Work</h2>
+				<h2 className='text-2xl text-purple-mdn'>Further Work</h2>
 				<p>Further research has explored NCA in multiple areas, demonstrating capabilities such as:</p>
 				<ul className='list-disc list-inside ml-4'>
-					<li>
-						<b>Combining multiple algorithms</b>
-					</li>
-					<li>
-						<b>Adapting to different grid sizes without retraining</b>
-					</li>
-					<li>
-						<b>Classifying images</b>
-					</li>
-					<li>
-						<b>Interpreting external signals</b>
-					</li>
-					<li>
-						<b>Producing small and efficient models</b>
-					</li>
+					<li>Combining multiple algorithms</li>
+					<li>Adapting to different grid sizes without retraining</li>
+					<li>Classifying images</li>
+					<li>Interpreting external signals</li>
+					<li>Producing small and efficient models</li>
 				</ul>
 			</section>
 		</div>

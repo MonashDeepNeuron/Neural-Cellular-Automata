@@ -14,16 +14,14 @@ export default function Navbar() {
 		{ name: 'Cellular Automata', path: '/cellular-automata' },
 		{ name: 'Intro', path: '/intro' },
 		{ name: 'Research', path: '/research' },
-		{ name: 'Keeping Up', path: '/keeping-up' },
+		// { name: 'Keeping Up', path: '/keeping-up' },
 		{ name: 'Simulator', path: '/simulator' },
 		{ name: 'Troubleshooting', path: '/troubleshooting' },
 		{ name: 'Contact Us', path: '/contact' }
 	];
 
 	return (
-		<nav className='bg-purple shadow-md fixed top-0 left-0 right-0 z-50'>
-			{' '}
-			{/* Purple Background */}
+		<nav className='bg-purple-mdn shadow-md fixed top-0 left-0 right-0 z-50'> {/* Purple Background */}
 			<div className='max-w-full mx-auto px-4 py-3 flex items-center justify-between'>
 				{/* Logo */}
 
@@ -41,7 +39,7 @@ export default function Navbar() {
 								className={`px-3 py-2 rounded-md text-lg font-medium text-white transition-transform duration-200 ${
 									pathname === link.path
 										? 'font-semibold' // Active link is bold
-										: 'hover:scale-105 hover:text-gray-200' // Hover effect
+										: 'hover:scale-105 hover:text-purple-mdn-light' // Hover effect
 								}`}
 							>
 								{link.name}
@@ -57,10 +55,8 @@ export default function Navbar() {
 			</div>
 			{/* Mobile Menu */}
 			{isOpen && (
-				<div className='md:hidden bg-purple-600 shadow-md'>
-					{' '}
-					{/* Purple Background for Mobile Menu */}
-					{navLinks.map(link => (
+				<div className='md:hidden bg-purple-mdn shadow-md'> {/* Purple Background for Mobile Menu */}
+					{navLinks.map((link) => (
 						<Link
 							key={link.path}
 							href={link.path}
