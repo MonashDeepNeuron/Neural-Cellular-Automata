@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -30,7 +29,7 @@ export default function Navbar() {
 
 				<div className='flex items-center space-x-4'>
 					<a href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer'>
-						<Image src='/images/mdn-logo.png' alt='Deep Neuron Logo' height={40} width={80} />
+						<img src='/images/mdn-logo.png' alt='Deep Neuron Logo' height={40} width={80} />
 					</a>
 
 					{/* Navigation Links */}
