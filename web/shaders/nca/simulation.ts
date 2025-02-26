@@ -4,7 +4,7 @@ interface NCAParameters {
 	convolutions: Convolution[];
 	channels: number;
 	hiddenChannels: number;
-  aliveMasking: boolean;
+	aliveMasking: boolean;
 }
 
 function nca({ convolutions, channels, hiddenChannels, aliveMasking }: NCAParameters) {
@@ -52,7 +52,7 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3u) {
 
   // Copy identity convolution directly from state
   for (var c = 0u; c < CHANNELS; c++) {
-    perceptions[c * 4 + 0] = state[index(c, x, y)];
+    perceptions[c * CONVOLUTIONS + 0] = state[index(c, x, y)];
   }
 
   // Compute convolutions
@@ -128,8 +128,8 @@ fn alive_mask(x: u32, y: u32) {
       // Find neighbours with circular padding
       let dx = (x + kx - 1 + size) % size;
       let dy = (y + ky - 1 + size) % size;
-      let i = index(4, dx, dy);
-      if (next_state[i] > 0.1) {
+      // Check alpha > 0.1
+      if (next_state[index(3, dx, dy)] > 0.1) {
         return;
       }
     }
@@ -150,17 +150,17 @@ const SOBEL_Y: Convolution = [-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0];
 const LAPLACIAN: Convolution = [1.0, 2.0, 1.0, 2.0, -12.0, 2.0, 1.0, 2.0, 1.0];
 
 export const texture = nca({
-  convolutions: [SOBEL_X, SOBEL_Y, LAPLACIAN],
-  channels: 12,
-  hiddenChannels: 96,
-  aliveMasking: false
-})
+	convolutions: [SOBEL_X, SOBEL_Y, LAPLACIAN],
+	channels: 12,
+	hiddenChannels: 96,
+	aliveMasking: false
+});
 
-export const gca = nca({
-  convolutions: [SOBEL_X, SOBEL_Y],
-  channels: 16,
-  hiddenChannels: 128,
-  aliveMasking: true
-})
+export const persisting = nca({
+	convolutions: [SOBEL_X, SOBEL_Y],
+	channels: 16,
+	hiddenChannels: 128,
+	aliveMasking: true
+});
 
 export default nca;

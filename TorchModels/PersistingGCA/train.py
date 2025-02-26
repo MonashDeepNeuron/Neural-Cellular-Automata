@@ -31,6 +31,27 @@ import argparse
 from learning_rate_adjuster import lradj
 import numpy as np
 
+TRAINING = False  # Is our purpose to train or are we just looking rn?
+LOAD_WEIGHTS = True # only load weights if we want to start training from previous
+
+## For learning rate adjustmnet
+ADJUSTMENT_WINDOW = 7
+
+GRID_SIZE = 40
+CHANNELS = 16
+
+POOL_SIZE = 1024
+
+EPOCHS = 5000  # 5000 recommended epochs 
+## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
+
+MODEL_PATH = "abc_4.pth"
+SAVE_PATH = "abc_4.pth"
+
+LR = 1e-4
+BATCH_SIZE = 12
+LR_FACTOR = 1/BATCH_SIZE
+
 
 def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     """
@@ -335,29 +356,12 @@ def initialiseGPU(model):
 
 if __name__ == "__main__":
 
-    TRAINING = True  # Is our purpose to train or are we just looking rn?
-    LOAD_WEIGHTS = True # only load weights if we want to start training from previous
-    
-
-    ## For learning rate adjustmnet
-    ADJUSTMENT_WINDOW = 7
-
-    GRID_SIZE = 40
-    CHANNELS = 16
-
-    POOL_SIZE = 1024
-
     print("Initialising model...")
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
-    EPOCHS = 5000  # 5000 recommended epochs 
-    ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
-    MODEL_PATH = "abc_3.pth"
-    SAVE_PATH = "abc_4.pth"
-
-    targetImg = load_image("RebuildingGCA/cat.png")
+    targetImg = load_image("./cat.png")
 
     ## Load model weights if available
     if LOAD_WEIGHTS:
@@ -396,9 +400,23 @@ if __name__ == "__main__":
             ## Save the model's weights after training
             torch.save(MODEL.state_dict(), SAVE_PATH)
 
-        LR = 1e-4
-        BATCH_SIZE = 12
-        LR_FACTOR = 1/BATCH_SIZE
+            # Prepare weights list
+            weights_list = []
+
+            # Log weight and bias shapes
+            for i, (name, param) in enumerate(MODEL.named_parameters()):
+                shape = tuple(param.shape)
+                print(f"Layer {i}: {name} - Shape: {shape} - Size {param.numel()}")
+
+                # Append flattened weight/bias data
+                weights_list.append(param.detach().cpu().numpy().flatten())
+
+            # Concatenate all weights and biases into a single NumPy array
+            weights = np.concatenate(weights_list, dtype=np.float32)
+
+            # Save to a raw binary file (compact format)
+            weights.tofile("./weights.bin")
+
         optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
         LOSS_FN = torch.nn.MSELoss(reduction="mean")
 

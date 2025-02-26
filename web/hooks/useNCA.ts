@@ -30,6 +30,7 @@ export interface NCASettings {
 	hiddenChannels: number;
 	convolutions: number;
 	weightsURL: string;
+	seed?: boolean;
 	shaders: {
 		simulation: string;
 	};
@@ -41,7 +42,7 @@ export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1]);
 const WORKGROUP_SIZE = 8;
 
-export default function useNCA({ size, channels, hiddenChannels, convolutions, shaders, weightsURL }: NCASettings) {
+export default function useNCA({ size, channels, hiddenChannels, convolutions, shaders, weightsURL, seed }: NCASettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources | null>(null);
@@ -261,8 +262,12 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 
 			// Write buffers
 			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
-			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
 			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
+			if (seed) {
+				const centre = 3 * size * size + Math.floor(size / 2) * size + Math.floor(size / 2);
+				cellState[centre] = 1;
+			}
+			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
 			device.queue.writeBuffer(weightBuffers[0], 0, weights.slice(0, parameters[0]));
 			device.queue.writeBuffer(weightBuffers[1], 0, weights.slice(parameters[0], parameters[0] + parameters[1]));
 			device.queue.writeBuffer(weightBuffers[2], 0, weights.slice(parameters[0] + parameters[1]));
@@ -321,7 +326,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			// Destroy device & associated buffers
 			resources?.device.destroy();
 		};
-	}, [size, channels, hiddenChannels, convolutions, weightsURL, shaders.simulation, resources]);
+	}, [size, channels, hiddenChannels, convolutions, weightsURL, seed, shaders.simulation, resources]);
 
 	useEffect(() => {
 		if (status !== NCAStatus.READY || !resources) return;
