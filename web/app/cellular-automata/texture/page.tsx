@@ -14,7 +14,7 @@ export default function Texture() {
 		channels: 12,
 		hiddenChannels: 96,
 		convolutions: 4,
-		weightsURL: '/weights/texture.bin',
+		weightsURL: '/weights/texture-bubbles.bin',
 		shaders: {
 			simulation
 		}
