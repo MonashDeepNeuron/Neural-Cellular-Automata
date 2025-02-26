@@ -7,8 +7,10 @@ export default {
 			colors: {
 				background: 'var(--background)',
 				foreground: 'var(--foreground)',
-				purple: '#7065f9',
-				'dark-purple': '#5a4ce9'
+				'purple-mdn': '#7065f9',
+				'purple-mdn-dark': '#4838d6',
+				'purple-mdn-lighter': '#7f90f9',
+				'purple-mdn-light': '#afc0f2'
 			}
 		}
 	},
