@@ -1,0 +1,17 @@
+version: 1
+frontend:
+    phases:
+        preBuild:  # Add preBuild phase if needed
+            commands:
+                - cd web  # Navigate to the 'web' directory
+                - npm install  # Install dependencies, adjust if needed
+        build:
+            commands:
+                - npm run build  # Run your build command; adjust as needed
+    artifacts:
+        baseDirectory: web/build  # Change this to your build output directory if necessary
+        files:
+            - '**/*'
+    cache:
+        paths:
+            - node_modules/**/*  # Cache node_modules for faster builds
