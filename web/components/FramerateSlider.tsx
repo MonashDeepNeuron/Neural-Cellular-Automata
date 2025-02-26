@@ -17,15 +17,7 @@ export default function FramerateSlider({ state, setState, min = 1, max = 120 }:
 			<label htmlFor={id} className='text-md mb-2'>
 				<b>Framerate</b>:
 			</label>
-			<input
-				id={id}
-				type='range'
-				min={min}
-				max={max}
-				value={state}
-				onChange={e => setState(Number(e.target.value))}
-				className='w-full'
-			/>
+			<input id={id} type='range' min={min} max={max} value={state} onChange={e => setState(Number(e.target.value))} className='w-full' />
 			<div className='flex justify-between w-full text-sm mt-2'>
 				<span>{min} FPS</span>
 				<span>{state} FPS</span>

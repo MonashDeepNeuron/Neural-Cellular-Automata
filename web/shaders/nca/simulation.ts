@@ -4,7 +4,7 @@ interface NCAParameters {
 	convolutions: Convolution[];
 	channels: number;
 	hiddenChannels: number;
-  aliveMasking: boolean;
+	aliveMasking: boolean;
 }
 
 function nca({ convolutions, channels, hiddenChannels, aliveMasking }: NCAParameters) {
@@ -150,17 +150,17 @@ const SOBEL_Y: Convolution = [-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0];
 const LAPLACIAN: Convolution = [1.0, 2.0, 1.0, 2.0, -12.0, 2.0, 1.0, 2.0, 1.0];
 
 export const texture = nca({
-  convolutions: [SOBEL_X, SOBEL_Y, LAPLACIAN],
-  channels: 12,
-  hiddenChannels: 96,
-  aliveMasking: false
-})
+	convolutions: [SOBEL_X, SOBEL_Y, LAPLACIAN],
+	channels: 12,
+	hiddenChannels: 96,
+	aliveMasking: false
+});
 
 export const gca = nca({
-  convolutions: [SOBEL_X, SOBEL_Y],
-  channels: 16,
-  hiddenChannels: 128,
-  aliveMasking: true
-})
+	convolutions: [SOBEL_X, SOBEL_Y],
+	channels: 16,
+	hiddenChannels: 128,
+	aliveMasking: true
+});
 
 export default nca;
