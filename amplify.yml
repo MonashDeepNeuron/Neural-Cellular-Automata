@@ -9,11 +9,11 @@ frontend:
         build:
             commands:
                 - pnpm build
-                - pnpm start
+                - pnpm export
     artifacts:
-        baseDirectory: web/.next
+        baseDirectory: web/out
         files:
             - '**/*'
     cache:
         paths:
-            - node_modules/**/*
+            - web/node_modules/**/*
