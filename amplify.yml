@@ -4,6 +4,7 @@ frontend:
         preBuild:
             commands:
                 - cd web
+                - npm install -g pnpm
                 - pnpm install
         build:
             commands:
