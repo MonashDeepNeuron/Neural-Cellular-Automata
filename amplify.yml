@@ -9,6 +9,7 @@ frontend:
         build:
             commands:
                 - pnpm build
+                - pnpm start
     artifacts:
         baseDirectory: web/.next
         files:
