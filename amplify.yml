@@ -9,7 +9,6 @@ frontend:
         build:
             commands:
                 - pnpm build
-                - pnpm export
     artifacts:
         baseDirectory: web/out
         files:
