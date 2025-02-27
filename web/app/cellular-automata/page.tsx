@@ -84,7 +84,7 @@ export default function CellularAutomata() {
 
 				<p className='leading-7 text-lg mt-4'>
 					From a deep learning perspective, NCA can be characterized as a Recurrent Convolutional Neural Network. Learn more about this{' '}
-					<Link href='/intro' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
+					<Link href='/learn' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
 						here
 					</Link>
 					.
