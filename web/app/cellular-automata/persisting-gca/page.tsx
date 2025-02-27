@@ -46,7 +46,7 @@ export default function PersistingGCA() {
 					<div className='absolute top-0 left-0 flex items-center justify-center overflow-hidden w-full h-full'>
 						{error && <p className='text-red-500 px-4 text-center'>{error}</p>}
 					</div>
-					<canvas height={SIZE} width={SIZE} className='w-96 h-96' ref={canvasRef} />
+					<canvas height={SIZE} width={SIZE} className='w-96 h-96' ref={canvasRef} style={{ imageRendering: 'pixelated' }} />
 				</Card>
 			</div>
 		</div>

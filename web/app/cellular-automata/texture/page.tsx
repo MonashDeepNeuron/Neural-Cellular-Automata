@@ -45,7 +45,7 @@ export default function Texture() {
 					<div className='absolute top-0 left-0 flex items-center justify-center overflow-hidden w-full h-full'>
 						{error && <p className='text-red-500 px-4 text-center'>{error}</p>}
 					</div>
-					<canvas height={SIZE} width={SIZE} className='h-full w-full' ref={canvasRef} />
+					<canvas height={SIZE} width={SIZE} className='h-full w-full' ref={canvasRef} style={{ imageRendering: 'pixelated' }} />
 				</div>
 			</Card>
 		</div>
