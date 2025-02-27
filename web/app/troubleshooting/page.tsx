@@ -23,14 +23,9 @@ export default function Troubleshooting() {
 				</p>
 				<p className='mt-2'>
 					To check if your browser supports WebGPU, visit{' '}
-					<a
-						href='https://caniuse.com/webgpu'
-						target='_blank'
-						rel='noopener noreferrer'
-						className='text-purple-mdn font-semibold hover:underline'
-					>
+					<Link href='https://caniuse.com/webgpu' className='text-purple-mdn font-semibold hover:underline'>
 						Can I Use WebGPU?
-					</a>
+					</Link>
 				</p>
 
 				<h3 className='text-lg font-semibold text-gray-600 italic mt-4'>2️⃣ JavaScript Is Turned Off</h3>

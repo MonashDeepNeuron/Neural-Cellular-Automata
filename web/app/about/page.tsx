@@ -11,24 +11,20 @@ export default function About() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Who Are We?</h2>
 				<p className='leading-7 text-lg'>
 					We are a project team under{' '}
-					<a
+					<Link
 						href='https://www.deepneuron.org/'
-						target='_blank'
-						rel='noopener noreferrer'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
 					>
 						Monash DeepNeuron
-					</a>
+					</Link>
 					, an Engineering/IT student team run by Monash University students. NCA is one of many research projects, which you can read more
 					about{' '}
-					<a
+					<Link
 						href='https://www.deepneuron.org/'
-						target='_blank'
-						rel='noopener noreferrer'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
 					>
 						here
-					</a>
+					</Link>
 					!
 				</p>
 			</section>
@@ -63,14 +59,12 @@ export default function About() {
 					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
 					up. First-year or Master's students — all are welcome!
 				</p>
-				<a
+				<Link
 					href='https://www.deepneuron.org/join-us'
-					target='_blank'
-					rel='noopener noreferrer'
 					className='inline-block mt-4 px-6 py-2 bg-purple-mdn text-white font-semibold rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300'
 				>
 					Join the Team
-				</a>
+				</Link>
 			</section>
 		</div>
 	);

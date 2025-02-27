@@ -1,9 +1,11 @@
+import Link from 'next/link';
+
 export default function Intro() {
 	return (
 		<div className='max-w-4xl mx-auto px-6 py-10 text-gray-800'>
 			{/* Main Title */}
 			<h1 className='text-4xl font-bold text-gray-800 mb-6 text-center'>Neural Cellular Automata</h1>
-
+			{/* TODO: Re-write or update. This article content AI generated */}
 			{/* Introduction Section */}
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Introduction</h2>
@@ -30,6 +32,17 @@ export default function Intro() {
 					When viewed through the lens of neural networks, NCAs leverage the power of deep learning to optimize the update rules. This
 					allows the system to adapt, learn, and generalize behaviors across various environments, making NCAs versatile tools for modeling
 					dynamic systems.
+				</p>
+			</section>
+
+			{/* Research */}
+			<section>
+				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>The Research</h2>
+				<p className='text-lg leading-7'>
+					... Read about our favourite research articles{' '}
+					<Link href='/learn/research' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
+						here
+					</Link>
 				</p>
 			</section>
 		</div>

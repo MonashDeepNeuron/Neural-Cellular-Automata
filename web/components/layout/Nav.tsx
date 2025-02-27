@@ -11,11 +11,9 @@ export default function Navbar() {
 	const navLinks = [
 		{ name: 'Home', path: '/' },
 		{ name: 'About', path: '/about' },
-		{ name: 'Cellular Automata', path: '/cellular-automata' },
-		{ name: 'Intro', path: '/intro' },
-		{ name: 'Research', path: '/research' },
+		{ name: 'Simulator', path: '/cellular-automata' },
+		{ name: 'Learn', path: '/learn' },
 		// { name: 'Keeping Up', path: '/keeping-up' },
-		{ name: 'Simulator', path: '/simulator' },
 		{ name: 'Troubleshooting', path: '/troubleshooting' },
 		{ name: 'Contact Us', path: '/contact' }
 	];
