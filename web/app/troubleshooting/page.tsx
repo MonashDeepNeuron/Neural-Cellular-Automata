@@ -23,10 +23,7 @@ export default function Troubleshooting() {
 				</p>
 				<p className='mt-2'>
 					To check if your browser supports WebGPU, visit{' '}
-					<Link
-						href='https://caniuse.com/webgpu'
-						className='text-purple-mdn font-semibold hover:underline'
-					>
+					<Link href='https://caniuse.com/webgpu' className='text-purple-mdn font-semibold hover:underline'>
 						Can I Use WebGPU?
 					</Link>
 				</p>

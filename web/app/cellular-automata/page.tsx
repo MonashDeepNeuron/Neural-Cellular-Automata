@@ -6,7 +6,6 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 export default function CellularAutomata() {
-	
 	const [showWarning, setShowWarning] = useState(true);
 	return (
 		<div className='max-w-4xl mx-auto px-6 py-10 text-gray-800'>
@@ -69,7 +68,6 @@ export default function CellularAutomata() {
 				</div>
 			</section>
 
-
 			{/* Title */}
 			<h1 className='text-4xl font-bold mb-6 text-center'>Cellular Automata Models</h1>
 
@@ -85,7 +83,7 @@ export default function CellularAutomata() {
 
 				<p className='leading-7 text-lg mt-4'>
 					From a deep learning perspective, NCA can be characterized as a Recurrent Convolutional Neural Network. Learn more about this{' '}
-					<Link href='/intro' className="text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition">
+					<Link href='/intro' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
 						here
 					</Link>
 					.
@@ -160,8 +158,8 @@ export default function CellularAutomata() {
 				</p>
 
 				<p className='leading-7 text-lg mt-4'>
-					It shares properties of regeneration, as well as independence of grid location, resulting in textures that
-					can be smoothly and cohesively replicated over grids of any size and shape - or even onto 3D graphs, as the paper{' '}
+					It shares properties of regeneration, as well as independence of grid location, resulting in textures that can be smoothly and
+					cohesively replicated over grids of any size and shape - or even onto 3D graphs, as the paper{' '}
 					<Link
 						href='https://doi.org/10.1145/3658127'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
@@ -170,8 +168,6 @@ export default function CellularAutomata() {
 					</Link>{' '}
 					(E. Pajouheshgar et al., 2024) expands.
 				</p>
-
-				<p className='leading-7 text-lg mt-4'></p>
 			</section>
 
 			{/* Game of Life Section */}

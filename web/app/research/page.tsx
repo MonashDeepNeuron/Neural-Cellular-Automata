@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Research() {
 	return (
@@ -14,8 +14,8 @@ export default function Research() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mt-6'>Growing Neural Cellular Automata</h2>
 				<p>
 					Differentiable Model of Morphogenesis, <i>Feb. 11, 2020</i>. doi:{' '}
-					<Link 
-						href='https://doi.org/10.23915/distill.00023' 
+					<Link
+						href='https://doi.org/10.23915/distill.00023'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
 					>
 						10.23915/distill.00023
@@ -48,8 +48,8 @@ export default function Research() {
 				<h2 className='text-2xl font-semibold text-purple-mdn'>Self-Organising Textures</h2>
 				<p>
 					Neural Cellular Automata Model of Pattern Formation, <i>Feb. 11, 2021</i>. doi:{' '}
-					<Link 
-						href='https://doi.org/10.23915/distill.00027.003' 
+					<Link
+						href='https://doi.org/10.23915/distill.00027.003'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
 					>
 						10.23915/distill.00027.003
@@ -63,10 +63,10 @@ export default function Research() {
 
 				<div className='grid grid-cols-2 overflow-y-auto gap-4'>
 					<div>
-					{/* TODO: Check if there is a better way of putting this video in */}
+						{/* TODO: Check if there is a better way of putting this video in */}
 						<video className='w-full rounded-md shadow' loop autoPlay muted>
 							<source src='/images/nca_output.mp4' type='video/mp4' />
-						</video> 
+						</video>
 						<p className='text-sm text-center italic'>NCA algorithm in live operation after training.</p>
 					</div>
 					<div>
@@ -81,8 +81,8 @@ export default function Research() {
 				<h2 className='text-2xl font-semibold text-purple-mdn'>Mesh Neural Cellular Automata</h2>
 				<p>
 					<i>Jul. 19, 2024</i>. doi:{' '}
-					<Link 
-						href='https://doi.org/10.1145/3658127' 
+					<Link
+						href='https://doi.org/10.1145/3658127'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
 					>
 						10.1145/3658127
