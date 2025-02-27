@@ -9,7 +9,7 @@ export default function Research() {
 			<h3 className='text-lg text-gray-600 text-center mb-2'>- Top 5 Papers, Summarised!</h3>
 			<p className='text-center text-gray-400 italic'>Last updated Dec 2024</p>
 
-			{/* Paper 1 */}
+			{/* Paper 1: Growing NCA */}
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mt-6'>Growing Neural Cellular Automata</h2>
 				<p>
@@ -44,7 +44,7 @@ export default function Research() {
 				</ul>
 			</section>
 
-			{/* Paper 2 */}
+			{/* Paper 2: Texture NCA */}
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn'>Self-Organising Textures</h2>
 				<p>
@@ -80,7 +80,7 @@ export default function Research() {
 				</div>
 			</section>
 
-			{/* Paper 3 */}
+			{/* Paper 3: Mesh NCA */}
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn'>Mesh Neural Cellular Automata</h2>
 				<p>
@@ -101,7 +101,7 @@ export default function Research() {
 				</p>
 			</section>
 
-			{/* Paper 4 */}
+			{/* Paper 4: DyNCA */}
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn'>DyNCA</h2>
 				<p>
@@ -121,8 +121,8 @@ export default function Research() {
 				</p>
 			</section>
 
-			{/* Paper 5 */}
-				<section className='mb-8'>
+			{/* Paper 5: Med-NCA */}
+			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn'>Med-NCA</h2>
 				<p>
 					Robust and Lightweight Segmentation with Neural Cellular Automata, <i>Feb. 7, 2023</i>. doi:{' '}

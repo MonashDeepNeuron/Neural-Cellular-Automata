@@ -7,20 +7,20 @@ export default function Home() {
 	return (
 		<div className='min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6'>
 			{/* Side-by-Side Layout */}
-			<div className='flex flex-col-2 gap-6 max-w-6xl w-full'>
+			<div className='flex flex-col-2 gap-12 max-w-6xl w-full text-center'>
 				{/* Simulation Section */}
-				<div className='w-full md:w-1/2'>
-					<h1 className='text-3xl font-bold text-left text-gray-800 mb-4'>🧪 Neural Cellular Automata Simulator</h1>
+				<div className='flex flex-col w-full md:w-1/2 justify-center'>
+					<h1 className='text-3xl font-bold text-gray-800 mb-4'>🧪 Neural Cellular Automata Simulator</h1>
 					<Link href='cellular-automata'>
 						<Image
 							src='images/semitrained-cat.png'
 							alt='Target Knitted Texture'
 							height={60}
 							width={50}
-							className='w-4/5 rounded-md shadow'
+							className='w-full rounded-md shadow'
 						/>
 					</Link>
-					<p className='text-left text-gray-600 mt-2'>Experience the dynamics of Neural Cellular Automata in real-time.</p>
+					<p className='text-gray-600 mt-2'>Experience the dynamics of Neural Cellular Automata in real-time.</p>
 				</div>
 
 				{/* Main Content */}
