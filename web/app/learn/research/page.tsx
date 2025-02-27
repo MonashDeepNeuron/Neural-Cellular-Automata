@@ -101,6 +101,46 @@ export default function Research() {
 				</p>
 			</section>
 
+			{/* Paper 4 */}
+			<section className='mb-8'>
+				<h2 className='text-2xl font-semibold text-purple-mdn'>DyNCA</h2>
+				<p>
+					Dynamic Texture Synthesis Using Neural Cellular Automata, <i>Mar. 30, 2023</i>. doi:{' '}
+					<Link
+						href='https://doi.org/10.48550/arXiv.2211.11417'
+						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
+					>
+						10.48550/arXiv.2211.11417
+					</Link>
+				</p>
+				<h4 className='italic text-gray-600'>
+					Ehsan Pajouheshgar, Yitao Xu, Tong Zhang, Sabine Süsstrunk
+				</h4>
+				<p>
+					gecko
+				</p>
+			</section>
+
+			{/* Paper 5 */}
+				<section className='mb-8'>
+				<h2 className='text-2xl font-semibold text-purple-mdn'>Med-NCA</h2>
+				<p>
+					Robust and Lightweight Segmentation with Neural Cellular Automata, <i>Feb. 7, 2023</i>. doi:{' '}
+					<Link
+						href='https://doi.org/10.48550/arXiv.2211.11417'
+						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
+					>
+						10.48550/arXiv.2211.11417
+					</Link>
+				</p>
+				<h4 className='italic text-gray-600'>
+					John Kalkhof, Camila González & Anirban Mukhopadhyay
+				</h4>
+				<p>
+					gecko
+				</p>
+			</section>
+
 			{/* Further Work */}
 			<section className='mb-8'>
 				<h2 className='text-2xl text-purple-mdn'>Further Work</h2>
