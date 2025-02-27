@@ -1,2 +1,4 @@
 packages:
- - 'web'
+  - web
+onlyBuiltDependencies:
+  - '@biomejs/biome'
