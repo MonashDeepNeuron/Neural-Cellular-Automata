@@ -19,7 +19,7 @@ export default function Navbar() {
 	];
 
 	return (
-		<nav className='bg-purple-mdn shadow-md fixed top-0 left-0 right-0 z-50'>
+		<nav className='bg-purple-mdn shadow-md fixed top-0 left-0 right-0 z-50 h-16'>
 			{/* Purple Background */}
 			<div className='max-w-full mx-auto px-4 py-3 flex items-center justify-between'>
 				{/* Logo */}
