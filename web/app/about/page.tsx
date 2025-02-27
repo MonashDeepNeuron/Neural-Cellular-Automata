@@ -50,8 +50,8 @@ export default function About() {
 			<section>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Join Us!</h2>
 				<p className='text-lg'>
-					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new
-					positions open up. First-year or Master's students — all are welcome!
+					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
+					up. First-year or Master's students — all are welcome!
 				</p>
 				<Link 
 					href="https://www.deepneuron.org/join-us" 

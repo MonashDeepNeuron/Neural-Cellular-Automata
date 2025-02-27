@@ -27,21 +27,20 @@ export default function Home() {
 						<h2 className='text-2xl font-semibold text-gray-700'>🌐 Explore More:</h2>
 						<ul className='space-y-2 mt-2'>
 							<li>
-								<Link href="/intro" className="text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition">
+								<Link href='/intro' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
 									📘 What is Neural Cellular Automata?
 								</Link>
 							</li>
 							<li>
-								<Link href="/research" className="text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition">
+								<Link href='/research' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
 									🔬 Our Research & Latest Findings
 								</Link>
 							</li>
 							<li>
-								<Link href="/simulator" className="text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition">
+								<Link href='/simulator' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
 									🧪 Try the NCA Simulator
 								</Link>
 							</li>
-
 
 							{/* TODO: re-write keeping up */}
 							{/* <li>

@@ -17,7 +17,7 @@ export default function Research() {
 					<Link 
 						href='https://doi.org/10.23915/distill.00023' 
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					> 
+					>
 						10.23915/distill.00023
 					</Link>
 				</p>
@@ -51,7 +51,7 @@ export default function Research() {
 					<Link 
 						href='https://doi.org/10.23915/distill.00027.003' 
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					> 
+					>
 						10.23915/distill.00027.003
 					</Link>
 				</p>
@@ -84,7 +84,7 @@ export default function Research() {
 					<Link 
 						href='https://doi.org/10.1145/3658127' 
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					> 
+					>
 						10.1145/3658127
 					</Link>
 				</p>
