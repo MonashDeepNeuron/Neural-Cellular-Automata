@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang='en'>
-			<body className={clsx(geistSans.variable, geistMono.variable, 'antialiased text-black overflow-hidden max-w-screen')}>
+			<body className={clsx(geistSans.variable, geistMono.variable, 'antialiased text-black overflow-x-hidden max-w-screen')}>
 				<Navbar />
 				<main className='min-h-screen p-4 pt-20 max-w-full'>
 					{/* Added 'pt-20' for top padding */}
