@@ -1,5 +1,6 @@
 'use client'; // 👈 This tells Next.js to treat this as a Client Component
 
+import Card from '@/components/Card';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -34,7 +35,7 @@ export default function CellularAutomata() {
 
 			{/* Model Selection Panel */}
 			<section className='mb-16 mt-5'>
-				<div className='bg-gray-100 border-gray-500 p-6 rounded-md shadow-md mb-8'>
+				<Card className='bg-gray-100'>
 					<h3 className='text-2xl font-semibold text-gray-800 mb-4'>Select a Model:</h3>
 
 					<div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -55,7 +56,8 @@ export default function CellularAutomata() {
 							</Link>
 						))}
 					</div>
-				</div>
+				{/* </div> */}
+				</Card>
 
 				{/* Navigation to Troubleshooting */}
 				<div className='text-center mt-8'>

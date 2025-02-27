@@ -15,7 +15,6 @@ export default function Navbar() {
 		{ name: 'Intro', path: '/intro' },
 		{ name: 'Research', path: '/research' },
 		// { name: 'Keeping Up', path: '/keeping-up' },
-		{ name: 'Simulator', path: '/simulator' },
 		{ name: 'Troubleshooting', path: '/troubleshooting' },
 		{ name: 'Contact Us', path: '/contact' }
 	];

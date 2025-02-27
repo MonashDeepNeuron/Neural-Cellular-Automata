@@ -36,7 +36,7 @@ export default function Home() {
 								</Link>
 							</li>
 							<li>
-								<Link href='/simulator' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
+								<Link href='/cellular-automata' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
 									🧪 Try the NCA Simulator
 								</Link>
 							</li>
