@@ -1,6 +1,5 @@
 'use client';
 
-import WebGPUCanvas from '@/components/GPUCanvas';
 import Link from 'next/link';
 
 export default function Home() {
@@ -12,7 +11,7 @@ export default function Home() {
 				<div className='w-full md:w-1/2'>
 					<h1 className='text-3xl font-bold text-center md:text-left text-gray-800 mb-2'>🧪 Neural Cellular Automata Simulator</h1>
 					<p className='text-center md:text-left text-gray-600 mb-4'>Experience the dynamics of Neural Cellular Automata in real-time.</p>
-					<WebGPUCanvas />
+
 				</div>
 
 				{/* Main Content */}
@@ -57,14 +56,12 @@ export default function Home() {
 					<div className='mt-4'>
 						<h2 className='text-2xl font-semibold text-gray-700'>🤝 Join Us!</h2>
 						<p className='text-gray-600 mt-1'>Interested in working on this project? We'd love to hear from you!</p>
-						<a
+						<Link
 							href="https://www.deepneuron.org/contact-us"
-							target="_blank"
-							rel="noopener noreferrer"
 							className="inline-block bg-purple-mdn text-white px-6 py-2 rounded-md mt-3 hover:bg-purple-mdn-dark transition"
 						>
 							Get in Touch
-						</a>
+						</Link>
 					</div>
 				</div>
 			</div>

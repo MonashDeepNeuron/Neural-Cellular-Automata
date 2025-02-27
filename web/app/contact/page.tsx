@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Contact() {
 	return (
 		<div className='max-w-3xl mx-auto px-6 py-10 text-gray-800'>
@@ -12,14 +14,12 @@ export default function Contact() {
 			{/* Contact Information */}
 			<div className='bg-purple-50 p-6 rounded-md shadow-md text-center'>
 				<p className='text-xl font-semibold mb-2'>Get in Touch:</p>
-				<a
+				<Link
 					href='https://www.deepneuron.org/contact-us'
-					target='_blank'
-					rel='noopener noreferrer'
 					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300'
 				>
 					Visit the Deep Neuron Contact Page
-				</a>
+				</Link>
 			</div>
 
 			{/* Additional Note */}

@@ -1,22 +1,81 @@
+'use client'; // 👈 This tells Next.js to treat this as a Client Component
+
+import Link from 'next/link';
+import { useState } from 'react';
+
 import Image from 'next/image';
 
 export default function CellularAutomata() {
+	
+	const [showWarning, setShowWarning] = useState(true);
 	return (
 		<div className='max-w-4xl mx-auto px-6 py-10 text-gray-800'>
+			{/* Title */}
+			<div className='text-center mb-8'>
+				<h1 className='text-4xl font-extrabold text-gray-800'>Neural Cellular Automata Simulator</h1>
+				<p className='text-md text-gray-600 mt-2'>Explore dynamic models in real-time!</p>
+			</div>
+
+			{/* Warning Message */}
+			{showWarning && (
+				<div className='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow-md mb-6 transition-opacity duration-500'>
+					<p className='mb-3'>
+						<strong>⚠️ Warning:</strong> This website contains content that may <u>flash at high frequencies</u>. Please use discretion when
+						selecting frame rates if sensitive to flashing visuals.
+					</p>
+					<button
+						type='button'
+						onClick={() => setShowWarning(false)}
+						className='bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition-transform duration-300 transform hover:scale-105'
+					>
+						Dismiss
+					</button>
+				</div>
+			)}
+
+			{/* Model Selection Panel */}
+			<section className='mb-16 mt-5'>
+				<div className='bg-gray-100 border-gray-500 p-6 rounded-md shadow-md mb-8'>
+					<h3 className='text-2xl font-semibold text-gray-800 mb-4'>Select a Model:</h3>
+
+					<div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+						{[
+							{ name: 'Classic Conway', link: '/CAs/ConwaysLife/life.html' },
+							{ name: 'Life Like', link: '/CAs/LifeLike/life.html' },
+							{ name: 'Larger', link: '/CAs/Larger/life.html' },
+							{ name: 'Continuous', link: '/CAs/Continuous/life.html' },
+							{ name: 'Growing NCA', link: 'cellular-automata/persisting-gca' },
+							{ name: 'Texture NCA', link: 'cellular-automata/texture' }
+						].map(model => (
+							<Link
+								key={model.name}
+								href={model.link}
+								className='bg-purple-mdn text-white text-center py-3 rounded-md shadow hover:bg-purple-mdn-dark hover:scale-105 transition-transform duration-300'
+							>
+								{model.name}
+							</Link>
+						))}
+					</div>
+				</div>
+
+				{/* Navigation to Troubleshooting */}
+				<div className='text-center mt-8'>
+					<Link
+						href='/troubleshooting'
+						className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
+					>
+						🛠️ Go to Troubleshooting
+					</Link>
+				</div>
+			</section>
+
+
 			{/* Title */}
 			<h1 className='text-4xl font-bold mb-6 text-center'>Cellular Automata Models</h1>
 
 			{/* Neural Cellular Automata Section */}
 			<section className='mb-10'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Neural Cellular Automata (NCA)</h2>
-
-				{/* TODO:Uncomment when the page for this is made. */}
-				{/* <a
-					href='cellular-automata/growing-gca.html'
-					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
-				>
-					Explore G-NCA
-				</a> */}
 
 				<p className='leading-7 text-lg mt-4'>
 					Neural Cellular Automata (NCA) are a category of cellular automata that involve using a neural network as the cell’s update rule.
@@ -26,9 +85,9 @@ export default function CellularAutomata() {
 
 				<p className='leading-7 text-lg mt-4'>
 					From a deep learning perspective, NCA can be characterized as a Recurrent Convolutional Neural Network. Learn more about this{' '}
-					<a href='/Pages/nca-ca.html' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
+					<Link href='/intro' className="text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition">
 						here
-					</a>
+					</Link>
 					.
 				</p>
 
@@ -38,24 +97,21 @@ export default function CellularAutomata() {
 			<section className='mb-10'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Growing NCA</h2>
 
-				{/* TODO:Uncomment when the page for this is made. */}
-				<a
+				<Link
 					href='cellular-automata/persisting-gca'
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
 					Explore G-NCA
-				</a>
+				</Link>
 
 				<p className='leading-7 text-lg mt-4'>
 					One of the best examples of NCA is{' '}
-					<a
+					<Link
 						href='https://distill.pub/2020/growing-ca/'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-						target='_blank'
-						rel='noopener noreferrer'
 					>
 						Growing Neural Cellular Automata
-					</a>{' '}
+					</Link>{' '}
 					(A. Mordvintsev et al., 2020), where they trained NCA to ‘grow’ target images from a single seed cell.
 				</p>
 
@@ -87,23 +143,21 @@ export default function CellularAutomata() {
 			<section className='mb-10'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Texture NCA</h2>
 
-				<a
+				<Link
 					href='cellular-automata/texture'
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
 					Explore Textures
-				</a>
+				</Link>
 
 				<p className='leading-7 text-lg mt-4'>
 					Texture NCA is based off the paper{' '}
-					<a
+					<Link
 						href='https://arxiv.org/pdf/2105.07299'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-						target='_blank'
-						rel='noopener noreferrer'
 					>
 						Self Organising Textures
-					</a>{' '}
+					</Link>{' '}
 					(A. Mordvintsev et al., 2021), where they trained NCA to ‘grow’ target images from a single seed cell.
 				</p>
 
@@ -116,14 +170,12 @@ export default function CellularAutomata() {
 				<p className='leading-7 text-lg mt-4'>
 					It shares properties of regeneration, as well as independence of grid location, resulting in textures that
 					can be smoothly and cohesively replicated over grids of any size and shape - or even onto 3D graphs, as the paper{' '}
-					<a
+					<Link
 						href='https://doi.org/10.1145/3658127'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-						target='_blank'
-						rel='noopener noreferrer'
 					>
 						Mesh Neural Cellular Automata
-					</a>{' '}
+					</Link>{' '}
 					(E. Pajouheshgar et al., 2024) expands.
 				</p>
 
@@ -140,12 +192,12 @@ export default function CellularAutomata() {
 						<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>John Conway’s Game of Life</h2>
 
 						{/* TODO:Uncomment when the page for this is made. */}
-						{/* <a
+						{/* <Link
 							href='/CAs/ConwaysLife/life.html'
 							className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 						>
 							Play Classic Conway
-						</a> */}
+						</Link> */}
 
 						<p className='leading-7 text-lg mt-4'>
 							This is probably the most famous example of cellular automata. The Game of Life operates on these simple rules:
@@ -161,14 +213,12 @@ export default function CellularAutomata() {
 						<p className='leading-7 text-lg mt-4'>
 							Even with such simple rules, complex behaviors can emerge. Many self-sustaining patterns have been discovered. A more
 							sophisticated version can be found{' '}
-							<a
+							<Link
 								href='https://playgameoflife.com/'
 								className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-								target='_blank'
-								rel='noopener noreferrer'
 							>
 								here
-							</a>
+							</Link>
 							.
 						</p>
 					</div>
@@ -189,12 +239,12 @@ export default function CellularAutomata() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Life Like Cellular Automata</h2>
 
 				{/* TODO: Uncomment when the page for this is made */}
-				{/* <a 
+				{/* <Link 
 					href='/CAs/LifeLike/life.html' 
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
 					Life Like
-				</a> */}
+				</Link> */}
 
 				<p className='leading-7 text-lg mt-4'>
 					Life like CA operate very similarly to the Game of Life in that all cells
@@ -221,12 +271,12 @@ export default function CellularAutomata() {
 						<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Larger than Life</h2>
 						
 						{/* TODO: Uncomment when the page for this is made */}
-						{/* <a 
+						{/* <Link 
 							href='/CAs/Larger/life.html' 
 							className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 						>
 							Larger
-						</a> */}
+						</Link> */}
 
 						<p className='leading-7 text-lg mt-4'>
 							Larger than Life builds on Life Like CA by introducing even more flexibility. 
@@ -268,12 +318,12 @@ export default function CellularAutomata() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Continuous Cellular Automata</h2>
 				
 				{/* TODO: Uncomment when the page for this is made */}
-				{/* <a
+				{/* <Link
 					href='/CAs/Continuous/life.html'
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
 					Explore Continuous CA
-				</a> */}
+				</Link> */}
 
 				<p className='leading-7 text-lg mt-4'>
 					Continuous CA also builds on Life Like CA. The main difference 

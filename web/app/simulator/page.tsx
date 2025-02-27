@@ -43,13 +43,13 @@ export default function Simulator() {
 						{ name: 'Continuous', link: '/CAs/Continuous/life.html' },
 						{ name: 'G-NCA', link: '/CAs/GCA/life.html' }
 					].map(model => (
-						<a
+						<Link
 							key={model.name}
 							href={model.link}
 							className='bg-purple-mdn text-white text-center py-3 rounded-md shadow hover:bg-purple-mdn-dark hover:scale-105 transition-transform duration-300'
 						>
 							{model.name}
-						</a>
+						</Link>
 					))}
 				</div>
 			</div>
