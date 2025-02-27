@@ -1,16 +1,26 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Home() {
 	return (
 		<div className='min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6'>
 			{/* Side-by-Side Layout */}
-			<div className='flex flex-col md:flex-row items-center justify-center gap-8 max-w-6xl w-full'>
+			<div className='flex flex-col-2 gap-6 max-w-6xl w-full'>
 				{/* Simulation Section */}
 				<div className='w-full md:w-1/2'>
-					<h1 className='text-3xl font-bold text-center md:text-left text-gray-800 mb-2'>🧪 Neural Cellular Automata Simulator</h1>
-					<p className='text-center md:text-left text-gray-600 mb-4'>Experience the dynamics of Neural Cellular Automata in real-time.</p>
+					<h1 className='text-3xl font-bold text-left text-gray-800 mb-4'>🧪 Neural Cellular Automata Simulator</h1>
+					<Link href='cellular-automata'>
+						<Image
+							src='images/semitrained-cat.png'
+							alt='Target Knitted Texture'
+							height={60}
+							width={50}
+							className='w-4/5 rounded-md shadow'
+						/>
+					</Link>
+					<p className='text-left text-gray-600 mt-2'>Experience the dynamics of Neural Cellular Automata in real-time.</p>
 				</div>
 
 				{/* Main Content */}
@@ -36,7 +46,10 @@ export default function Home() {
 								</Link>
 							</li>
 							<li>
-								<Link href='/cellular-automata' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
+								<Link
+									href='/cellular-automata'
+									className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
+								>
 									🧪 Try the NCA Simulator
 								</Link>
 							</li>
