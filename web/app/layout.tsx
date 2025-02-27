@@ -26,7 +26,6 @@ export default function RootLayout({
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased text-black`}>
 				<Navbar />
 				<main className='min-h-screen p-4 pt-20'>
-					{' '}
 					{/* Added 'pt-20' for top padding */}
 					<Providers>{children}</Providers>
 				</main>

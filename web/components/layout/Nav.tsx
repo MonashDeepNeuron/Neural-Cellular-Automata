@@ -21,10 +21,10 @@ export default function Navbar() {
 	];
 
 	return (
-		<nav className='bg-purple-mdn shadow-md fixed top-0 left-0 right-0 z-50'> {/* Purple Background */}
+		<nav className='bg-purple-mdn shadow-md fixed top-0 left-0 right-0 z-50'>
+			{/* Purple Background */}
 			<div className='max-w-full mx-auto px-4 py-3 flex items-center justify-between'>
 				{/* Logo */}
-
 				<div className='flex items-center space-x-4'>
 					<a href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer'>
 						<img src='/images/mdn-logo.png' alt='Deep Neuron Logo' height={40} width={80} />
@@ -49,14 +49,16 @@ export default function Navbar() {
 				</div>
 
 				{/* Hamburger Icon for Mobile */}
-				<button className='md:hidden text-white focus:outline-none' onClick={() => setIsOpen(!isOpen)}>
+				<button className='md:hidden text-white focus:outline-none' onClick={() => setIsOpen(!isOpen)} type='button'>
 					☰
 				</button>
 			</div>
 			{/* Mobile Menu */}
 			{isOpen && (
-				<div className='md:hidden bg-purple-mdn shadow-md'> {/* Purple Background for Mobile Menu */}
-					{navLinks.map((link) => (
+				<div className='md:hidden bg-purple-mdn shadow-md'>
+					{' '}
+					{/* Purple Background for Mobile Menu */}
+					{navLinks.map(link => (
 						<Link
 							key={link.path}
 							href={link.path}

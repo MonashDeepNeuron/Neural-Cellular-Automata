@@ -19,8 +19,8 @@ export default function About() {
 					>
 						Monash DeepNeuron
 					</a>
-					, an Engineering/IT student team run by Monash University students. 
-					NCA is one of many research projects, which you can read more about{' '}
+					, an Engineering/IT student team run by Monash University students. NCA is one of many research projects, which you can read more
+					about{' '}
 					<a
 						href='https://www.deepneuron.org/'
 						target='_blank'
@@ -60,8 +60,8 @@ export default function About() {
 			<section>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Join Us!</h2>
 				<p className='text-lg'>
-					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new
-					positions open up. First-year or Master's students — all are welcome!
+					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
+					up. First-year or Master's students — all are welcome!
 				</p>
 				<a
 					href='https://www.deepneuron.org/join-us'

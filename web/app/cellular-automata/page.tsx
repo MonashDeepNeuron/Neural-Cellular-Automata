@@ -31,7 +31,6 @@ export default function CellularAutomata() {
 					</a>
 					.
 				</p>
-
 			</section>
 
 			{/* Growing Neural Cellular Automata Section */}
@@ -60,27 +59,21 @@ export default function CellularAutomata() {
 				</p>
 
 				<p className='leading-7 text-lg mt-4'>
-					The Growing-NCA model emphasises that the perception of only neighbouring cells
-					bears parallels with how natural cells communicate within living organisms. 
-					Interestingly, this results in Growing Neural Cellular Automata (and other NCA) 
-					also showing natural regenerative properties when the image is disturbed during generation.
+					The Growing-NCA model emphasises that the perception of only neighbouring cells bears parallels with how natural cells communicate
+					within living organisms. Interestingly, this results in Growing Neural Cellular Automata (and other NCA) also showing natural
+					regenerative properties when the image is disturbed during generation.
 				</p>
 
 				<p className='leading-7 text-lg mt-4'>
-					Designed to cut the model back to as simple and small a system as possible, 
-					Growing NCA is designed as a demonstration of how exceedingly simple systems 
-					can robustly self-organise into a very complex system without a large amount
-					of information and very simple instructions.
+					Designed to cut the model back to as simple and small a system as possible, Growing NCA is designed as a demonstration of how
+					exceedingly simple systems can robustly self-organise into a very complex system without a large amount of information and very
+					simple instructions.
 				</p>
 
 				<p className='leading-7 text-lg mt-4'>
-					Understanding this model is a good foundation for Neural Cellular Automata, as 
-					a large portion of NCA use a very similar base structure, with varying objective functions.
-					They incorporate relevant optimisations and recombination.
+					Understanding this model is a good foundation for Neural Cellular Automata, as a large portion of NCA use a very similar base
+					structure, with varying objective functions. They incorporate relevant optimisations and recombination.
 				</p>
-
-
-
 			</section>
 
 			{/* Texture NCA */}
@@ -108,14 +101,13 @@ export default function CellularAutomata() {
 				</p>
 
 				<p className='leading-7 text-lg mt-4'>
-					The main difference between Texture NCA and Growing NCA is that it aims to replicate image features on a 
-					small scale - an application that takes advantage of the short-range communication and organisational capabilities 
-					of NCA. 
+					The main difference between Texture NCA and Growing NCA is that it aims to replicate image features on a small scale - an
+					application that takes advantage of the short-range communication and organisational capabilities of NCA.
 				</p>
 
 				<p className='leading-7 text-lg mt-4'>
-					It shares properties of regeneration, as well as independence of grid location, resulting in textures that
-					can be smoothly and cohesively replicated over grids of any size and shape - or even onto 3D graphs, as the paper{' '}
+					It shares properties of regeneration, as well as independence of grid location, resulting in textures that can be smoothly and
+					cohesively replicated over grids of any size and shape - or even onto 3D graphs, as the paper{' '}
 					<a
 						href='https://doi.org/10.1145/3658127'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
@@ -127,10 +119,7 @@ export default function CellularAutomata() {
 					(E. Pajouheshgar et al., 2024) expands.
 				</p>
 
-				<p className='leading-7 text-lg mt-4'>
-					
-				</p>
-
+				<p className='leading-7 text-lg mt-4'></p>
 			</section>
 
 			{/* Game of Life Section */}
@@ -174,18 +163,20 @@ export default function CellularAutomata() {
 					</div>
 
 					<div>
-						<Image src='/images/GoL neighbourhood.png' alt='The neighbourhood of each cell consists of the cells in contact with it.' height={60} width={50} className='w-full rounded-md shadow' />
-						<p className='text-sm text-center italic'>
-							The neighbourhood of each cell consists of 
-							the cells in contact with it.
-						</p>
+						<Image
+							src='/images/GoL neighbourhood.png'
+							alt='The neighbourhood of each cell consists of the cells in contact with it.'
+							height={60}
+							width={50}
+							className='w-full rounded-md shadow'
+						/>
+						<p className='text-sm text-center italic'>The neighbourhood of each cell consists of the cells in contact with it.</p>
 					</div>
 				</div>
 			</section>
 
 			{/* Life-Like Section */}
 			<section className='mb-10'>
-				
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Life Like Cellular Automata</h2>
 
 				{/* TODO: Uncomment when the page for this is made */}
@@ -197,21 +188,17 @@ export default function CellularAutomata() {
 				</a> */}
 
 				<p className='leading-7 text-lg mt-4'>
-					Life like CA operate very similarly to the Game of Life in that all cells
-					are either alive or dead. However, Life Like gives you the freedom to 
-					choose how many cells must be alive in the neighbourhood to either 
-					survive or be born. This is specified by a <i>rule string</i>. 
+					Life like CA operate very similarly to the Game of Life in that all cells are either alive or dead. However, Life Like gives you
+					the freedom to choose how many cells must be alive in the neighbourhood to either survive or be born. This is specified by a{' '}
+					<i>rule string</i>.
 				</p>
 
 				<p className='leading-7 text-lg mt-4'>
-					The rule string format we have used is <i>survival/birth notation.</i> In
-					this notation, the original Game of Life would be expressed as <b>23/3</b> (we 
-					don’t worry about spacing between numbers because they can only be the 
-					numbers 0-8), where 2 or 3 cells in the neighbourhood are required for 
-					survival of a living cell, and 3 cells in the neighbourhood are required 
-					for a dead cell to come to life/be born.
+					The rule string format we have used is <i>survival/birth notation.</i> In this notation, the original Game of Life would be
+					expressed as <b>23/3</b> (we don’t worry about spacing between numbers because they can only be the numbers 0-8), where 2 or 3
+					cells in the neighbourhood are required for survival of a living cell, and 3 cells in the neighbourhood are required for a dead
+					cell to come to life/be born.
 				</p>
-
 			</section>
 
 			{/* Larger than Life Section */}
@@ -219,7 +206,7 @@ export default function CellularAutomata() {
 				<div className='grid grid-cols-2 overflow-y-auto gap-4'>
 					<div>
 						<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Larger than Life</h2>
-						
+
 						{/* TODO: Uncomment when the page for this is made */}
 						{/* <a 
 							href='/CAs/Larger/life.html' 
@@ -229,44 +216,51 @@ export default function CellularAutomata() {
 						</a> */}
 
 						<p className='leading-7 text-lg mt-4'>
-							Larger than Life builds on Life Like CA by introducing even more flexibility. 
-							This means the following are now specifiable in the rule string:
+							Larger than Life builds on Life Like CA by introducing even more flexibility. This means the following are now specifiable in
+							the rule string:
 						</p>
 
 						<ul className='list-disc list-inside space-y-2 text-lg mt-4'>
-							<li>The neighbourhood radius to encompass cells that are further than one
-								cell away.</li>
+							<li>The neighbourhood radius to encompass cells that are further than one cell away.</li>
 							<li>Neighbourhood shape.</li>
-							<li>Minimum lifespan of living cells (basically living cells have HP that
-								is deducted from every time it’s exposed to death conditions)</li>
+							<li>
+								Minimum lifespan of living cells (basically living cells have HP that is deducted from every time it’s exposed to death
+								conditions)
+							</li>
 						</ul>
-
 					</div>
-					
+
 					<div className='grid grid-cols-1 overflow-y-auto gap-4'>
-
-						<Image src='/images/LargerRadius2.png' alt='The neighbourhood in larger than life also contains all the 
-							cells within a specified distance from the target cell' height={60} width={50} className='w-full rounded-md shadow' />
+						<Image
+							src='/images/LargerRadius2.png'
+							alt='The neighbourhood in larger than life also contains all the 
+							cells within a specified distance from the target cell'
+							height={60}
+							width={50}
+							className='w-full rounded-md shadow'
+						/>
 						<p className='text-sm text-center italic'>
-							Neighbourhood of a target cell in Larger 
-							than Life when the neighbourhood radius is set to 2 cells 
+							Neighbourhood of a target cell in Larger than Life when the neighbourhood radius is set to 2 cells
 						</p>
-						
-						<Image src='/images/LargerNeighbourhoodTypes.png' alt='The neighbourhood of each cell consists of the cells in contact with it.' height={60} width={50} className='w-full rounded-md shadow' />
+
+						<Image
+							src='/images/LargerNeighbourhoodTypes.png'
+							alt='The neighbourhood of each cell consists of the cells in contact with it.'
+							height={60}
+							width={50}
+							className='w-full rounded-md shadow'
+						/>
 						<p className='text-sm text-center italic'>
-							Different neighbourhood shapes/different 
-							ways of determining a cell's distance from the target cell
+							Different neighbourhood shapes/different ways of determining a cell's distance from the target cell
 						</p>
 					</div>
-				</div>       
-				
-				
+				</div>
 			</section>
-			
+
 			{/* Continuous Cellular Automata Section */}
 			<section className='mb-10'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Continuous Cellular Automata</h2>
-				
+
 				{/* TODO: Uncomment when the page for this is made */}
 				{/* <a
 					href='/CAs/Continuous/life.html'
@@ -276,12 +270,10 @@ export default function CellularAutomata() {
 				</a> */}
 
 				<p className='leading-7 text-lg mt-4'>
-					Continuous CA also builds on Life Like CA. The main difference 
-					is that instead of using the binary dead or alive as states, we use a 
-					continuous range of values. The new cell state value is calculated in 
-					by multiplying each neighbour by a weight, adding this together and applying a basic mathematical function to it. 
-					Continuous CA can display behaviours similar to basic organisms and population level behaviours of 
-					bacteria etc. that have simple behavioural patterns. 
+					Continuous CA also builds on Life Like CA. The main difference is that instead of using the binary dead or alive as states, we use
+					a continuous range of values. The new cell state value is calculated in by multiplying each neighbour by a weight, adding this
+					together and applying a basic mathematical function to it. Continuous CA can display behaviours similar to basic organisms and
+					population level behaviours of bacteria etc. that have simple behavioural patterns.
 				</p>
 			</section>
 		</div>

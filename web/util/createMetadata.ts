@@ -14,15 +14,15 @@ export default function createMetadata(params?: CreateMetadataParams): Metadata 
 		description,
 		openGraph: {
 			type: 'website',
-      title,
+			title,
 			description: description,
-      url: 'https://neuralca.org',
-      siteName: 'Neural Cellular Automata',
-      locale: 'en',
+			url: 'https://neuralca.org',
+			siteName: 'Neural Cellular Automata',
+			locale: 'en'
 		},
-    appleWebApp: {
-      title: 'NCA'
-    }
+		appleWebApp: {
+			title: 'NCA'
+		}
 	};
 
 	return metadata;

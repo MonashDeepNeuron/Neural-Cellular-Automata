@@ -12,7 +12,8 @@ export default function Troubleshooting() {
 
 				<h3 className='text-lg font-semibold text-gray-600 italic'>1️⃣ Browser Does Not Support WebGPU</h3>
 				<p className='leading-7 text-lg mt-2'>
-					Our project relies on WebGPU, a cutting-edge graphics computing tool for web development. Unfortunately, not all browsers support WebGPU yet.
+					Our project relies on WebGPU, a cutting-edge graphics computing tool for web development. Unfortunately, not all browsers support
+					WebGPU yet.
 				</p>
 				<p className='mt-2'>
 					<strong>Unsupported Browsers:</strong> Safari (including all browsers on iPhone/iPad) and Firefox.
@@ -52,7 +53,8 @@ export default function Troubleshooting() {
 
 				<h3 className='text-lg font-semibold text-gray-600 italic mt-4'>2️⃣ Activation Function Changes</h3>
 				<p className='leading-7 text-lg mt-2'>
-					If you modified the activation function, there might be a bug in the code. Ensure the activation function follows WGSL syntax and returns a single `float32` value.
+					If you modified the activation function, there might be a bug in the code. Ensure the activation function follows WGSL syntax and
+					returns a single `float32` value.
 				</p>
 				<p>
 					<strong>Solution:</strong> Use your browser’s developer tools (Inspect Element) to identify and fix issues.
@@ -91,9 +93,7 @@ export default function Troubleshooting() {
 				</p>
 
 				<h3 className='text-lg font-semibold text-gray-600 italic mt-4'>2️⃣ Why Does It Run Smoothly at Certain Frame Rates?</h3>
-				<p className='leading-7 text-lg mt-2'>
-					To prevent freezes, the display update rate is capped at 50 fps.
-				</p>
+				<p className='leading-7 text-lg mt-2'>To prevent freezes, the display update rate is capped at 50 fps.</p>
 				<ul className='list-disc list-inside ml-4 space-y-1 mt-2 text-lg'>
 					<li>At 1-50, 101-150 fps, etc., you see odd frames.</li>
 					<li>At 51-100, 151-200 fps, etc., you see even frames.</li>

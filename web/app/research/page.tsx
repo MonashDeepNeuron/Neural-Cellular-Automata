@@ -13,12 +13,12 @@ export default function Research() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mt-6'>Growing Neural Cellular Automata</h2>
 				<p>
 					Differentiable Model of Morphogenesis, <i>Feb. 11, 2020</i>. doi:{' '}
-					<a 
-						href='https://doi.org/10.23915/distill.00023' 
+					<a
+						href='https://doi.org/10.23915/distill.00023'
 						target='_blank'
 						rel='noopener noreferrer'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					> 
+					>
 						10.23915/distill.00023
 					</a>
 				</p>
@@ -49,12 +49,12 @@ export default function Research() {
 				<h2 className='text-2xl font-semibold text-purple-mdn'>Self-Organising Textures</h2>
 				<p>
 					Neural Cellular Automata Model of Pattern Formation, <i>Feb. 11, 2021</i>. doi:{' '}
-					<a 
-						href='https://doi.org/10.23915/distill.00027.003' 
+					<a
+						href='https://doi.org/10.23915/distill.00027.003'
 						target='_blank'
 						rel='noopener noreferrer'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					> 
+					>
 						10.23915/distill.00027.003
 					</a>
 				</p>
@@ -83,12 +83,12 @@ export default function Research() {
 				<h2 className='text-2xl font-semibold text-purple-mdn'>Mesh Neural Cellular Automata</h2>
 				<p>
 					<i>Jul. 19, 2024</i>. doi:{' '}
-					<a 
-						href='https://doi.org/10.1145/3658127' 
+					<a
+						href='https://doi.org/10.1145/3658127'
 						target='_blank'
 						rel='noopener noreferrer'
 						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					> 
+					>
 						10.1145/3658127
 					</a>
 				</p>

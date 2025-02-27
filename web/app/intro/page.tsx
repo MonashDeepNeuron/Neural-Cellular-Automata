@@ -2,9 +2,7 @@ export default function Intro() {
 	return (
 		<div className='max-w-4xl mx-auto px-6 py-10 text-gray-800'>
 			{/* Main Title */}
-			<h1 className='text-4xl font-bold text-gray-800 mb-6 text-center'>
-				Neural Cellular Automata
-			</h1>
+			<h1 className='text-4xl font-bold text-gray-800 mb-6 text-center'>Neural Cellular Automata</h1>
 
 			{/* Introduction Section */}
 			<section className='mb-8'>

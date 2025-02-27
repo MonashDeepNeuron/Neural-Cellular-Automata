@@ -19,8 +19,8 @@ export default function KeepingUp() {
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>October Update 2024</h2>
 				<p className='text-lg leading-7'>
-					We've made significant breakthroughs in optimizing NCA simulations, with faster rendering speeds and enhanced visualization
-					tools. Additionally, we’ve begun integrating new datasets to diversify our models' capabilities.
+					We've made significant breakthroughs in optimizing NCA simulations, with faster rendering speeds and enhanced visualization tools.
+					Additionally, we’ve begun integrating new datasets to diversify our models' capabilities.
 				</p>
 			</section>
 
@@ -28,8 +28,8 @@ export default function KeepingUp() {
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>July Update 2024</h2>
 				<p className='text-lg leading-7'>
-					Exciting developments this month as we launched new simulation models that showcase regenerative behaviors. Our team presented
-					at the Monash AI Conference, receiving great feedback from the academic community.
+					Exciting developments this month as we launched new simulation models that showcase regenerative behaviors. Our team presented at
+					the Monash AI Conference, receiving great feedback from the academic community.
 				</p>
 			</section>
 
