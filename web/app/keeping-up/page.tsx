@@ -13,14 +13,15 @@ export default function KeepingUp() {
 
 				<ul className='list-disc list-inside space-y-2 text-lg mt-4'>
 					<li>Implemented and trained later stages of the Growing NCA model, including our version of the persisting model.</li>
-					<li>Implemented and trained image recognition models in the methodology specified by Image Segmentation NCA and then Med-NCA. </li>
+					<li>
+						Implemented and trained image recognition models in the methodology specified by Image Segmentation NCA and then Med-NCA.{' '}
+					</li>
 					<li>Implemented and trained Self-Organising Textures. </li>
 					<li>Continued background research for competitive methods for proposed usages of NCA.</li>
 					<li>Re-vamped the website to use Next.js, making the website cleaner more maintainable.</li>
 					<li>Added completed models for Textures to the website and added final randomising function for Growing NCA. </li>
 					<li>Added educational pages to the website.</li>
 				</ul>
-
 			</section>
 
 			{/* October Update */}
@@ -39,8 +40,8 @@ export default function KeepingUp() {
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>July Update 2024</h2>
 				<p className='text-lg leading-7'>
-					Website Launch! The first iteration of the website is hosted Featuring: Conway's life, life-like, larger than life
-					and continuous ca Literature searching conducted for NCA, getting an understanding of the major papers regarding NCA
+					Website Launch! The first iteration of the website is hosted Featuring: Conway's life, life-like, larger than life and continuous
+					ca Literature searching conducted for NCA, getting an understanding of the major papers regarding NCA
 				</p>
 			</section>
 
