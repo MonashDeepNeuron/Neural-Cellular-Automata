@@ -45,7 +45,7 @@ export default function CellularAutomata() {
 							{ name: 'Larger', link: '/CAs/Larger/life.html' },
 							{ name: 'Continuous', link: '/CAs/Continuous/life.html' },
 							{ name: 'Growing NCA', link: 'simulator/growing' },
-							{ name: 'Texture NCA', link: 'simulatora/texture' }
+							{ name: 'Texture NCA', link: 'simulator/texture' }
 						].map(model => (
 							<Link
 								key={model.name}
