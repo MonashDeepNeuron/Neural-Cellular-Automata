@@ -61,6 +61,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			if (!navigator.gpu) {
 				setStatus(NCAStatus.FAILED);
 				setError('WebGPU is not supported on this browser.');
+				return;
 			}
 
 			// Request GPU Adapter
