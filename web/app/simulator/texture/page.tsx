@@ -1,21 +1,11 @@
-'use client';
-import Simulator from '@/components/layout/Simulator';
-import useNCA from '@/hooks/useNCA';
-import { texture as simulation } from '@/shaders/nca/simulation';
+import createMetadata from '@/util/createMetadata';
+import Client from './client';
 
-const SIZE = 256;
+export const metadata = createMetadata({
+	title: 'Texture Simulator',
+	description: 'Simulate growing textures using location independent cellular automata.'
+});
 
-export default function Texture() {
-	const controls = useNCA({
-		size: SIZE,
-		channels: 12,
-		hiddenChannels: 96,
-		convolutions: 4,
-		weightsURL: '/weights/texture-bubbles.bin',
-		shaders: {
-			simulation
-		}
-	});
-
-	return <Simulator name='Texture' size={SIZE} {...controls} />;
+export default function page() {
+	return <Client />;
 }

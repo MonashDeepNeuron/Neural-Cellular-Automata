@@ -1,22 +1,11 @@
-'use client';
-import Simulator from '@/components/layout/Simulator';
-import useNCA from '@/hooks/useNCA';
-import { growing as simulation } from '@/shaders/nca/simulation';
+import createMetadata from '@/util/createMetadata';
+import Client from './client';
 
-const SIZE = 60;
+export const metadata = createMetadata({
+	title: 'Growing Simulator',
+	description: 'Simulate growing organisms using location independent cellular automata.'
+});
 
-export default function PersistingGCA() {
-	const controls = useNCA({
-		size: SIZE,
-		channels: 16,
-		hiddenChannels: 128,
-		convolutions: 3,
-		weightsURL: '/weights/growing.bin',
-		seed: true,
-		shaders: {
-			simulation
-		}
-	});
-
-	return <Simulator name='Growing' size={SIZE} {...controls} />;
+export default function page() {
+	return <Client />;
 }
