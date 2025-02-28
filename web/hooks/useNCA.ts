@@ -356,7 +356,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				lastFrameTime = now - (deltaTime % frameTime);
 
 				// Generate a new seed each frame
-				const seed = step % Number.MAX_SAFE_INTEGER;
+				const seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER); // step % Number.MAX_SAFE_INTEGER;
 				resources.device.queue.writeBuffer(resources.buffers.seed, 0, new Uint32Array([seed]));
 
 				// Create command encoder
