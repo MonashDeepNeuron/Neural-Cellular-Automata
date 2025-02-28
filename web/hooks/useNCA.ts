@@ -57,6 +57,13 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			if (resources) return;
 			console.log('Initialising Shaders');
 
+			// Secure context check
+			if (!window.isSecureContext) {
+				setStatus(NCAStatus.FAILED);
+				setError('WebGPU is not allowed in non-secure contexts.  Please access this website over HTTPS.');
+				return;
+			}
+
 			// Check for WebGPU support
 			if (!navigator.gpu) {
 				setStatus(NCAStatus.FAILED);
