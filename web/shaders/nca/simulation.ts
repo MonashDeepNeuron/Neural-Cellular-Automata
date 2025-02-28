@@ -156,7 +156,7 @@ export const texture = nca({
 	aliveMasking: false
 });
 
-export const persisting = nca({
+export const growing = nca({
 	convolutions: [SOBEL_X, SOBEL_Y],
 	channels: 16,
 	hiddenChannels: 128,

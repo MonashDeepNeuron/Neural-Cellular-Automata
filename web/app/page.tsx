@@ -11,7 +11,7 @@ export default function Home() {
 				{/* Simulation Section */}
 				<div className='flex flex-col w-full md:w-1/2'>
 					<h1 className='text-3xl font-bold text-gray-800 mb-4'>🧪 Neural Cellular Automata Simulator</h1>
-					<Link href='cellular-automata'>
+					<Link href='simulator'>
 						<Image
 							src='images/semitrained-cat.png'
 							alt='Target Knitted Texture'
@@ -50,7 +50,7 @@ export default function Home() {
 							</li>
 							<li>
 								<Link
-									href='/cellular-automata'
+									href='/simulator'
 									className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
 								>
 									🧪 Try the NCA Simulator

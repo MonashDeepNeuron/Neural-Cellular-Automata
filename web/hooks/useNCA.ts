@@ -418,3 +418,5 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 		canvasRef
 	};
 }
+
+export type NCAControls = ReturnType<typeof useNCA>;

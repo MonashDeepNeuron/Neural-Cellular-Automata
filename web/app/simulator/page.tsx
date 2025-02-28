@@ -44,8 +44,8 @@ export default function CellularAutomata() {
 							{ name: 'Life Like', link: '/CAs/LifeLike/life.html' },
 							{ name: 'Larger', link: '/CAs/Larger/life.html' },
 							{ name: 'Continuous', link: '/CAs/Continuous/life.html' },
-							{ name: 'Growing NCA', link: 'cellular-automata/persisting-gca' },
-							{ name: 'Texture NCA', link: 'cellular-automata/texture' }
+							{ name: 'Growing NCA', link: 'simulator/growing' },
+							{ name: 'Texture NCA', link: 'simulatora/texture' }
 						].map(model => (
 							<Link
 								key={model.name}
@@ -96,7 +96,7 @@ export default function CellularAutomata() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Growing NCA</h2>
 
 				<Link
-					href='cellular-automata/persisting-gca'
+					href='simulator/growing'
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
 					Explore G-NCA
@@ -136,7 +136,7 @@ export default function CellularAutomata() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Texture NCA</h2>
 
 				<Link
-					href='cellular-automata/texture'
+					href='/simulator/texture'
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
 					Explore Textures

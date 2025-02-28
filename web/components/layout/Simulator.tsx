@@ -1,29 +1,18 @@
-'use client';
-
-import Card from '@/components/Card';
-import FramerateSlider from '@/components/FramerateSlider';
-import useNCA, { NCAStatus } from '@/hooks/useNCA';
-import { texture as simulation } from '@/shaders/nca/simulation';
+import { type NCAControls, NCAStatus } from '@/hooks/useNCA';
 import clsx from 'clsx';
+import Card from '../Card';
+import FramerateSlider from '../FramerateSlider';
 
-const SIZE = 256;
+interface SimulatorProps extends NCAControls {
+	name: string;
+	size: number;
+}
 
-export default function Texture() {
-	const { error, status, play, setPlay, step, FPS, setFPS, canvasRef } = useNCA({
-		size: SIZE,
-		channels: 12,
-		hiddenChannels: 96,
-		convolutions: 4,
-		weightsURL: '/weights/texture-bubbles.bin',
-		shaders: {
-			simulation
-		}
-	});
-
+export default function Simulator({ name, FPS, setFPS, setPlay, play, error, canvasRef, size, step, status }: SimulatorProps) {
 	return (
 		<div className='grid gap-4 grid-rows-2 grid-cols-1 max-w-full lg:grid-rows-1 lg:grid-cols-[24rem,1fr] lg:h-[calc(100vh-6rem)]'>
 			<Card>
-				<h1>Texture</h1>
+				<h1 className='font-bold'>{name}</h1>
 				<p>
 					<b>Status</b>: {status}
 				</p>
@@ -45,7 +34,7 @@ export default function Texture() {
 					<div className='absolute top-0 left-0 flex items-center justify-center overflow-hidden w-full h-full'>
 						{error && <p className='text-red-500 px-4 text-center'>{error}</p>}
 					</div>
-					<canvas height={SIZE} width={SIZE} className='h-full w-full' ref={canvasRef} style={{ imageRendering: 'pixelated' }} />
+					<canvas height={size} width={size} className='h-full w-full' ref={canvasRef} style={{ imageRendering: 'pixelated' }} />
 				</div>
 			</Card>
 		</div>
