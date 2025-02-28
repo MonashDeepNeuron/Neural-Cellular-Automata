@@ -1,9 +1,14 @@
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Poppins } from 'next/font/google';
 import './globals.css';
 import Providers from '@/components/Providers';
 import Navbar from '@/components/layout/Nav';
 import createMetadata from '@/util/createMetadata';
 import clsx from 'clsx';
+
+const poppins = Poppins({
+	weight: ["500","400"], 
+	subsets: ['latin']
+})
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -24,7 +29,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang='en'>
-			<body className={clsx(geistSans.variable, geistMono.variable, 'antialiased text-black overflow-x-hidden max-w-screen')}>
+			<body className={`${poppins.className}`}>
 				<Navbar />
 				<main className='min-h-screen p-4 pt-20 max-w-full'>
 					{/* Added 'pt-20' for top padding */}

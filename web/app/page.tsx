@@ -7,7 +7,7 @@ export default function Home() {
 	return (
 		<div className='min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6'>
 			{/* Side-by-Side Layout */}
-			<div className='flex flex-col-2 gap-6 max-w-6xl w-full text-center'>
+			<div className='flex flex-col-2 gap-6 max-w-7xl w-full text-center'>
 				{/* Simulation Section */}
 				<div className='flex flex-col w-full md:w-1/2'>
 					<h1 className='text-3xl font-bold text-gray-800 mb-4'>🧪 Neural Cellular Automata Simulator</h1>
@@ -17,7 +17,7 @@ export default function Home() {
 							alt='Target Knitted Texture'
 							height={60}
 							width={50}
-							className='w-4/5 rounded-md shadow mx-10'
+							className='w-4/5 rounded-md items-center shadow mx-10'
 						/>
 					</Link>
 					<p className='text-gray-600 mt-2'>Experience the dynamics of Neural Cellular Automata in real-time.</p>
