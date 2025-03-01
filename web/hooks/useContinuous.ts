@@ -1,7 +1,6 @@
 'use client';
 
-import cell from '@/shaders/nca/cell';
-import loadWeights from '@/util/loadWeights';
+import cell from '@/shaders/continuous/cell';
 import { useEffect, useRef, useState } from 'react';
 
 export enum NCAStatus {
@@ -20,17 +19,11 @@ export interface GPUResources {
 	};
 	buffers: {
 		vertex: GPUBuffer;
-		seed: GPUBuffer;
 	};
 }
 
-export interface NCASettings {
+export interface ContinuousSettings {
 	size: number;
-	channels: number;
-	hiddenChannels: number;
-	convolutions: number;
-	weightsURL: string;
-	seed?: boolean;
 	shaders: {
 		simulation: string;
 	};
@@ -42,14 +35,14 @@ export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1]);
 const WORKGROUP_SIZE = 8;
 
-export default function useNCA({ size, channels, hiddenChannels, convolutions, shaders, weightsURL, seed }: NCASettings) {
+export default function useContinuous({ size, shaders }: ContinuousSettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources | null>(null);
 	const [play, setPlay] = useState(true);
 	const [step, setStep] = useState(0);
 	const [FPS, setFPS] = useState(60);
-	const [stepsPerFrame, setStepsPerFrame] = useState(1);
+	const [stepsPerFrame, setStepsPerFrame] = useState(2);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -105,23 +98,6 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				alphaMode: 'opaque'
 			});
 
-			// Load weights
-			let weights: Float32Array | null = null;
-			try {
-				weights = await loadWeights(weightsURL);
-			} catch (error) {
-				setStatus(NCAStatus.FAILED);
-				setError(`Failed to load weights from URL: ${(error as Error).message}`);
-				return;
-			}
-			const parameters = [channels * convolutions * hiddenChannels, hiddenChannels, hiddenChannels * channels];
-			const total = parameters.reduce((acc, p) => acc + p, 0);
-			if (total !== weights.length) {
-				setStatus(NCAStatus.FAILED);
-				setError(`Loaded weights do not match provided model shape. Expected (${parameters.join(', ')})`);
-				return;
-			}
-
 			// Create vertex buffer
 			const vertexBuffer = device.createBuffer({
 				label: 'Cell Vertices',
@@ -158,7 +134,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 					{
 						binding: 0, // Grid size
 						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
-						buffer: { type: 'uniform' }
+						buffer: { type: 'read-only-storage' }
 					},
 					{
 						binding: 1, // State / Input State (Compute)
@@ -171,24 +147,9 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 						buffer: { type: 'storage' }
 					},
 					{
-						binding: 3, // Layer 1 Weights
+						binding: 3, // Kernel
 						visibility: GPUShaderStage.COMPUTE,
 						buffer: { type: 'read-only-storage' }
-					},
-					{
-						binding: 4, // Layer 1 Biases
-						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'read-only-storage' }
-					},
-					{
-						binding: 5, // Layer 2 Weights
-						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'read-only-storage' }
-					},
-					{
-						binding: 6,
-						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'uniform' }
 					}
 				]
 			});
@@ -225,14 +186,14 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			});
 
 			// Initialise buffers
-			const shapeArray = new Uint32Array([channels, convolutions, hiddenChannels, size]);
-			const shapeBuffer = device.createBuffer({
+			const sizeArray = new Uint32Array([size]);
+			const sizeBuffer = device.createBuffer({
 				label: 'Size Buffer',
-				size: shapeArray.byteLength,
-				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+				size: sizeArray.byteLength,
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			});
 
-			const cellState = new Float32Array(channels * size * size).fill(0);
+			const cellState = new Float32Array(size * size).fill(0).map(() => Math.random());
 			const cellStateBuffers: CellStateBufferPair = [
 				device.createBuffer({
 					label: 'Cell State A',
@@ -246,40 +207,18 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				})
 			];
 
-			const weightBuffers = [
-				device.createBuffer({
-					label: 'Layer 1 Weights',
-					size: parameters[0] * Float32Array.BYTES_PER_ELEMENT,
-					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-				}),
-				device.createBuffer({
-					label: 'Layer 1 Biases',
-					size: parameters[1] * Float32Array.BYTES_PER_ELEMENT,
-					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-				}),
-				device.createBuffer({
-					label: 'Layer 2 Weights',
-					size: parameters[2] * Float32Array.BYTES_PER_ELEMENT,
-					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-				})
-			];
-
-			const seedBuffer = device.createBuffer({
-				size: Int32Array.BYTES_PER_ELEMENT,
-				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+			const kernelArray = new Float32Array([0.68, -0.9, 0.68, -0.9, -0.66, -0.9, 0.68, -0.9, 0.68]);
+			const kernelBuffer = device.createBuffer({
+				label: 'Kernel Buffer',
+				size: kernelArray.byteLength,
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			});
 
 			// Write buffers
-			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
-			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
-			if (seed) {
-				const centre = 3 * size * size + Math.floor(size / 2) * size + Math.floor(size / 2);
-				cellState[centre] = 1;
-			}
+			device.queue.writeBuffer(sizeBuffer, 0, sizeArray);
 			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
-			device.queue.writeBuffer(weightBuffers[0], 0, weights.slice(0, parameters[0]));
-			device.queue.writeBuffer(weightBuffers[1], 0, weights.slice(parameters[0], parameters[0] + parameters[1]));
-			device.queue.writeBuffer(weightBuffers[2], 0, weights.slice(parameters[0] + parameters[1]));
+			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
+			device.queue.writeBuffer(kernelBuffer, 0, kernelArray);
 
 			// Create Bind Group
 			const bindGroups: CellStateBindGroupPair = [
@@ -287,26 +226,20 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 					label: 'Bind Group A',
 					layout: bindGroupLayout,
 					entries: [
-						{ binding: 0, resource: { buffer: shapeBuffer } },
+						{ binding: 0, resource: { buffer: sizeBuffer } },
 						{ binding: 1, resource: { buffer: cellStateBuffers[0] } },
 						{ binding: 2, resource: { buffer: cellStateBuffers[1] } },
-						{ binding: 3, resource: { buffer: weightBuffers[0] } },
-						{ binding: 4, resource: { buffer: weightBuffers[1] } },
-						{ binding: 5, resource: { buffer: weightBuffers[2] } },
-						{ binding: 6, resource: { buffer: seedBuffer } }
+						{ binding: 3, resource: { buffer: kernelBuffer } }
 					]
 				}),
 				device.createBindGroup({
 					label: 'Bind Group B',
 					layout: bindGroupLayout,
 					entries: [
-						{ binding: 0, resource: { buffer: shapeBuffer } },
+						{ binding: 0, resource: { buffer: sizeBuffer } },
 						{ binding: 1, resource: { buffer: cellStateBuffers[1] } },
 						{ binding: 2, resource: { buffer: cellStateBuffers[0] } },
-						{ binding: 3, resource: { buffer: weightBuffers[0] } },
-						{ binding: 4, resource: { buffer: weightBuffers[1] } },
-						{ binding: 5, resource: { buffer: weightBuffers[2] } },
-						{ binding: 6, resource: { buffer: seedBuffer } }
+						{ binding: 3, resource: { buffer: kernelBuffer } }
 					]
 				})
 			];
@@ -321,8 +254,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 					simulation: simulationPipeline
 				},
 				buffers: {
-					vertex: vertexBuffer,
-					seed: seedBuffer
+					vertex: vertexBuffer
 				}
 			});
 			setStatus(NCAStatus.READY);
@@ -335,7 +267,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			// Destroy device & associated buffers
 			resources?.device.destroy();
 		};
-	}, [size, channels, hiddenChannels, convolutions, weightsURL, seed, shaders.simulation, resources]);
+	}, [size, shaders.simulation, resources]);
 
 	useEffect(() => {
 		if (status !== NCAStatus.READY || !resources) return;
@@ -355,10 +287,6 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 
 			if (deltaTime >= frameTime) {
 				lastFrameTime = now - (deltaTime % frameTime);
-
-				// Generate a new seed each frame
-				const seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER); // step % Number.MAX_SAFE_INTEGER;
-				resources.device.queue.writeBuffer(resources.buffers.seed, 0, new Uint32Array([seed]));
 
 				// Create command encoder
 				const encoder = resources.device.createCommandEncoder();
@@ -424,4 +352,4 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 	};
 }
 
-export type NCAControls = ReturnType<typeof useNCA>;
+export type NCAControls = ReturnType<typeof useContinuous>;
