@@ -10,7 +10,7 @@ interface SimulatorProps extends NCAControls {
 
 export default function Simulator({ name, FPS, setFPS, setPlay, play, error, canvasRef, size, step, status }: SimulatorProps) {
 	return (
-		<div className='grid gap-4 grid-rows-2 grid-cols-1 max-w-full lg:grid-rows-1 lg:grid-cols-[24rem,1fr] lg:h-[calc(100vh-6rem)]'>
+		<div className='grid gap-4 grid-rows-[1fr,auto] grid-cols-1 max-w-full lg:grid-rows-1 lg:grid-cols-[24rem,1fr] lg:h-[calc(100vh-6rem)]'>
 			<Card>
 				<h1 className='font-bold'>{name}</h1>
 				<p>
@@ -30,7 +30,7 @@ export default function Simulator({ name, FPS, setFPS, setPlay, play, error, can
 				</button>
 			</Card>
 			<Card className='flex justify-center'>
-				<div className='relative aspect-square h-full max-h-full max-w-full overflow-hidden'>
+				<div className='relative aspect-square w-full lg:w-auto lg:h-full max-h-full max-w-full overflow-hidden'>
 					<div className='absolute top-0 left-0 flex items-center justify-center overflow-hidden w-full h-full'>
 						{error && <p className='text-red-500 px-4 text-center'>{error}</p>}
 					</div>
