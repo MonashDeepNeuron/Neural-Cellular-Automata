@@ -400,23 +400,6 @@ if __name__ == "__main__":
             ## Save the model's weights after training
             torch.save(MODEL.state_dict(), SAVE_PATH)
 
-            # Prepare weights list
-            weights_list = []
-
-            # Log weight and bias shapes
-            for i, (name, param) in enumerate(MODEL.named_parameters()):
-                shape = tuple(param.shape)
-                print(f"Layer {i}: {name} - Shape: {shape} - Size {param.numel()}")
-
-                # Append flattened weight/bias data
-                weights_list.append(param.detach().cpu().numpy().flatten())
-
-            # Concatenate all weights and biases into a single NumPy array
-            weights = np.concatenate(weights_list, dtype=np.float32)
-
-            # Save to a raw binary file (compact format)
-            weights.tofile("./weights.bin")
-
         optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
         LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
@@ -425,12 +408,33 @@ if __name__ == "__main__":
 
         ## Save the model's weights after training
         torch.save(MODEL.state_dict(), SAVE_PATH)
-        
-        losses = losses2 #np.concatenate((losses1, losses2), axis=0)
+    
+        # Prepare weights list
+        weights_list = []
+
+        # Log weight and bias shapes
+        for i, (name, param) in enumerate(MODEL.named_parameters()):
+            shape = tuple(param.shape)
+            print(f"Layer {i}: {name} - Shape: {shape} - Size {param.numel()}")
+
+            # Append flattened weight/bias data
+            weights_list.append(param.detach().cpu().numpy().flatten())
+
+        # Concatenate all weights and biases into a single NumPy array
+        weights = np.concatenate(weights_list, dtype=np.float32)
+
+        # Save to a raw binary file (compact format)
+        weights.tofile("./weights.bin")
+
+
         ## Plot loss
+        losses = losses2 #np.concatenate((losses1, losses2), axis=0)
+
         plt.plot(range(len(losses)), losses)
 
-       
+        plt.savefig("loss.png")
+
+
         ## Visialise the training snapshots
         if (LOAD_WEIGHTS):
             anim = visualise(recording2, anim=True, filenameBase="pool", show=False)
