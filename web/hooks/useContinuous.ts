@@ -1,6 +1,6 @@
 'use client';
 
-import cell from '@/shaders/nca/cell';
+import cell from '@/shaders/continuous/cell';
 import { useEffect, useRef, useState } from 'react';
 
 export enum NCAStatus {
@@ -34,7 +34,6 @@ export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 
 const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1]);
 const WORKGROUP_SIZE = 8;
-const CHANNELS = 4;
 
 export default function useContinuous({ size, shaders }: ContinuousSettings) {
 	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
@@ -134,7 +133,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 					{
 						binding: 0, // Grid size
 						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
-						buffer: { type: 'uniform' }
+						buffer: { type: 'read-only-storage' }
 					},
 					{
 						binding: 1, // State / Input State (Compute)
@@ -147,24 +146,9 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 						buffer: { type: 'storage' }
 					},
 					{
-						binding: 3, // Layer 1 Weights
+						binding: 3, // Kernel
 						visibility: GPUShaderStage.COMPUTE,
 						buffer: { type: 'read-only-storage' }
-					},
-					{
-						binding: 4, // Layer 1 Biases
-						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'read-only-storage' }
-					},
-					{
-						binding: 5, // Layer 2 Weights
-						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'read-only-storage' }
-					},
-					{
-						binding: 6,
-						visibility: GPUShaderStage.COMPUTE,
-						buffer: { type: 'uniform' }
 					}
 				]
 			});
@@ -201,14 +185,14 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 			});
 
 			// Initialise buffers
-			const shapeArray = new Uint32Array([size]);
-			const shapeBuffer = device.createBuffer({
+			const sizeArray = new Uint32Array([size]);
+			const sizeBuffer = device.createBuffer({
 				label: 'Size Buffer',
-				size: shapeArray.byteLength,
-				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+				size: sizeArray.byteLength,
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			});
 
-			const cellState = new Float32Array(CHANNELS * size * size).fill(0);
+			const cellState = new Float32Array(size * size).fill(0).map(() => Math.random());
 			const cellStateBuffers: CellStateBufferPair = [
 				device.createBuffer({
 					label: 'Cell State A',
@@ -222,10 +206,18 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 				})
 			];
 
+			const kernelArray = new Float32Array(9).fill(0.11);
+			const kernelBuffer = device.createBuffer({
+				label: 'Kernel Buffer',
+				size: kernelArray.byteLength,
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+			});
+
 			// Write buffers
-			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
+			device.queue.writeBuffer(sizeBuffer, 0, sizeArray);
 			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
 			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
+			device.queue.writeBuffer(kernelBuffer, 0, kernelArray);
 
 			// Create Bind Group
 			const bindGroups: CellStateBindGroupPair = [
@@ -233,18 +225,20 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 					label: 'Bind Group A',
 					layout: bindGroupLayout,
 					entries: [
-						{ binding: 0, resource: { buffer: shapeBuffer } },
+						{ binding: 0, resource: { buffer: sizeBuffer } },
 						{ binding: 1, resource: { buffer: cellStateBuffers[0] } },
-						{ binding: 2, resource: { buffer: cellStateBuffers[1] } }
+						{ binding: 2, resource: { buffer: cellStateBuffers[1] } },
+						{ binding: 3, resource: { buffer: kernelBuffer } }
 					]
 				}),
 				device.createBindGroup({
 					label: 'Bind Group B',
 					layout: bindGroupLayout,
 					entries: [
-						{ binding: 0, resource: { buffer: shapeBuffer } },
+						{ binding: 0, resource: { buffer: sizeBuffer } },
 						{ binding: 1, resource: { buffer: cellStateBuffers[1] } },
-						{ binding: 2, resource: { buffer: cellStateBuffers[0] } }
+						{ binding: 2, resource: { buffer: cellStateBuffers[0] } },
+						{ binding: 3, resource: { buffer: kernelBuffer } }
 					]
 				})
 			];
@@ -259,7 +253,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 					simulation: simulationPipeline
 				},
 				buffers: {
-					vertex: vertexBuffer,
+					vertex: vertexBuffer
 				}
 			});
 			setStatus(NCAStatus.READY);

@@ -9,7 +9,7 @@ export default function PersistingGCA() {
 	const controls = useContinuous({
 		size: SIZE,
 		shaders: {
-			simulation
+			simulation: simulation()
 		}
 	});
 

@@ -1,5 +1,5 @@
 const cell = /* wgsl */ `
-@group(0) @binding(0) var<uniform> size: f32;
+@group(0) @binding(0) var<storage> size: u32;
 @group(0) @binding(1) var<storage> state: array<f32>;
 
 struct VertexInput {
