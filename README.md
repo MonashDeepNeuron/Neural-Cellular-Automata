@@ -19,18 +19,32 @@ All of our code for <a href="https://neuralca.org">our website</a> and for gener
 
 ## Current Progress
 
+### Website Construction
 - [x] Learning WebGPU and creating a platform to share our work
   - [x] Built Conway's game of life
   - [x] Built Life-like CA, capable of taking input changing the behaviour of the CA
   - [x] Built Larger than Life, capable of creating coloured outputs 
   - [x] Built Continuous, implementing convolutions and live-editable WebGPU code
-  - [ ] Built Growing Neural Cellular Automata
+  - [x] Built Growing Neural Cellular Automata
     - [x] Developed and trained model
     - [x] Ported model weights over to the website in readable format
     - [ ] Implemented Growing Neural Cellular Automata on website
 - [ ] Built the about page
 - [x] Created basic descriptions of Neural Cellular Automata
 - [ ] Created advanced resources on Neural Cellular Automata
+
+### Model Development
+- [x] Implement our own copy of Growing Neural Cellular Automata in PyTorch
+  - [x] Implement model
+  - [x] Implement Growing training script
+  - [x] Implement Persisting training script
+  - [ ] Implement Regenerating training script
+- [x] Create system to weights and convert to format usable for website
+- [x] Explore the viability of extending NCA for Image Segmentation
+  - [x] Implementation of the paper Image Segmentation Neural Cellular Automata
+  - [x] Implementation of the paper Med-NCA
+- [x] Explore the viability of extending NCA for texture generation
+  - [x] Implementation of Self Organising Textures
 
 ## Resources
 
