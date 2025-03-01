@@ -7,6 +7,7 @@ import FramerateSlider from '../FramerateSlider';
 
 interface SimulatorProps extends NCAControls {
 	name: string;
+	className?: string;
 	size: number;
 }
 
@@ -22,7 +23,8 @@ export default function Simulator({
 	step,
 	status,
 	stepsPerFrame,
-	setStepsPerFrame
+	setStepsPerFrame,
+	className
 }: SimulatorProps) {
 	const checkboxId = useId();
 
@@ -59,7 +61,13 @@ export default function Simulator({
 					<div className='absolute top-0 left-0 flex items-center justify-center overflow-hidden w-full h-full'>
 						{error && <p className='text-red-500 px-4 text-center'>{error}</p>}
 					</div>
-					<canvas height={size} width={size} className='h-full w-full' ref={canvasRef} style={{ imageRendering: 'pixelated' }} />
+					<canvas
+						height={size}
+						width={size}
+						className={clsx('h-full w-full', className)}
+						ref={canvasRef}
+						style={{ imageRendering: 'pixelated' }}
+					/>
 				</div>
 			</Card>
 		</div>
