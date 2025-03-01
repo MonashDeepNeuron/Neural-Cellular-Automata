@@ -42,7 +42,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 	const [play, setPlay] = useState(true);
 	const [step, setStep] = useState(0);
 	const [FPS, setFPS] = useState(60);
-	const [stepsPerFrame, setStepsPerFrame] = useState(1);
+	const [stepsPerFrame, setStepsPerFrame] = useState(2);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
