@@ -42,6 +42,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 	const [play, setPlay] = useState(true);
 	const [step, setStep] = useState(0);
 	const [FPS, setFPS] = useState(60);
+	const [stepsPerFrame, setStepsPerFrame] = useState(1);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -291,13 +292,15 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 				const encoder = resources.device.createCommandEncoder();
 				const textureView = resources.context.getCurrentTexture().createView();
 
-				// Compute Pass
-				const computePass = encoder.beginComputePass();
-				computePass.setPipeline(resources.pipelines.simulation);
-				computePass.setBindGroup(0, resources.bindGroups[step % 2]);
-				const workgroupCount = Math.ceil(size / WORKGROUP_SIZE);
-				computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
-				computePass.end();
+				// Compute Passes
+				for (let i = 0; i < stepsPerFrame; i++) {
+					const computePass = encoder.beginComputePass();
+					computePass.setPipeline(resources.pipelines.simulation);
+					computePass.setBindGroup(0, resources.bindGroups[(step + i) % 2]);
+					const workgroupCount = Math.ceil(size / WORKGROUP_SIZE);
+					computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
+					computePass.end();
+				}
 
 				// Render pass
 				const renderPass = encoder.beginRenderPass({
@@ -318,7 +321,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 
 				// Submit commands
 				resources.device.queue.submit([encoder.finish()]);
-				setStep(prev => prev + 1);
+				setStep(prev => prev + stepsPerFrame);
 			}
 
 			animationFrameId = requestAnimationFrame(renderLoop);
@@ -330,7 +333,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 		return () => {
 			cancelAnimationFrame(animationFrameId);
 		};
-	}, [play, FPS, resources, status, size, step]);
+	}, [play, FPS, resources, status, size, step, stepsPerFrame]);
 
 	return {
 		play,
@@ -343,6 +346,8 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 		setStatus,
 		FPS,
 		setFPS,
+		stepsPerFrame,
+		setStepsPerFrame,
 		canvasRef
 	};
 }
