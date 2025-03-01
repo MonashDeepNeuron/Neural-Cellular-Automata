@@ -315,7 +315,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 				});
 				renderPass.setPipeline(resources.pipelines.cell);
 				renderPass.setVertexBuffer(0, resources.buffers.vertex);
-				renderPass.setBindGroup(0, resources.bindGroups[step % 2]);
+				renderPass.setBindGroup(0, resources.bindGroups[(step + stepsPerFrame - 1) % 2]);
 				renderPass.draw(SHAPE_VERTICES.length / 2, size * size);
 				renderPass.end();
 

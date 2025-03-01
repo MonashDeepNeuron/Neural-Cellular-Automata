@@ -368,7 +368,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				for (let i = 0; i < stepsPerFrame; i++) {
 					const computePass = encoder.beginComputePass();
 					computePass.setPipeline(resources.pipelines.simulation);
-					computePass.setBindGroup(0, resources.bindGroups[step % 2]);
+					computePass.setBindGroup(0, resources.bindGroups[(step + i) % 2]);
 					const workgroupCount = Math.ceil(size / WORKGROUP_SIZE);
 					computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
 					computePass.end();
@@ -387,7 +387,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				});
 				renderPass.setPipeline(resources.pipelines.cell);
 				renderPass.setVertexBuffer(0, resources.buffers.vertex);
-				renderPass.setBindGroup(0, resources.bindGroups[step % 2]);
+				renderPass.setBindGroup(0, resources.bindGroups[(step + stepsPerFrame - 1) % 2]);
 				renderPass.draw(SHAPE_VERTICES.length / 2, size * size);
 				renderPass.end();
 
