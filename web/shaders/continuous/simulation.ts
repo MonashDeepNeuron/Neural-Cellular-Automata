@@ -5,7 +5,7 @@ interface ContinuousParameters {
 const defaultActivation = 'return -1./pow(2., (0.6*pow(x, 2.)))+1.;';
 
 function continuous(parameters?: ContinuousParameters) {
-  const activation = parameters?.activation || defaultActivation;
+	const activation = parameters?.activation || defaultActivation;
 
 	const simulation = /*wgsl*/ `
 @group(0) @binding(0) var<storage> size: u32;
