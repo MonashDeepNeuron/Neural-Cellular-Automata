@@ -91,7 +91,7 @@ const renderPipeline = device.createRenderPipeline({
 EventManager.bindEvents();
 
 /* Load model weights*/
-let weights = await loadWeights('/model_weights_logo.bin');
+let weights = await loadWeights('/persist_cat20000.bin');
 console.log(weights)
 
 
