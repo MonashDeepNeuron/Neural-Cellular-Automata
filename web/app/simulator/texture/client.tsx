@@ -11,7 +11,7 @@ export default function Client() {
 		channels: 12,
 		hiddenChannels: 96,
 		convolutions: 4,
-		weightsURL: '/weights/texture-bubbles.bin',
+		weightsURL: '/weights/texture-leaf.bin',
 		shaders: {
 			simulation
 		}
