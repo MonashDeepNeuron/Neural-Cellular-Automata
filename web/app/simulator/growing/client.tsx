@@ -3,7 +3,7 @@ import Simulator from '@/components/layout/Simulator';
 import useNCA from '@/hooks/useNCA';
 import { growing as simulation } from '@/shaders/nca/simulation';
 
-const SIZE = 60;
+const SIZE = 48;
 
 export default function PersistingGCA() {
 	const controls = useNCA({

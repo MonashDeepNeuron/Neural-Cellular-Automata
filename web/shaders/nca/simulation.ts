@@ -4,10 +4,11 @@ interface NCAParameters {
 	convolutions: Convolution[];
 	channels: number;
 	hiddenChannels: number;
-	aliveMasking: boolean;
+	aliveMasking?: boolean;
+	stripe?: boolean;
 }
 
-function nca({ convolutions, channels, hiddenChannels, aliveMasking }: NCAParameters) {
+function nca({ convolutions, channels, hiddenChannels, aliveMasking, stripe }: NCAParameters) {
 	const simulation = /* wgsl */ `
 struct ParameterShape {
   channels: u32,
@@ -52,12 +53,12 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3u) {
 
   // Copy identity convolution directly from state
   for (var c = 0u; c < CHANNELS; c++) {
-    perceptions[c * CONVOLUTIONS] = state[index(c, x, y)];
+    perceptions[c${stripe ? ' * CONVOLUTIONS' : ''}] = state[index(c, x, y)];
   }
 
   // Compute convolutions
   for (var c = 0u; c < CHANNELS; c++) {
-    ${convolutions.map((_, i) => `perceptions[c * CONVOLUTIONS + ${i + 1}] = convolve(c, x, y, PERCEPTION_${i});`).join('\n')}
+    ${convolutions.map((_, i) => `perceptions[c ${stripe ? '* CONVOLUTIONS +' : '+ CHANNELS *'} ${i + 1}] = convolve(c, x, y, PERCEPTION_${i});`).join('\n')}
   }
 
   // Fully connected layers
@@ -153,7 +154,7 @@ export const texture = nca({
 	convolutions: [SOBEL_X, SOBEL_Y, LAPLACIAN],
 	channels: 12,
 	hiddenChannels: 96,
-	aliveMasking: false
+	stripe: true
 });
 
 export const growing = nca({
