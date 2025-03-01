@@ -49,6 +49,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 	const [play, setPlay] = useState(true);
 	const [step, setStep] = useState(0);
 	const [FPS, setFPS] = useState(60);
+	const [stepsPerFrame, setStepsPerFrame] = useState(1);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -57,10 +58,18 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			if (resources) return;
 			console.log('Initialising Shaders');
 
+			// Secure context check
+			if (!window.isSecureContext) {
+				setStatus(NCAStatus.FAILED);
+				setError('WebGPU is not allowed in non-secure contexts.  Please access this website over HTTPS.');
+				return;
+			}
+
 			// Check for WebGPU support
 			if (!navigator.gpu) {
 				setStatus(NCAStatus.FAILED);
 				setError('WebGPU is not supported on this browser.');
+				return;
 			}
 
 			// Request GPU Adapter
@@ -348,20 +357,22 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				lastFrameTime = now - (deltaTime % frameTime);
 
 				// Generate a new seed each frame
-				const seed = step % Number.MAX_SAFE_INTEGER;
+				const seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER); // step % Number.MAX_SAFE_INTEGER;
 				resources.device.queue.writeBuffer(resources.buffers.seed, 0, new Uint32Array([seed]));
 
 				// Create command encoder
 				const encoder = resources.device.createCommandEncoder();
 				const textureView = resources.context.getCurrentTexture().createView();
 
-				// Compute Pass
-				const computePass = encoder.beginComputePass();
-				computePass.setPipeline(resources.pipelines.simulation);
-				computePass.setBindGroup(0, resources.bindGroups[step % 2]);
-				const workgroupCount = Math.ceil(size / WORKGROUP_SIZE);
-				computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
-				computePass.end();
+				// Compute Passes
+				for (let i = 0; i < stepsPerFrame; i++) {
+					const computePass = encoder.beginComputePass();
+					computePass.setPipeline(resources.pipelines.simulation);
+					computePass.setBindGroup(0, resources.bindGroups[(step + i) % 2]);
+					const workgroupCount = Math.ceil(size / WORKGROUP_SIZE);
+					computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
+					computePass.end();
+				}
 
 				// Render pass
 				const renderPass = encoder.beginRenderPass({
@@ -376,13 +387,13 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				});
 				renderPass.setPipeline(resources.pipelines.cell);
 				renderPass.setVertexBuffer(0, resources.buffers.vertex);
-				renderPass.setBindGroup(0, resources.bindGroups[step % 2]);
+				renderPass.setBindGroup(0, resources.bindGroups[(step + stepsPerFrame - 1) % 2]);
 				renderPass.draw(SHAPE_VERTICES.length / 2, size * size);
 				renderPass.end();
 
 				// Submit commands
 				resources.device.queue.submit([encoder.finish()]);
-				setStep(prev => prev + 1);
+				setStep(prev => prev + stepsPerFrame);
 			}
 
 			animationFrameId = requestAnimationFrame(renderLoop);
@@ -394,7 +405,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 		return () => {
 			cancelAnimationFrame(animationFrameId);
 		};
-	}, [play, FPS, resources, status, size, step]);
+	}, [play, FPS, resources, status, size, step, stepsPerFrame]);
 
 	return {
 		play,
@@ -407,6 +418,10 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 		setStatus,
 		FPS,
 		setFPS,
+		stepsPerFrame,
+		setStepsPerFrame,
 		canvasRef
 	};
 }
+
+export type NCAControls = ReturnType<typeof useNCA>;

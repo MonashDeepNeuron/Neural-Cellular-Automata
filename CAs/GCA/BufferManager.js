@@ -35,7 +35,7 @@ export default class BufferManager {
     }
 
 
-    static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, weights) {
+    static initialiseComputeBindgroups(device, renderPipeline, gridSize, initialState, weights, stochasticMaskSeed) {
 
         const uniformArray = new Float32Array([gridSize, gridSize]);
         const uniformBuffer = device.createBuffer({
@@ -49,11 +49,13 @@ export default class BufferManager {
 
         const { w1Storage: w1, b1Storage: b1, w2Storage: w2 } = BufferManager.setRuleBuffer(device, weights);
 
+        const stochasticMaskBuffer = BufferManager.setStochasticMaskBuffer(device, stochasticMaskSeed);
+
         const bindGroups = [
-            BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], w1, b1, w2),
-            BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], w1, b1, w2)
+            BufferManager.createBindGroup(device, renderPipeline, "Cell renderer bind group A", uniformBuffer, cellStateStorage[0], cellStateStorage[1], w1, b1, w2, stochasticMaskBuffer),
+            BufferManager.createBindGroup(device, renderPipeline, "Cell render bind group B", uniformBuffer, cellStateStorage[1], cellStateStorage[0], w1, b1, w2, stochasticMaskBuffer)
         ];
-        return { bindGroups, uniformBuffer, cellStateStorage, w1, b1, w2 };
+        return { bindGroups, uniformBuffer, cellStateStorage, w1, b1, w2, stochasticMaskBuffer };
     }
 
     static setInitialStateBuffer(device, gridSize, initialState) {
@@ -91,8 +93,8 @@ export default class BufferManager {
             for (let i = 0; i < initialState.width; i++) {
                 for (let j = 0; j < initialState.height; j++) {
                     console.log(i + centreOffset + (j + centreOffset) * gridSize)
-                    for (let k = 0; k < 16; k++) { // TODO: Not hardcode number of channels
-                        cellStateArray[(i + centreOffset + (j + centreOffset) * gridSize) * 16 + k] = initialState.pattern[(i + j * initialState.width) * 16 + k];
+                    for (let k = 0; k < BufferManager.NUM_CHANNELS; k++) { 
+                        cellStateArray[(i + centreOffset + (j + centreOffset) * gridSize) * BufferManager.NUM_CHANNELS + k] = initialState.pattern[(i + j * initialState.width) * BufferManager.NUM_CHANNELS + k];
                     }
                 }
             }
@@ -134,24 +136,29 @@ export default class BufferManager {
 
                 {
                     binding: 3,
-                    visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
+                    visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
                     buffer: { type: "read-only-storage" } // w1
                 },
                 {
                     binding: 4,
-                    visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
+                    visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
                     buffer: { type: "read-only-storage" } // b1
                 },
                 {
                     binding: 5,
-                    visibility: GPUShaderStage.COMPUTE | GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
+                    visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
                     buffer: { type: "read-only-storage" } // w2
+                },
+                {
+                    binding: 6,
+                    visibility: GPUShaderStage.COMPUTE,
+                    buffer: {} // Uniform Buffer
                 }
             ]
         });
     }
 
-    static createBindGroup(device, renderPipeline, label, uniformBuffer, cellStateA, cellStateB, w1, b1, w2) {
+    static createBindGroup(device, renderPipeline, label, uniformBuffer, cellStateA, cellStateB, w1, b1, w2, stochasticMaskBuffer) {
         console.log(w1.byteLength); // Should match 128 * 48 * 4 bytes for Float32Array
 
         return device.createBindGroup({
@@ -163,13 +170,14 @@ export default class BufferManager {
                 { binding: 2, resource: { buffer: cellStateB } },
                 { binding: 3, resource: { buffer: w1 } },
                 { binding: 4, resource: { buffer: b1 } },
-                { binding: 5, resource: { buffer: w2 } }
+                { binding: 5, resource: { buffer: w2 } },
+                { binding: 6, resource: { buffer: stochasticMaskBuffer }}
             ],
         });
     }
 
-    static setRuleBuffer(device, modelWeights) {
-
+    static setRuleBuffer(device, modelWeights) { 
+        
         // Sizes based on your PyTorch model's parameter shapes
         const w1Size = 128 * 48;   // Shape: [128, 48, 1, 1] -> 128 * 48
         const b1Size = 128;        // Shape: [128] -> 128
@@ -205,6 +213,28 @@ export default class BufferManager {
         device.queue.writeBuffer(w2Storage, 0, w2);
 
         return { w1Storage, b1Storage, w2Storage };
+    }
+
+    static setStochasticMaskBuffer(device, stochasticMaskArray) { // TODO: make adaption of this to cater for the random number storage update 
+
+        // Create buffers for w1, b1, and w2
+        const stochasticMaskBuffer = device.createBuffer({
+            label: "Stochastic Mask Seed Storage",
+            size: stochasticMaskArray.byteLength,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
+
+        // Write the sliced weights to the buffers
+        device.queue.writeBuffer(stochasticMaskBuffer, 0, stochasticMaskArray);
+
+        return stochasticMaskBuffer;
+    }
+
+    static changeStochasticMaskSeed(device, stochasticMaskBuffer) {
+        let stochasticMaskSeed = Math.floor(Math.random() * 1000000); // TODO: ensure datatype is correct
+        let stochasticMaskArray = new Int32Array([stochasticMaskSeed])
+        device.queue.writeBuffer(stochasticMaskBuffer, 0, stochasticMaskArray);    
+        return stochasticMaskBuffer
     }
 
 }

@@ -6,6 +6,8 @@ export const computeShaderCode =
 @group(0) @binding(3) var<storage> w1 : array<f32>;
 @group(0) @binding(4) var<storage> b1 : array<f32>;
 @group(0) @binding(5) var<storage> w2 : array<f32>;
+@group(0) @binding(6) var<uniform> rand: u32; 
+
 
 const WORKGROUP_SIZE: u32 = 16;
 const NUM_CHANNELS: u32 = 16;
@@ -131,6 +133,21 @@ fn computeLinearLayers(perceptionVector: array<f32, 48>, x: i32, y: i32) -> arra
     return h2;
 }
 
+fn createStochasticMask(rand: u32, cellOffset: u32) -> bool {
+
+    let prime = 31u;
+    var hashValue = 0u; 
+    var n = rand + cellOffset;
+    while (n > 0u) {
+        hashValue = (hashValue * prime + (n % 10));
+        n = n / 10;
+    }
+
+    return bool(hashValue % 2u);
+
+}
+
+
 @compute @workgroup_size(WORKGROUP_SIZE, WORKGROUP_SIZE)
 fn computeMain(@builtin(global_invocation_id) cell: vec3<u32>) {
     let offset = cellIndex(cell.xy, 0); 
@@ -141,23 +158,30 @@ fn computeMain(@builtin(global_invocation_id) cell: vec3<u32>) {
     // Apply the update using linear layers
     let output = computeLinearLayers(perceptionVector, i32(cell.x), i32(cell.y));
 
-    // TODO: Apply stochastic mask to the output
-
-    // Calculate the final output (add the masked update to the current state)
-    var finalState: array<f32, 16> = array<f32, 16>();
-
-    // NYAN DIAGNOSIS -> output = [value , 0, 0, 0...,0]
-
-    for (var i: u32 = 0u; i < 16u; i = i + 1u) {
-        finalState[i] = cellStateIn[i + offset] + output[i];
-    }
-
-    // Apply the alive mask to the entire final state
-    let finalOutput = applyAliveMask(finalState, i32(cell.x), i32(cell.y));
-
-    // Write the final output to cellStateOut
-    for (var i: u32 = 0u; i < 16u; i = i + 1u) {
-        cellStateOut[i + offset] = finalOutput[i];
+    if (createStochasticMask(rand, offset)){
+   
+        // Calculate the final output (add the masked update to the current state)
+        var finalState: array<f32, 16> = array<f32, 16>();
+    
+        // NYAN DIAGNOSIS -> output = [value , 0, 0, 0...,0]
+    
+        for (var i: u32 = 0u; i < 16u; i = i + 1u) {
+            finalState[i] = cellStateIn[i + offset] + output[i];
+        }
+    
+        // Apply the alive mask to the entire final state
+        let finalOutput = applyAliveMask(finalState, i32(cell.x), i32(cell.y));
+        
+    
+        // Write the final output to cellStateOut
+        for (var i: u32 = 0u; i < 16u; i = i + 1u) {
+            cellStateOut[i + offset] = finalOutput[i];
+        }
+    } else {
+        // Write the final output to cellStateOut
+        for (var i: u32 = 0u; i < 16u; i = i + 1u) {
+            cellStateOut[i + offset] = cellStateIn[i + offset] ;
+        }
     }
 }
 `
