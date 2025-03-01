@@ -52,7 +52,7 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3u) {
 
   // Copy identity convolution directly from state
   for (var c = 0u; c < CHANNELS; c++) {
-    perceptions[c * CONVOLUTIONS + 0] = state[index(c, x, y)];
+    perceptions[c * CONVOLUTIONS] = state[index(c, x, y)];
   }
 
   // Compute convolutions

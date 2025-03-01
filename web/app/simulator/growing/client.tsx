@@ -11,7 +11,7 @@ export default function PersistingGCA() {
 		channels: 16,
 		hiddenChannels: 128,
 		convolutions: 3,
-		weightsURL: '/weights/growing.bin',
+		weightsURL: '/weights/persist_cat20000.bin',
 		seed: true,
 		shaders: {
 			simulation
