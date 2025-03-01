@@ -24,14 +24,14 @@ fn compute_main(@builtin(global_invocation_id) cell: vec3u) {
   // k7 | k8 | k9
   var sum = 0.0;
   sum += value(cell.x-1, cell.y-1) * kernel[0];
-  sum += value(cell.x, cell.y-1) * kernel[1] ;
-  sum += value(cell.x+1, cell.y-1) * kernel[2] ;
-  sum += value(cell.x-1, cell.y) * kernel[3] ;
-  sum += value(cell.x, cell.y) * kernel[4] ;
-  sum += value(cell.x+1, cell.y) * kernel[5] ;
-  sum += value(cell.x-1, cell.y+1) * kernel[6] ;
-  sum += value(cell.x, cell.y+1) * kernel[7] ;
-  sum += value(cell.x+1, cell.y+1) * kernel[8] ;
+  sum += value(cell.x, cell.y-1) * kernel[1];
+  sum += value(cell.x+1, cell.y-1) * kernel[2];
+  sum += value(cell.x-1, cell.y) * kernel[3];
+  sum += value(cell.x, cell.y) * kernel[4];
+  sum += value(cell.x+1, cell.y) * kernel[5];
+  sum += value(cell.x-1, cell.y+1) * kernel[6];
+  sum += value(cell.x, cell.y+1) * kernel[7];
+  sum += value(cell.x+1, cell.y+1) * kernel[8];
 
   next_state[i] = applyActivation(sum);
 }

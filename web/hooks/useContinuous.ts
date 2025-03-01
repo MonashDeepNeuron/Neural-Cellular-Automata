@@ -206,7 +206,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 				})
 			];
 
-			const kernelArray = new Float32Array(9).fill(0.11);
+			const kernelArray = new Float32Array([0.68, -0.9, 0.68, -0.9, -0.66, -0.9, 0.68, -0.9, 0.68]);
 			const kernelBuffer = device.createBuffer({
 				label: 'Kernel Buffer',
 				size: kernelArray.byteLength,
