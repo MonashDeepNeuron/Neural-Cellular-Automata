@@ -1,0 +1,7 @@
+{
+	"$schema": "./web/node_modules/@biomejs/biome/configuration_schema.json",
+	"javascript": {
+		"globals": ["React"]
+	},
+	"extends": ["@angablue/biome-config"]
+}

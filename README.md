@@ -19,18 +19,32 @@ All of our code for <a href="https://neuralca.org">our website</a> and for gener
 
 ## Current Progress
 
+### Website Construction
 - [x] Learning WebGPU and creating a platform to share our work
   - [x] Built Conway's game of life
   - [x] Built Life-like CA, capable of taking input changing the behaviour of the CA
   - [x] Built Larger than Life, capable of creating coloured outputs 
   - [x] Built Continuous, implementing convolutions and live-editable WebGPU code
-  - [ ] Built Growing Neural Cellular Automata
+  - [x] Built Growing Neural Cellular Automata
     - [x] Developed and trained model
     - [x] Ported model weights over to the website in readable format
     - [ ] Implemented Growing Neural Cellular Automata on website
 - [ ] Built the about page
 - [x] Created basic descriptions of Neural Cellular Automata
 - [ ] Created advanced resources on Neural Cellular Automata
+
+### Model Development
+- [x] Implement our own copy of Growing Neural Cellular Automata in PyTorch
+  - [x] Implement model
+  - [x] Implement Growing training script
+  - [x] Implement Persisting training script
+  - [ ] Implement Regenerating training script
+- [x] Create system to weights and convert to format usable for website
+- [x] Explore the viability of extending NCA for Image Segmentation
+  - [x] Implementation of the paper Image Segmentation Neural Cellular Automata
+  - [x] Implementation of the paper Med-NCA
+- [x] Explore the viability of extending NCA for texture generation
+  - [x] Implementation of Self Organising Textures
 
 ## Resources
 
@@ -101,3 +115,29 @@ The general progression of a dev cycle is as follows.
 4. Bug testing on dev. These may occur as a result of feature integration.
 5. After bug testing (and more benchmarking maybe) is complete, Then Dev should be merged back to main.
 6. Dev is archived, and the Dev cycle is complete.
+
+## Setup
+This project works on Python 3.12 and may also work on versions newer than Python 3.9.  To install and manage multiple versions of Python, we recommend using [miniconda](https://docs.anaconda.com/miniconda/install/#quick-command-line-install).  This is especially useful, if you plan on using Python for other projects.
+
+### Conda Environment
+To create a new environment for this project, run the following commands in your terminal (assuming you have a GPU that supports CUDA 12.4):
+```bash
+conda create -n nca --file requirements.txt
+```
+
+If you do not have a discrete GPU, or have an older GPU that does not support CUDA 12.4, you can create an environment manually with the following commands:
+```bash
+conda create -n nca python==3.12
+conda activate nca
+pip install matplotlib
+```
+
+You will also need to install the correct PyTorch version with conda using their [installation guide](https://pytorch.org/get-started/locally/).  Ensure that you choose `Conda` as the package manager, and select the correct CUDA version for your GPU or CPU.
+
+### Using the Environment
+To use the environment, run the following command in your terminal:
+```bash
+conda activate nca
+```
+
+You can also automatically activate the environment for this project in VSCode by selecting the correct Python interpreter in the bottom right corner of the window (when a Python file is open).

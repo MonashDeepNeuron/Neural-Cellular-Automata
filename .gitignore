@@ -5,6 +5,7 @@
 #
 # Virtual environment
 venv
+
 # User-specific files
 *.rsuser
 *.suo
@@ -399,4 +400,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-.DS-Store
+*.DS-Store
+
