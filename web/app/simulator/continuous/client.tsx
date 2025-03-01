@@ -3,7 +3,7 @@ import Simulator from '@/components/layout/Simulator';
 import useContinuous from '@/hooks/useContinuous';
 import simulation from '@/shaders/continuous/simulation';
 
-const SIZE = 256;
+const SIZE = 512;
 
 export default function PersistingGCA() {
 	const controls = useContinuous({
