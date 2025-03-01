@@ -18,5 +18,5 @@ export default function PersistingGCA() {
 		}
 	});
 
-	return <Simulator name='Growing' size={SIZE} {...controls} />;
+	return <Simulator name='Growing' size={SIZE} className='-rotate-90' {...controls} />;
 }
