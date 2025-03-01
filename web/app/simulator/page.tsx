@@ -40,10 +40,10 @@ export default function CellularAutomata() {
 
 					<div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
 						{[
-							{ name: 'Classic Conway', link: '/CAs/ConwaysLife/life.html' },
-							{ name: 'Life Like', link: '/CAs/LifeLike/life.html' },
-							{ name: 'Larger', link: '/CAs/Larger/life.html' },
-							{ name: 'Continuous', link: '/CAs/Continuous/life.html' },
+							{ name: 'Classic Conway', link: 'simulator/conway' },
+							{ name: 'Life Like', link: 'simulator/life-like' },
+							{ name: 'Larger', link: 'simulator/larger' },
+							{ name: 'Continuous', link: 'simulator/continuous' },
 							{ name: 'Growing NCA', link: 'simulator/growing' },
 							{ name: 'Texture NCA', link: 'simulator/texture' }
 						].map(model => (
