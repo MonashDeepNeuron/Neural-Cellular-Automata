@@ -17,26 +17,31 @@ SOBEL_X = torch.tensor(
 )
 SOBEL_Y = -torch.rot90(SOBEL_X, k=-1, dims=[0, 1])  # GPT
 SOBEL_Z = SOBEL_X.permute(2, 1, 0)  # GPT
-IDENTITY = torch.zeros((3, 3, 3), dtype=torch.float32)
-IDENTITY[1, 1, 1] = 1
+
+SOBEL_X = SOBEL_X.unsqueeze(0) # needs shape (out_channels, in_channels, X, Y, Z). Repeat will be used in perception to handle the channels when channels != 1
+SOBEL_Y = SOBEL_Y.unsqueeze(0)
+SOBEL_Z = SOBEL_Z.unsqueeze(0)
+# IDENTITY = torch.zeros((3, 3, 3), dtype=torch.float32)
+# IDENTITY[1, 1, 1] = 1
+# identity not really needed
 
 # Create perception layer, consisting of the identity, sobel x, sobel y and laplacian
-PERCEPTIONS = torch.stack([IDENTITY, SOBEL_X, SOBEL_Y, SOBEL_Z])
-PERCEPTION_COUNT = PERCEPTIONS.shape[0]
+# PERCEPTIONS = torch.stack([SOBEL_X, SOBEL_Y, SOBEL_Z])
+# PERCEPTION_COUNT = PERCEPTIONS.shape[0]
 
 
 class NCA_3D(nn.Module):
-    def __init__(self, channels=16, hidden_channels=16):
+    def __init__(self, n_channels=16, hidden_channels=32):
         super().__init__()
 
-        self.channels = channels
+        self.channels = n_channels
 
         # Define dense layers (3D convolutions with kernel size of 1)
+        # For simple model, use one hidden layer
         self.layers = nn.Sequential(
-            # Input channels = channels * # of perceptions
-            nn.Conv3d(channels * PERCEPTION_COUNT, hidden_channels, 1),
+            nn.Conv3d(n_channels * 4, hidden_channels, 1), # need to multiply by 4, not 3, due to added dimension Z
             nn.ReLU(),
-            nn.Conv3d(hidden_channels, channels, 1, bias=False),
+            nn.Conv3d(hidden_channels, n_channels, 1, bias=False),
         )
 
         ## Initialise model parameters as much smaller numbers
@@ -63,24 +68,40 @@ class NCA_3D(nn.Module):
 
     def perception_conv(self, x):
         """Apply each perception convolution to the current state."""
-        # Reshape input to apply perception convolution
-        batches, channels, height, width, depth = x.shape
 
-        y = x.reshape(batches * channels, 1, height, width, depth)
         # Circular pad the input to avoid losing information at the edges
-        y = f.pad(y, [1, 1, 1, 1, 1, 1], "circular")
+        padded_grid = f.pad(x, [1, 1, 1, 1, 1, 1], "circular")
 
-        # Apply each perception convolution
-        y = f.conv3d(y, PERCEPTIONS[:, None])
+        grad_x = f.conv3d(
+            padded_grid,
+            SOBEL_X.repeat(padded_grid.size(1), 1, 1, 1, 1), # It repeats the sobel_x for each channel
+            stride=(1,1,1), # specify stride as a tuple/list for each dimension
+            padding=0,
+            groups=padded_grid.size(1), # again, useful when considering more than 1 channel
+        ) 
+        grad_y = f.conv3d(
+            padded_grid,
+            SOBEL_Y.repeat(padded_grid.size(1), 1, 1, 1, 1), # It repeats the sobel_y for each channel
+            stride=(1,1,1),
+            padding=0,
+            groups=padded_grid.size(1), # again, useful when considering more than 1 channel
+        )  
+        grad_z = f.conv3d(
+            padded_grid,
+            SOBEL_Z.repeat(padded_grid.size(1), 1, 1, 1, 1), # It repeats the sobel_z for each channel
+            stride=(1,1,1),
+            padding=0,
+            groups=padded_grid.size(1), # again, useful when considering more than 1 channel
+        )
 
-        # Reshape back to original shape
-        return y.reshape(batches, -1, height, width, depth)
+        perception_output = torch.cat([grad_x, grad_y, grad_z, x], dim=1) # just pass x, rather than applying identity. Output should be (BATCH_SIZE, 4*IN_CHANNELS, X, Y, Z)
+        return perception_output
 
-    def mask(self, x, update_rate=0.5):
+    def mask(self, x, update_rate=0.25):
         """Stochastically mask updates to mimic the random updates found in biological cells."""
         # Uniformly mask across all channels
         batches, channels, height, width, depth = x.shape
-        mask = (torch.rand(batches, 1, height, width, depth) + update_rate).floor()
+        mask = (torch.rand(batches, channels, height, width, depth) + update_rate).floor() # mask needs to be same shape
 
         # Apply mask
         return x * mask
@@ -91,7 +112,7 @@ class NCA_3D(nn.Module):
         A cell is considered empty (set rgba : 0) if there is no mature (alpha > 0.1) cell in its 3x3 neighbourhood
         """
         mask = (
-            f.max_pool3d(x[:, 0:1, :, :, :], kernel_size=3, stride=1, padding=1) > 0.1
+            f.max_pool3d(x[:, 3, :, :, :], kernel_size=3, stride=1, padding=1) > 0.1
         )
 
         # Apply mask
