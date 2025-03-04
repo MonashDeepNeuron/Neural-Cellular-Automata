@@ -9,33 +9,33 @@ export const computeShader = /*wgsl*/ `
     @group(0) @binding(3) var<storage> rule: array<u32>;
     override WORKGROUP_SIZE: u32 = 16;
     
-    fn cellIndex(cell: vec2u) -> u32 {
+    fn cell_index(cell: vec2u) -> u32 {
         // Supports grid wrap-around
         // grid.x and grid.y 
         return (cell.y % u32(grid.y))*u32(grid.x)+(cell.x % u32(grid.x));
     }
 
-    fn cellActive(x : u32, y: u32) -> u32 {
-        if (cellStateIn[cellIndex(vec2(x,y))] > 0){
+    fn cell_active(x : u32, y: u32) -> u32 {
+        if (cellStateIn[cell_index(vec2(x,y))] > 0){
             return 1;
         } else {
             return 0;
         }
     }
 
-    fn countMooreNeighbours(cell:vec3u, thisCell:u32, radius:u32) -> u32 {
+    fn count_moore_neighbours(cell:vec3u, thisCell:u32, radius:u32) -> u32 {
         let gridSize = radius*2 + 1;
         var activeNeighbours = 0u;
         for (var i = 0u; i < gridSize; i++){ // Row iterator
             for (var j = 0u; j < gridSize; j++){ // Column iterator
-                activeNeighbours = activeNeighbours + cellActive(cell.x - radius + j, cell.y - radius + i);
+                activeNeighbours = activeNeighbours + cell_active(cell.x - radius + j, cell.y - radius + i);
             }
         }
         activeNeighbours = activeNeighbours - cellStateIn[thisCell];
         return activeNeighbours;
     }
 
-    fn countVonNeumannNeighbours(cell:vec3u, thisCell:u32, radius:u32) -> u32 {
+    fn count_von_neumann_neighbours(cell:vec3u, thisCell:u32, radius:u32) -> u32 {
         
         //      x      von neumann neighbourhood is calculated based on Manhatten 
         //    x x x         distance/city block distance
@@ -47,13 +47,13 @@ export const computeShader = /*wgsl*/ `
         for (var i = 0u; i < radius+1; i++){ // Row iterator
             let rowWidth = i*2+1;
             for (var j = 0u; j < rowWidth; j++){ // Column iterator
-                activeNeighbours = activeNeighbours + cellActive(cell.x - i + j, cell.y - radius + i);
+                activeNeighbours = activeNeighbours + cell_active(cell.x - i + j, cell.y - radius + i);
             }
         }
         for (var i = 0u; i < radius; i++){ // Row iterator
             let rowWidth = i*2+1;
             for (var j = 0u; j < rowWidth; j++){ // Column iterator
-                activeNeighbours = activeNeighbours + cellActive(cell.x - i + j, cell.y + radius - i);
+                activeNeighbours = activeNeighbours + cell_active(cell.x - i + j, cell.y + radius - i);
             }
         }
         activeNeighbours = activeNeighbours - cellStateIn[thisCell];
@@ -61,7 +61,7 @@ export const computeShader = /*wgsl*/ `
     }
 
     
-    fn countCircularNeighbours(cell:vec3u, thisCell:u32, radius:u32) -> u32{
+    fn count_circular_neighbours(cell:vec3u, thisCell:u32, radius:u32) -> u32{
         // Circular neighbourhood is calculated based on the circular radius from the cell in question
         // Radius will be considered as sqrt(cells_across^2 + cells_up^2)
         // This will give the cell-centre to cell-centre distance from cell to cell
@@ -75,44 +75,44 @@ export const computeShader = /*wgsl*/ `
 
             for (var j = 1u; j <= currentWidth; j++){
                 // reflect on 4 quarters
-                activeNeighbours = activeNeighbours + cellActive(cell.x+j, cell.y +i);
-                activeNeighbours = activeNeighbours + cellActive(cell.x-j, cell.y +i);
-                activeNeighbours = activeNeighbours + cellActive(cell.x+j, cell.y -i);
-                activeNeighbours = activeNeighbours + cellActive(cell.x-j, cell.y -i);
+                activeNeighbours = activeNeighbours + cell_active(cell.x+j, cell.y +i);
+                activeNeighbours = activeNeighbours + cell_active(cell.x-j, cell.y +i);
+                activeNeighbours = activeNeighbours + cell_active(cell.x+j, cell.y -i);
+                activeNeighbours = activeNeighbours + cell_active(cell.x-j, cell.y -i);
             }
 
 
             // Do centre of row
-            activeNeighbours = activeNeighbours + cellActive(cell.x, cell.y+i);
-            activeNeighbours = activeNeighbours + cellActive(cell.x, cell.y-i);
+            activeNeighbours = activeNeighbours + cell_active(cell.x, cell.y+i);
+            activeNeighbours = activeNeighbours + cell_active(cell.x, cell.y-i);
 
         }
 
         for (var j = 1u; j <= radius; j++){
-            activeNeighbours = activeNeighbours + cellActive(cell.x +j, cell.y);
-            activeNeighbours = activeNeighbours + cellActive(cell.x -j, cell.y);
+            activeNeighbours = activeNeighbours + cell_active(cell.x +j, cell.y);
+            activeNeighbours = activeNeighbours + cell_active(cell.x -j, cell.y);
         }
 
-        activeNeighbours = activeNeighbours + cellActive(cell.x, cell.y);
+        activeNeighbours = activeNeighbours + cell_active(cell.x, cell.y);
 
         return activeNeighbours;
     }
 
-    fn getActiveNeighbours(neighbourhoodType:u32, cell:vec3u, thisCell:u32, radius:u32) -> u32 {
+    fn get_active_neighbours(neighbourhoodType:u32, cell:vec3u, thisCell:u32, radius:u32) -> u32 {
         switch (neighbourhoodType){
-            case 0: {return countMooreNeighbours(cell, thisCell, radius);}
-            case 1: {return countVonNeumannNeighbours(cell, thisCell, radius);}
-            case 2: {return countCircularNeighbours(cell, thisCell, radius);}
-            default: {return countMooreNeighbours(cell, thisCell, radius);}
+            case 0: {return count_moore_neighbours(cell, thisCell, radius);}
+            case 1: {return count_von_neumann_neighbours(cell, thisCell, radius);}
+            case 2: {return count_circular_neighbours(cell, thisCell, radius);}
+            default: {return count_moore_neighbours(cell, thisCell, radius);}
         }
     }
 
     @compute @workgroup_size(WORKGROUP_SIZE, WORKGROUP_SIZE)
-    fn computeMain(@builtin(global_invocation_id) cell: vec3u) {
+    fn compute_main(@builtin(global_invocation_id) cell: vec3u) {
 
         // Determine number of neighbours
-        let thisCell = cellIndex(cell.xy);
-        let activeNeighbours = getActiveNeighbours(rule[2], cell, thisCell, rule[0]);
+        let thisCell = cell_index(cell.xy);
+        let activeNeighbours = get_active_neighbours(rule[2], cell, thisCell, rule[0]);
         let states = rule[1];
         //  0  1  2       3       4    ... (no.srange items) ... no.srange+3 
         // [r, c, n, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
