@@ -11,11 +11,11 @@ export default function Client() {
 		channels: 12,
 		hiddenChannels: 96,
 		convolutions: 4,
-		weightsURL: '/weights/texture-leaf.bin',
+		weightsURL: '/weights/texture-hills.bin',
 		shaders: {
 			simulation
 		}
 	});
 
-	return <Simulator name='Texture' size={SIZE} {...controls} />;
+	return <Simulator name='Texture' size={SIZE} className='-rotate-90' {...controls} />;
 }
