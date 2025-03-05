@@ -1,4 +1,10 @@
 import Card from '@/components/Card';
+import createMetadata from '@/util/createMetadata';
+
+export const metadata = createMetadata({
+	title: 'Keeping Up',
+	description: 'Follow updates and see how this project has evolved over time.'
+});
 
 export default function KeepingUp() {
 	return (
