@@ -1,5 +1,11 @@
+import createMetadata from '@/util/createMetadata';
 import Image from 'next/image';
 import Link from 'next/link';
+
+export const metadata = createMetadata({
+	title: 'Research',
+	description: "Read summaries of research paper's we find interesting!"
+});
 
 export default function Research() {
 	return (

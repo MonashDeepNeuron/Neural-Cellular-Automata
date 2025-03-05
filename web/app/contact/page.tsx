@@ -1,6 +1,12 @@
+import Card from '@/components/Card';
+import createMetadata from '@/util/createMetadata';
 import Link from 'next/link';
 
-import Card from '@/components/Card';
+export const metadata = createMetadata({
+	title: 'Contact Us',
+	description:
+		'We would love to hear from you! If you have any questions, feedback, or inquiries, please don’t hesitate to reach out to us.'
+});
 
 export default function Contact() {
 	return (

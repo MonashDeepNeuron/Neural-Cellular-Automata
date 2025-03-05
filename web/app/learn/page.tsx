@@ -1,4 +1,10 @@
+import createMetadata from '@/util/createMetadata';
 import Link from 'next/link';
+
+export const metadata = createMetadata({
+	title: 'Learn',
+	description: 'Learn about what neural cellular automata are - the evolution from cellular automata.'
+});
 
 export default function Intro() {
 	return (

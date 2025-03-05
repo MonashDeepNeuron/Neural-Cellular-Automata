@@ -1,4 +1,4 @@
-export const NEIGHBOURHOOD_MAP: Record<string, number> = {
+export const NEIGHBOURHOOD_TYPES: Record<string, number> = {
 	M: 0, // Moore/square
 	N: 1, // Neumann/diamond/radius measured by Manhatten distance
 	C: 2 // Centre of cell within sqrt(dx^2 + dy^2)
@@ -30,12 +30,12 @@ export function parseRuleString(raw: string): Uint32Array | null {
 	// console.log("Getting RULE...");
 	// ruleString is given by the user. it is a string
 	// Output format
-	// [r, c, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
+	// [r, c, no. srange, sl, su, sl, su, ... , no. brange, bl, bu, bl, bu, ... , n]
 	// For the sake of efficiency, for S and B,
 	// if the number is specifically just the number, rather than a range, this
-	// is denoted through the use of negatives
+	// is denoted through the duplication of the number
 	// eg. 2-5, 7, 11-13, ...,
-	// push 2, 5, -7, 11, 13, ...,
+	// push 2, 5, 7, 7, 11, 13, ...,
 	if (ruleString.length < 8) {
 		return null;
 	}
@@ -115,7 +115,7 @@ export function parseRuleString(raw: string): Uint32Array | null {
 			ruleList[sConditionCountIndex]++;
 		}
 	} // NOTE: this will over-push by one number i.e. it will include the
-	// number refered to by lastS
+	// number referred to by lastS
 
 	//console.log(`Update after finding survivials: ${ruleList}`);
 
@@ -139,7 +139,7 @@ export function parseRuleString(raw: string): Uint32Array | null {
 	//console.log(`Last B range at index ${lastB}`);
 
 	// eg. 2-5, 7, 11-13, ...,
-	// push 2, 5, -7, 11, 13, ...,
+	// push 2, 5, 7, 7, 11, 13, ...,
 	while (i <= lastB) {
 		ruleList.push(nextNumber());
 		ruleList[bConditionCountIndex]++;
@@ -166,7 +166,7 @@ export function parseRuleString(raw: string): Uint32Array | null {
 	}
 	i++;
 
-	ruleList[2] = NEIGHBOURHOOD_MAP[ruleString[i]];
+	ruleList[2] = NEIGHBOURHOOD_TYPES[ruleString[i]];
 
 	i++;
 
