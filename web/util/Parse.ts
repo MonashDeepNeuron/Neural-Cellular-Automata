@@ -9,9 +9,9 @@ export const NEIGHBOURHOOD_TYPES: Record<string, number> = {
  * Rulestring is given as Rr, Cc, Ss Bb, Nn where:
  *  - r is the radius in units
  *  - c is how many cell states there are.
+ *  - n is the type of neighbourhood (eg. moore, neumann, cicular)
  *  - s is ranges in the form a-b, c-d, e, ... conditions of survival
  *  - b is ranges in the form a-b, c-d, e, ... conditions of birth
- *  - n is the type of neighbourhood (eg. moore, neumann, cicular)
  *
  * For cell states, all cells are born on maximum cell state, then decrease one point for
  * each cycle they are not within the survival bounds (so they don't die instantly)
@@ -30,7 +30,7 @@ export function parseRuleString(raw: string): Uint32Array | null {
 	// console.log("Getting RULE...");
 	// ruleString is given by the user. it is a string
 	// Output format
-	// [r, c, no. srange, sl, su, sl, su, ... , no. brange, bl, bu, bl, bu, ... , n]
+	// [r, c, n, no. srange, sl, su, sl, su, ... , no. brange, bl, bu, bl, bu, ...]
 	// For the sake of efficiency, for S and B,
 	// if the number is specifically just the number, rather than a range, this
 	// is denoted through the duplication of the number

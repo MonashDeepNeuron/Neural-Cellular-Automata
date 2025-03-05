@@ -2,12 +2,12 @@
  * Computes grid updates
  * (DO NOT REMOVE wgsl comment. This is for the WGSL Literal extension)
  */
-export const computeShader = /*wgsl*/ `
+export const computeShader = 
+    /*wgsl*/ `
     @group(0) @binding(0) var<uniform> grid: vec2f;
     @group(0) @binding(1) var<storage> cellStateIn: array<u32>;
     @group(0) @binding(2) var<storage, read_write> cellStateOut: array<u32>;
     @group(0) @binding(3) var<storage> rule: array<u32>;
-    override WORKGROUP_SIZE: u32 = 16;
     
     fn cell_index(cell: vec2u) -> u32 {
         // Supports grid wrap-around
@@ -107,7 +107,8 @@ export const computeShader = /*wgsl*/ `
         }
     }
 
-    @compute @workgroup_size(WORKGROUP_SIZE, WORKGROUP_SIZE)
+    @workgroup_size(8, 8)
+    @compute
     fn compute_main(@builtin(global_invocation_id) cell: vec3u) {
 
         // Determine number of neighbours
@@ -115,7 +116,7 @@ export const computeShader = /*wgsl*/ `
         let activeNeighbours = get_active_neighbours(rule[2], cell, thisCell, rule[0]);
         let states = rule[1];
         //  0  1  2       3       4    ... (no.srange items) ... no.srange+3 
-        // [r, c, n, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ... , n]
+        // [r, c, n, no. srange, su, sl, su, sl, ... , no. brange, bu, bl, bu, bl, ...]
         //                      ^if alive                         ^if dead
         // See parse for origin
 
@@ -127,7 +128,7 @@ export const computeShader = /*wgsl*/ `
         let valsToCheck = rule[ruleOffset]; // the value of either no.sranges of no.branges
         // No. sranges & no. of branges are always even due to parsing method
 
-        for (var i = 0u; i < valsToCheck; i=i+2){
+        for (var i = 0u; i < valsToCheck; i = i+2){
             if (activeNeighbours >= rule[ruleOffset+i+1] && activeNeighbours <= rule[ruleIter+1]){
                 if (thisState <= 0){
                     if (states > 1){

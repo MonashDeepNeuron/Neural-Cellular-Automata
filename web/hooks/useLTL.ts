@@ -227,6 +227,8 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 			// Write buffers
 			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
 			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
+
+			// Prepare statring state data for first buffer 
 			if (pattern.pattern == null) {
 				// If there is no pre-determined pattern, randomise the grid
 				for (let i = 0; i < cellState.length; i++) {

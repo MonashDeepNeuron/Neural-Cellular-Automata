@@ -30,12 +30,6 @@ const guiShader = /*wgsl*/ `
         let cellOffset = cell/grid *2;
         var gridPos : vec2f;
 
-        // In earlier versions, dead squares were defined as squares with size 0
-        // This might have enhanced efficiency in terms of what had to be updated 
-        // on the screen in each cycle (a guess, not verified)
-        
-        // Note this verison defines multiple levels of colouration and
-        // thus colour is now defined through the fragment shader
         gridPos = (input.pos +1)/grid -1 + cellOffset;
 
         var output: VertexOutput;
