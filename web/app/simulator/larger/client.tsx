@@ -1,8 +1,8 @@
 'use client';
 import Simulator from '@/components/layout/Simulator';
 import useLTL from '@/hooks/useLTL';
+import patterns from '@/patterns';
 import { computeShader as simulation } from '@/shaders/discrete/simulation';
-import patterns from '@/patterns'
 const SIZE = 60;
 
 export default function Client() {
