@@ -197,7 +197,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 			});
 
-			const cellState = new Float32Array(size * size).fill(0);
+			const cellState = new Uint32Array(size * size).fill(0);
 			const cellStateBuffers: CellStateBufferPair = [
 				device.createBuffer({
 					label: 'Cell State A',
