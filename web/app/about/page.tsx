@@ -1,4 +1,10 @@
+import createMetadata from '@/util/createMetadata';
 import Link from 'next/link';
+
+export const metadata = createMetadata({
+	title: 'About',
+	description: 'We are a project team under Monash DeepNeuron, an Engineering/IT student team run by Monash University students.'
+});
 
 export default function About() {
 	return (

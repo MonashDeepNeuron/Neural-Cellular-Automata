@@ -1,4 +1,10 @@
+import createMetadata from '@/util/createMetadata';
 import Link from 'next/link';
+
+export const metadata = createMetadata({
+	title: 'Troubleshooting',
+	description: 'Fix common issues with running neural cellular automata simulations.'
+});
 
 export default function Troubleshooting() {
 	return (

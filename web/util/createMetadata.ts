@@ -18,10 +18,14 @@ export default function createMetadata(params?: CreateMetadataParams): Metadata 
 			description: description,
 			url: 'https://neuralca.org',
 			siteName: 'Neural Cellular Automata',
-			locale: 'en'
+			locale: 'en',
+			images: 'https://neuralca.org/cover.jpg'
 		},
 		appleWebApp: {
 			title: 'NCA'
+		},
+		twitter: {
+			card: 'summary_large_image'
 		}
 	};
 
