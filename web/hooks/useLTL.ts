@@ -4,12 +4,7 @@ import type { Pattern } from '@/patterns';
 import guiShader from '@/shaders/discrete/guiShader';
 import { parseRuleString } from '@/util/Parse';
 import { useEffect, useRef, useState } from 'react';
-
-export enum LTLStatus {
-	ALLOCATING_RESOURCES = 'Allocating Resources',
-	READY = 'Ready',
-	FAILED = 'Failed'
-}
+import { CAStatus } from './useNCA';
 
 export interface GPUResources {
 	device: GPUDevice;
@@ -37,10 +32,10 @@ export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 
 const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1]);
 const WORKGROUP_SIZE = 8;
-const defaultRule : Uint32Array = new Uint32Array([1, 0, 2, 2, 3, 2, 3, 3, 0]); // Conway's game of life
+const defaultRule: Uint32Array = new Uint32Array([1, 0, 2, 2, 3, 2, 3, 3, 0]); // Conway's game of life
 
 export default function useLTL({ size, pattern, shaders }: LTLSettings) {
-	const [status, setStatus] = useState(LTLStatus.ALLOCATING_RESOURCES);
+	const [status, setStatus] = useState(CAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources | null>(null);
 	const [play, setPlay] = useState(true);
@@ -57,7 +52,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 
 			// Check for WebGPU support
 			if (!navigator.gpu) {
-				setStatus(LTLStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError('WebGPU is not supported on this browser.');
 			}
 
@@ -66,7 +61,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 			try {
 				adapter = await navigator.gpu.requestAdapter();
 			} catch (error) {
-				setStatus(LTLStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError(`Failed to get a GPU adapter: ${(error as Error).message}`);
 			}
 			if (!adapter) return;
@@ -76,7 +71,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 			try {
 				device = await adapter.requestDevice();
 			} catch (error) {
-				setStatus(LTLStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError(`Failed to get a GPU device: ${(error as Error).message}`);
 				return;
 			}
@@ -84,7 +79,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 			// Configure canvas context
 			const context = canvasRef.current?.getContext('webgpu');
 			if (!context) {
-				setStatus(LTLStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError('Failed to get canvas context.');
 				return;
 			}
@@ -94,17 +89,17 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 				alphaMode: 'opaque'
 			});
 
-			// Get rule 
+			// Get rule
 
-			const parsedRule : Uint32Array | null = parseRuleString(pattern.rule);
+			const parsedRule: Uint32Array | null = parseRuleString(pattern.rule);
 			let rule: Uint32Array = new Uint32Array([]);
 			if (parsedRule != null) {
 				rule = parsedRule;
 			} else {
 				rule = defaultRule;
 				// Throw an error for the user to show their rule did not load successfully
-				setStatus(LTLStatus.FAILED);
-				setError('Failed to parse rule. Rule set to Conway\' life');
+				setStatus(CAStatus.FAILED);
+				setError("Failed to parse rule. Rule set to Conway' life");
 			}
 
 			// Create vertex buffer
@@ -159,7 +154,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 						binding: 3, // Rule
 						visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT, // Fragment needs to see number of possible cell states to gradiate colours
 						buffer: { type: 'read-only-storage' }
-					},
+					}
 				]
 			});
 
@@ -216,19 +211,17 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 				})
 			];
 
-			const ruleBuffer =
-				device.createBuffer({
-					label: 'Rule',
-					size: rule.byteLength,
-					usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-				})
-			;
+			const ruleBuffer = device.createBuffer({
+				label: 'Rule',
+				size: rule.byteLength,
+				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+			});
 
 			// Write buffers
 			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
 			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
 
-			// Prepare statring state data for first buffer 
+			// Prepare starting state data for first buffer
 			if (pattern.pattern == null) {
 				// If there is no pre-determined pattern, randomise the grid
 				for (let i = 0; i < cellState.length; i++) {
@@ -236,13 +229,10 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 				}
 			} else {
 				// Copy the starting pattern in
-				for (let i = 0; i < cellState.length; i++) {
-					cellState[i] = 0;
-				}
-				const centreOffset = Math.floor((size-pattern.cols)/2);
+				const centreOffset = Math.floor((size - pattern.cols) / 2);
 				for (let i = 0; i < pattern.cols; i++) {
-					for (let j = 0; j < pattern.rows; j++){
-						cellState[i+centreOffset+(j+centreOffset)*size] = pattern.pattern[i+j*pattern.cols];
+					for (let j = 0; j < pattern.rows; j++) {
+						cellState[i + centreOffset + (j + centreOffset) * size] = pattern.pattern[i + j * pattern.cols];
 					}
 				}
 			}
@@ -258,7 +248,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 						{ binding: 0, resource: { buffer: shapeBuffer } },
 						{ binding: 1, resource: { buffer: cellStateBuffers[0] } },
 						{ binding: 2, resource: { buffer: cellStateBuffers[1] } },
-						{ binding: 3, resource: { buffer: ruleBuffer } },
+						{ binding: 3, resource: { buffer: ruleBuffer } }
 					]
 				}),
 				device.createBindGroup({
@@ -268,7 +258,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 						{ binding: 0, resource: { buffer: shapeBuffer } },
 						{ binding: 1, resource: { buffer: cellStateBuffers[1] } },
 						{ binding: 2, resource: { buffer: cellStateBuffers[0] } },
-						{ binding: 3, resource: { buffer: ruleBuffer } },
+						{ binding: 3, resource: { buffer: ruleBuffer } }
 					]
 				})
 			];
@@ -283,10 +273,10 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 					simulation: simulationPipeline
 				},
 				buffers: {
-					vertex: vertexBuffer,
+					vertex: vertexBuffer
 				}
 			});
-			setStatus(LTLStatus.READY);
+			setStatus(CAStatus.READY);
 		}
 
 		init();
@@ -299,7 +289,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 	}, [size, pattern, shaders.simulation, resources]);
 
 	useEffect(() => {
-		if (status !== LTLStatus.READY || !resources) return;
+		if (status !== CAStatus.READY || !resources) return;
 
 		let animationFrameId: number;
 		let lastFrameTime = performance.now();
@@ -378,6 +368,5 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 		canvasRef
 	};
 }
-
 
 export type LTLControls = ReturnType<typeof useLTL>;

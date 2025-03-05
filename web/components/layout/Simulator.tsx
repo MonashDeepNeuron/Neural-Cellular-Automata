@@ -1,5 +1,5 @@
 'use client';
-import { type NCAControls, NCAStatus } from '@/hooks/useNCA';
+import { CAStatus, type NCAControls } from '@/hooks/useNCA';
 import clsx from 'clsx';
 import { useId } from 'react';
 import Card from '../Card';
@@ -49,7 +49,7 @@ export default function Simulator({
 				<label htmlFor={checkboxId}>Skip every second frame</label>
 				<button
 					type='button'
-					disabled={status !== NCAStatus.READY}
+					disabled={status !== CAStatus.READY}
 					className={clsx('mt-4 block px-4 py-2 text-white min-w-24 rounded-md font-bold', play ? 'bg-red-700' : 'bg-green-700')}
 					onClick={() => setPlay(!play)}
 				>

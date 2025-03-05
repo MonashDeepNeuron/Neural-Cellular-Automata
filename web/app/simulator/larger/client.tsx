@@ -1,5 +1,5 @@
 'use client';
-import Simulator from '@/components/layout/SimulatorDiscrete';
+import Simulator from '@/components/layout/Simulator';
 import useLTL from '@/hooks/useLTL';
 import { computeShader as simulation } from '@/shaders/discrete/simulation';
 import patterns from '@/patterns'
