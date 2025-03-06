@@ -2,12 +2,7 @@
 
 import cell from '@/shaders/continuous/cell';
 import { useEffect, useRef, useState } from 'react';
-
-export enum NCAStatus {
-	ALLOCATING_RESOURCES = 'Allocating Resources',
-	READY = 'Ready',
-	FAILED = 'Failed'
-}
+import { CAStatus } from './useNCA';
 
 export interface GPUResources {
 	device: GPUDevice;
@@ -36,7 +31,7 @@ const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -
 const WORKGROUP_SIZE = 8;
 
 export default function useContinuous({ size, shaders }: ContinuousSettings) {
-	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
+	const [status, setStatus] = useState(CAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources | null>(null);
 	const [play, setPlay] = useState(true);
@@ -53,14 +48,14 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 
 			// Secure context check
 			if (!window.isSecureContext) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError('WebGPU is not allowed in non-secure contexts.  Please access this website over HTTPS.');
 				return;
 			}
 
 			// Check for WebGPU support
 			if (!navigator.gpu) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError('WebGPU is not supported on this browser.');
 				return;
 			}
@@ -70,7 +65,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 			try {
 				adapter = await navigator.gpu.requestAdapter();
 			} catch (error) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError(`Failed to get a GPU adapter: ${(error as Error).message}`);
 			}
 			if (!adapter) return;
@@ -80,7 +75,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 			try {
 				device = await adapter.requestDevice();
 			} catch (error) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError(`Failed to get a GPU device: ${(error as Error).message}`);
 				return;
 			}
@@ -88,7 +83,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 			// Configure canvas context
 			const context = canvasRef.current?.getContext('webgpu');
 			if (!context) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError('Failed to get canvas context.');
 				return;
 			}
@@ -257,7 +252,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 					vertex: vertexBuffer
 				}
 			});
-			setStatus(NCAStatus.READY);
+			setStatus(CAStatus.READY);
 		}
 
 		init();
@@ -270,7 +265,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 	}, [size, shaders.simulation, resources]);
 
 	useEffect(() => {
-		if (status !== NCAStatus.READY || !resources) return;
+		if (status !== CAStatus.READY || !resources) return;
 
 		let animationFrameId: number;
 		let lastFrameTime = performance.now();

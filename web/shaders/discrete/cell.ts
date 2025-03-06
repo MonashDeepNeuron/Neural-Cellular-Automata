@@ -4,7 +4,7 @@
  * Especially the vertex shader.
  * @todo re-evaluate current formula for negative cell values (may be possible?)
  */
-const guiShader = /*wgsl*/ `
+const cell = /*wgsl*/ `
     @group(0) @binding(0) var<uniform> grid: vec2f;
     @group(0) @binding(1) var<storage> cellState: array<u32>;
     @group(0) @binding(3) var<storage> rule: array<u32>;
@@ -56,4 +56,4 @@ const guiShader = /*wgsl*/ `
         return vec4f(pow(0.9, 1/intensity), pow(0.98, 1/(pow(intensity,3))), pow(intensity, 0.8),  1);//vec4f(1, 1, 1, 1);
     }`;
 
-export default guiShader;
+export default cell;

@@ -1,7 +1,7 @@
 'use client';
 
 import type { Pattern } from '@/patterns';
-import guiShader from '@/shaders/discrete/guiShader';
+import cell from '@/shaders/discrete/cell';
 import { parseRuleString } from '@/util/Parse';
 import { useEffect, useRef, useState } from 'react';
 import { CAStatus } from './useNCA';
@@ -124,7 +124,7 @@ export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 			// Create shaders
 			const cellShader = device.createShaderModule({
 				label: 'Cell Shader',
-				code: guiShader
+				code: cell
 			});
 
 			const simulationShader = device.createShaderModule({
