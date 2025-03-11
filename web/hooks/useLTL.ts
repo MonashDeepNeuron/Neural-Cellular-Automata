@@ -1,6 +1,8 @@
 'use client';
 
-import cell from '@/shaders/continuous/cell';
+import type { Pattern } from '@/patterns';
+import cell from '@/shaders/discrete/cell';
+import { parseRuleString } from '@/util/Parse';
 import { useEffect, useRef, useState } from 'react';
 import { CAStatus } from './useNCA';
 
@@ -17,8 +19,9 @@ export interface GPUResources {
 	};
 }
 
-export interface ContinuousSettings {
+export interface LTLSettings {
 	size: number;
+	pattern: Pattern;
 	shaders: {
 		simulation: string;
 	};
@@ -29,15 +32,16 @@ export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 
 const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1]);
 const WORKGROUP_SIZE = 8;
+const defaultRule: Uint32Array = new Uint32Array([1, 0, 2, 2, 3, 2, 3, 3, 0]); // Conway's game of life
 
-export default function useContinuous({ size, shaders }: ContinuousSettings) {
+export default function useLTL({ size, pattern, shaders }: LTLSettings) {
 	const [status, setStatus] = useState(CAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources | null>(null);
 	const [play, setPlay] = useState(true);
 	const [step, setStep] = useState(0);
-	const [FPS, setFPS] = useState(60);
-	const [stepsPerFrame, setStepsPerFrame] = useState(2);
+	const [FPS, setFPS] = useState(1);
+	const [stepsPerFrame, setStepsPerFrame] = useState(1);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -46,18 +50,10 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 			if (resources) return;
 			console.log('Initialising Shaders');
 
-			// Secure context check
-			if (!window.isSecureContext) {
-				setStatus(CAStatus.FAILED);
-				setError('WebGPU is not allowed in non-secure contexts.  Please access this website over HTTPS.');
-				return;
-			}
-
 			// Check for WebGPU support
 			if (!navigator.gpu) {
 				setStatus(CAStatus.FAILED);
 				setError('WebGPU is not supported on this browser.');
-				return;
 			}
 
 			// Request GPU Adapter
@@ -92,6 +88,19 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 				format: navigator.gpu.getPreferredCanvasFormat(),
 				alphaMode: 'opaque'
 			});
+
+			// Get rule
+
+			const parsedRule: Uint32Array | null = parseRuleString(pattern.rule);
+			let rule: Uint32Array = new Uint32Array([]);
+			if (parsedRule != null) {
+				rule = parsedRule;
+			} else {
+				rule = defaultRule;
+				// Throw an error for the user to show their rule did not load successfully
+				setStatus(CAStatus.FAILED);
+				setError("Failed to parse rule. Rule set to Conway' life");
+			}
 
 			// Create vertex buffer
 			const vertexBuffer = device.createBuffer({
@@ -129,7 +138,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 					{
 						binding: 0, // Grid size
 						visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
-						buffer: { type: 'read-only-storage' }
+						buffer: { type: 'uniform' }
 					},
 					{
 						binding: 1, // State / Input State (Compute)
@@ -142,8 +151,8 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 						buffer: { type: 'storage' }
 					},
 					{
-						binding: 3, // Kernel
-						visibility: GPUShaderStage.COMPUTE,
+						binding: 3, // Rule
+						visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT, // Fragment needs to see number of possible cell states to gradiate colours
 						buffer: { type: 'read-only-storage' }
 					}
 				]
@@ -181,14 +190,14 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 			});
 
 			// Initialise buffers
-			const sizeArray = new Uint32Array([size]);
-			const sizeBuffer = device.createBuffer({
+			const shapeArray = new Float32Array([size, size]);
+			const shapeBuffer = device.createBuffer({
 				label: 'Size Buffer',
-				size: sizeArray.byteLength,
-				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+				size: shapeArray.byteLength,
+				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 			});
 
-			const cellState = new Float32Array(size * size).fill(0).map(() => Math.random());
+			const cellState = new Uint32Array(size * size).fill(0);
 			const cellStateBuffers: CellStateBufferPair = [
 				device.createBuffer({
 					label: 'Cell State A',
@@ -202,18 +211,33 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 				})
 			];
 
-			const kernelArray = new Float32Array([0.68, -0.9, 0.68, -0.9, -0.66, -0.9, 0.68, -0.9, 0.68]);
-			const kernelBuffer = device.createBuffer({
-				label: 'Kernel Buffer',
-				size: kernelArray.byteLength,
+			const ruleBuffer = device.createBuffer({
+				label: 'Rule',
+				size: rule.byteLength,
 				usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 			});
 
 			// Write buffers
-			device.queue.writeBuffer(sizeBuffer, 0, sizeArray);
-			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
+			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
 			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
-			device.queue.writeBuffer(kernelBuffer, 0, kernelArray);
+
+			// Prepare starting state data for first buffer
+			if (pattern.pattern == null) {
+				// If there is no pre-determined pattern, randomise the grid
+				for (let i = 0; i < cellState.length; i++) {
+					cellState[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
+				}
+			} else {
+				// Copy the starting pattern in
+				const centreOffset = Math.floor((size - pattern.cols) / 2);
+				for (let i = 0; i < pattern.cols; i++) {
+					for (let j = 0; j < pattern.rows; j++) {
+						cellState[i + centreOffset + (j + centreOffset) * size] = pattern.pattern[i + j * pattern.cols];
+					}
+				}
+			}
+			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
+			device.queue.writeBuffer(ruleBuffer, 0, rule);
 
 			// Create Bind Group
 			const bindGroups: CellStateBindGroupPair = [
@@ -221,20 +245,20 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 					label: 'Bind Group A',
 					layout: bindGroupLayout,
 					entries: [
-						{ binding: 0, resource: { buffer: sizeBuffer } },
+						{ binding: 0, resource: { buffer: shapeBuffer } },
 						{ binding: 1, resource: { buffer: cellStateBuffers[0] } },
 						{ binding: 2, resource: { buffer: cellStateBuffers[1] } },
-						{ binding: 3, resource: { buffer: kernelBuffer } }
+						{ binding: 3, resource: { buffer: ruleBuffer } }
 					]
 				}),
 				device.createBindGroup({
 					label: 'Bind Group B',
 					layout: bindGroupLayout,
 					entries: [
-						{ binding: 0, resource: { buffer: sizeBuffer } },
+						{ binding: 0, resource: { buffer: shapeBuffer } },
 						{ binding: 1, resource: { buffer: cellStateBuffers[1] } },
 						{ binding: 2, resource: { buffer: cellStateBuffers[0] } },
-						{ binding: 3, resource: { buffer: kernelBuffer } }
+						{ binding: 3, resource: { buffer: ruleBuffer } }
 					]
 				})
 			];
@@ -262,7 +286,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 			// Destroy device & associated buffers
 			resources?.device.destroy();
 		};
-	}, [size, shaders.simulation, resources]);
+	}, [size, pattern, shaders.simulation, resources]);
 
 	useEffect(() => {
 		if (status !== CAStatus.READY || !resources) return;
@@ -287,15 +311,13 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 				const encoder = resources.device.createCommandEncoder();
 				const textureView = resources.context.getCurrentTexture().createView();
 
-				// Compute Passes
-				for (let i = 0; i < stepsPerFrame; i++) {
-					const computePass = encoder.beginComputePass();
-					computePass.setPipeline(resources.pipelines.simulation);
-					computePass.setBindGroup(0, resources.bindGroups[(step + i) % 2]);
-					const workgroupCount = Math.ceil(size / WORKGROUP_SIZE);
-					computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
-					computePass.end();
-				}
+				// Compute Pass
+				const computePass = encoder.beginComputePass();
+				computePass.setPipeline(resources.pipelines.simulation);
+				computePass.setBindGroup(0, resources.bindGroups[step % 2]);
+				const workgroupCount = Math.ceil(size / WORKGROUP_SIZE);
+				computePass.dispatchWorkgroups(workgroupCount, workgroupCount);
+				computePass.end();
 
 				// Render pass
 				const renderPass = encoder.beginRenderPass({
@@ -310,13 +332,13 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 				});
 				renderPass.setPipeline(resources.pipelines.cell);
 				renderPass.setVertexBuffer(0, resources.buffers.vertex);
-				renderPass.setBindGroup(0, resources.bindGroups[(step + stepsPerFrame - 1) % 2]);
+				renderPass.setBindGroup(0, resources.bindGroups[step % 2]);
 				renderPass.draw(SHAPE_VERTICES.length / 2, size * size);
 				renderPass.end();
 
 				// Submit commands
 				resources.device.queue.submit([encoder.finish()]);
-				setStep(prev => prev + stepsPerFrame);
+				setStep(prev => prev + 1);
 			}
 
 			animationFrameId = requestAnimationFrame(renderLoop);
@@ -328,7 +350,7 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 		return () => {
 			cancelAnimationFrame(animationFrameId);
 		};
-	}, [play, FPS, resources, status, size, step, stepsPerFrame]);
+	}, [play, FPS, resources, status, size, step]);
 
 	return {
 		play,
@@ -338,13 +360,13 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 		error,
 		setError,
 		status,
+		stepsPerFrame,
+		setStepsPerFrame,
 		setStatus,
 		FPS,
 		setFPS,
-		stepsPerFrame,
-		setStepsPerFrame,
 		canvasRef
 	};
 }
 
-export type NCAControls = ReturnType<typeof useContinuous>;
+export type LTLControls = ReturnType<typeof useLTL>;

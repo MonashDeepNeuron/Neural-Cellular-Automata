@@ -1,11 +1,15 @@
-'use client';
 import Card from '@/components/Card';
+import Warning from '@/components/Warning';
+import createMetadata from '@/util/createMetadata';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+
+export const metadata = createMetadata({
+	title: 'Simulators',
+	description: 'Explore dynamic models in real-time with our cellular automata simulators.'
+});
 
 export default function Simulator() {
-	const [showWarning, setShowWarning] = useState(true);
 	return (
 		<div className='max-w-4xl mx-auto px-6 py-10 text-gray-800'>
 			{/* Title */}
@@ -15,21 +19,7 @@ export default function Simulator() {
 			</div>
 
 			{/* Warning Message */}
-			{showWarning && (
-				<div className='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow-md mb-6 transition-opacity duration-500'>
-					<p className='mb-3'>
-						<strong>⚠️ Warning:</strong> This website contains content that may <u>flash at high frequencies</u>. Please use discretion when
-						selecting frame rates if sensitive to flashing visuals.
-					</p>
-					<button
-						type='button'
-						onClick={() => setShowWarning(false)}
-						className='bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition-transform duration-300 transform hover:scale-105'
-					>
-						Dismiss
-					</button>
-				</div>
-			)}
+			<Warning />
 
 			{/* Model Selection Panel */}
 			<section className='mb-16 mt-5'>
@@ -177,7 +167,7 @@ export default function Simulator() {
 
 						{/* TODO:Uncomment when the page for this is made. */}
 						{/* <Link
-							href='/CAs/ConwaysLife/life.html'
+							href='/simulator/conway'
 							className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 						>
 							Play Classic Conway
@@ -226,7 +216,7 @@ export default function Simulator() {
 
 				{/* TODO: Uncomment when the page for this is made */}
 				{/* <Link 
-					href='/CAs/LifeLike/life.html' 
+					href='/simulator/life' 
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
 					Life Like
@@ -253,12 +243,12 @@ export default function Simulator() {
 						<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Larger than Life</h2>
 
 						{/* TODO: Uncomment when the page for this is made */}
-						{/* <Link 
-							href='/CAs/Larger/life.html' 
+						<Link
+							href='/simulator/larger'
 							className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 						>
 							Larger
-						</Link> */}
+						</Link>
 
 						<p className='leading-7 text-lg mt-4'>
 							Larger than Life builds on Life Like CA by introducing even more flexibility. This means the following are now specifiable in
@@ -307,12 +297,12 @@ export default function Simulator() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Continuous Cellular Automata</h2>
 
 				{/* TODO: Uncomment when the page for this is made */}
-				{/* <Link
-					href='/CAs/Continuous/life.html'
+				<Link
+					href='/simulator/continuous'
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
 					Explore Continuous CA
-				</Link> */}
+				</Link>
 
 				<p className='leading-7 text-lg mt-4'>
 					Continuous CA also builds on Life Like CA. The main difference is that instead of using the binary dead or alive as states, we use

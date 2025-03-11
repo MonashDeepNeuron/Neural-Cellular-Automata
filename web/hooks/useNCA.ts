@@ -4,7 +4,7 @@ import cell from '@/shaders/nca/cell';
 import loadWeights from '@/util/loadWeights';
 import { useEffect, useRef, useState } from 'react';
 
-export enum NCAStatus {
+export enum CAStatus {
 	ALLOCATING_RESOURCES = 'Allocating Resources',
 	READY = 'Ready',
 	FAILED = 'Failed'
@@ -43,7 +43,7 @@ const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -
 const WORKGROUP_SIZE = 8;
 
 export default function useNCA({ size, channels, hiddenChannels, convolutions, shaders, weightsURL, seed }: NCASettings) {
-	const [status, setStatus] = useState(NCAStatus.ALLOCATING_RESOURCES);
+	const [status, setStatus] = useState(CAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources | null>(null);
 	const [play, setPlay] = useState(true);
@@ -60,14 +60,14 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 
 			// Secure context check
 			if (!window.isSecureContext) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError('WebGPU is not allowed in non-secure contexts.  Please access this website over HTTPS.');
 				return;
 			}
 
 			// Check for WebGPU support
 			if (!navigator.gpu) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError('WebGPU is not supported on this browser.');
 				return;
 			}
@@ -77,7 +77,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			try {
 				adapter = await navigator.gpu.requestAdapter();
 			} catch (error) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError(`Failed to get a GPU adapter: ${(error as Error).message}`);
 			}
 			if (!adapter) return;
@@ -87,7 +87,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			try {
 				device = await adapter.requestDevice();
 			} catch (error) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError(`Failed to get a GPU device: ${(error as Error).message}`);
 				return;
 			}
@@ -95,7 +95,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			// Configure canvas context
 			const context = canvasRef.current?.getContext('webgpu');
 			if (!context) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError('Failed to get canvas context.');
 				return;
 			}
@@ -110,14 +110,14 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 			try {
 				weights = await loadWeights(weightsURL);
 			} catch (error) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError(`Failed to load weights from URL: ${(error as Error).message}`);
 				return;
 			}
 			const parameters = [channels * convolutions * hiddenChannels, hiddenChannels, hiddenChannels * channels];
 			const total = parameters.reduce((acc, p) => acc + p, 0);
 			if (total !== weights.length) {
-				setStatus(NCAStatus.FAILED);
+				setStatus(CAStatus.FAILED);
 				setError(`Loaded weights do not match provided model shape. Expected (${parameters.join(', ')})`);
 				return;
 			}
@@ -325,7 +325,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 					seed: seedBuffer
 				}
 			});
-			setStatus(NCAStatus.READY);
+			setStatus(CAStatus.READY);
 		}
 
 		init();
@@ -338,7 +338,7 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 	}, [size, channels, hiddenChannels, convolutions, weightsURL, seed, shaders.simulation, resources]);
 
 	useEffect(() => {
-		if (status !== NCAStatus.READY || !resources) return;
+		if (status !== CAStatus.READY || !resources) return;
 
 		let animationFrameId: number;
 		let lastFrameTime = performance.now();

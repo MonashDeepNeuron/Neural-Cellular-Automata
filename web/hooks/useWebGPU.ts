@@ -1,8 +1,8 @@
+import { simulation } from '@/shaders/discrete/simulation';
 import { type RefObject, useEffect, useRef } from 'react';
 import BufferManager, { type CellStateBindGroupPair, type CellStateBufferPair } from '../managers/BufferManager';
 import startingPatterns from '../patterns';
-import { computeShader } from '../shaders/discrete/computeShader';
-import { guiShader } from '../shaders/discrete/guiShader';
+import cell from '../shaders/discrete/cell';
 import { parseRuleString } from '../util/Parse';
 import useTypedSelector from './useTypedSelector';
 
@@ -84,12 +84,12 @@ export default function useWebGPU(canvasRef: RefObject<HTMLCanvasElement | null>
 				// Create shaders
 				const cellShaderModule = device.createShaderModule({
 					label: 'shader that draws',
-					code: guiShader
+					code: cell
 				});
 
 				const simulationShaderModule = device.createShaderModule({
 					label: 'shader that computes next state',
-					code: computeShader
+					code: simulation
 				});
 
 				// Create pipeline layout and bind group layout
