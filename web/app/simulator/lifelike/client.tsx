@@ -9,7 +9,7 @@ const SIZE = 64;
 export default function Client() {
 	const controls = useLTL({
 		size: SIZE,
-		pattern: patterns[3],
+		pattern: patterns[4],
 		shaders: {
 			simulation
 		},
