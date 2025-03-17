@@ -1,11 +1,4 @@
-export interface Pattern {
-	name: string;
-	pattern: number[] | null;
-	cols: number;
-	rows: number;
-	minGrid: number;
-	rule: string;
-}
+import type { Pattern } from './pattern';
 
 const spaceship1 = {
 	name: "Conway's life glider",
@@ -166,7 +159,7 @@ const circularBug = {
 	pattern: null,
 	cols: 32,
 	rows: 32,
-	minGrid: 512,
+	minGrid: 128,
 	rule: 'R6,C0,S30-52,B32-38,NC'
 };
 

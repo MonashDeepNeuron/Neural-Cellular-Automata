@@ -3,7 +3,7 @@
 import { useRenderLoop } from '@/hooks/useRenderLoop';
 import useTypedSelector from '@/hooks/useTypedSelector';
 import useWebGPU, { type WebGPUResources } from '@/hooks/useWebGPU';
-import startingPatterns from '@/patterns';
+import startingPatterns from '@/patterns/larger';
 import { toggleRunning } from '@/store/webGPUSlice';
 import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
