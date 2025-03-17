@@ -2,7 +2,6 @@
 
 import type { Pattern } from '@/patterns';
 import cell from '@/shaders/discrete/cell';
-import { parseRuleString } from '@/util/Parse';
 import { useEffect, useRef, useState } from 'react';
 import { CAStatus } from './useNCA';
 
@@ -25,6 +24,7 @@ export interface LTLSettings {
 	shaders: {
 		simulation: string;
 	};
+	parseRuleString: (input: string) => Uint32Array | null;
 }
 
 export type CellStateBufferPair = [GPUBuffer, GPUBuffer];
@@ -34,7 +34,7 @@ const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -
 const WORKGROUP_SIZE = 8;
 const defaultRule: Uint32Array = new Uint32Array([1, 0, 2, 2, 3, 2, 3, 3, 0]); // Conway's game of life
 
-export default function useLTL({ size, pattern, shaders }: LTLSettings) {
+export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLSettings) {
 	const [status, setStatus] = useState(CAStatus.ALLOCATING_RESOURCES);
 	const [error, setError] = useState('');
 	const [resources, setResources] = useState<GPUResources | null>(null);

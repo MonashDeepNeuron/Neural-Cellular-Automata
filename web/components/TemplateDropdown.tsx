@@ -3,7 +3,7 @@
 import useTypedSelector from '@/hooks/useTypedSelector';
 import { type ChangeEventHandler, type MouseEventHandler, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import startingPatterns from '../patterns';
+import startingPatterns from '../patterns/larger';
 import { changeTemplate, resetStep } from '../store/webGPUSlice';
 
 export default function TemplateDropdown() {
