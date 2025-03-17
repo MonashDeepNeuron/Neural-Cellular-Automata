@@ -29,7 +29,7 @@ export default function Simulator() {
 					<div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
 						{[
 							{ name: 'Classic Conway', link: 'simulator/conway' },
-							{ name: 'Life Like', link: 'simulator/life-like' },
+							{ name: 'Life-Like', link: 'simulator/lifelike' },
 							{ name: 'Larger', link: 'simulator/larger' },
 							{ name: 'Continuous', link: 'simulator/continuous' },
 							{ name: 'Growing NCA', link: 'simulator/growing' },
@@ -165,13 +165,12 @@ export default function Simulator() {
 					<div>
 						<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>John Conway’s Game of Life</h2>
 
-						{/* TODO:Uncomment when the page for this is made. */}
-						{/* <Link
+						<Link
 							href='/simulator/conway'
 							className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 						>
-							Play Classic Conway
-						</Link> */}
+							Explore Conway's Life
+						</Link>
 
 						<p className='leading-7 text-lg mt-4'>
 							This is probably the most famous example of cellular automata. The Game of Life operates on these simple rules:
@@ -214,13 +213,12 @@ export default function Simulator() {
 			<section className='mb-10'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Life Like Cellular Automata</h2>
 
-				{/* TODO: Uncomment when the page for this is made */}
-				{/* <Link 
-					href='/simulator/life' 
+				<Link 
+					href='/simulator/lifelike' 
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
-					Life Like
-				</Link> */}
+					Explore Life-Like
+				</Link>
 
 				<p className='leading-7 text-lg mt-4'>
 					Life like CA operate very similarly to the Game of Life in that all cells are either alive or dead. However, Life Like gives you
@@ -242,12 +240,11 @@ export default function Simulator() {
 					<div>
 						<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Larger than Life</h2>
 
-						{/* TODO: Uncomment when the page for this is made */}
 						<Link
 							href='/simulator/larger'
 							className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 						>
-							Larger
+							Explore Larger
 						</Link>
 
 						<p className='leading-7 text-lg mt-4'>
@@ -296,7 +293,6 @@ export default function Simulator() {
 			<section className='mb-10'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Continuous Cellular Automata</h2>
 
-				{/* TODO: Uncomment when the page for this is made */}
 				<Link
 					href='/simulator/continuous'
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
