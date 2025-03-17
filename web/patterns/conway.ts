@@ -1,6 +1,6 @@
 import type { Pattern } from './pattern';
 
-export const CONWAYS_LIFE = new Uint32Array([1, 0, 2, 2, 3, 2, 3, 3, 0]); // Conway's game of life
+export const CONWAYS_LIFE = new Uint32Array([1, 0, 0, 2, 2, 3, 2, 3, 3]); // Conway's game of life
 
 // NOTE: the following patterns are for Conway's life
 // As conways life has a fixed rule, the rule here is somewhat redundant
