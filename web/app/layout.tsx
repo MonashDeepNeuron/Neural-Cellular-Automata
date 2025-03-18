@@ -1,6 +1,5 @@
 import { Poppins } from 'next/font/google';
 import './globals.css';
-import Providers from '@/components/Providers';
 import Navbar from '@/components/layout/Nav';
 import createMetadata from '@/util/createMetadata';
 import clsx from 'clsx';
@@ -28,7 +27,7 @@ export default function RootLayout({
 				<Navbar />
 				<main className='min-h-screen p-4 pt-20 max-w-full'>
 					{/* Added 'pt-20' for top padding */}
-					<Providers>{children}</Providers>
+					{children}
 				</main>
 			</body>
 		</html>
