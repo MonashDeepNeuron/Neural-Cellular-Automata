@@ -36,7 +36,17 @@ export default function use3D({ size }: Use3DSettings) {
 	const [step, setStep] = useState(0);
 	const [FPS, setFPS] = useState(60);
 	const [stepsPerFrame, setStepsPerFrame] = useState(1);
-
+	const [camera, setCamera] = useState({
+		x: 0,
+		y: 0,
+		z: 0,
+		rho: 1,
+		theta: 0,
+		phi: Math.PI / 2,
+		f: 10
+	});
+	const dragging = useRef(false);
+	const prevMouse = useRef({ x: 0, y: 0 });
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useEffect(() => {
@@ -228,6 +238,65 @@ export default function use3D({ size }: Use3DSettings) {
 			cancelAnimationFrame(animationFrameId);
 		};
 	}, [play, FPS, resources, status, size, step, stepsPerFrame]);
+
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const handleMouseDown = (e: MouseEvent) => {
+			dragging.current = true;
+			prevMouse.current = { x: e.clientX, y: e.clientY };
+		};
+
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!dragging.current) return;
+			const deltaX = e.clientX - prevMouse.current.x;
+			const deltaY = e.clientY - prevMouse.current.y;
+			prevMouse.current = { x: e.clientX, y: e.clientY };
+
+			setCamera(prev => {
+				// Clamp phi
+				const phi = Math.max(Number.EPSILON, Math.min(Math.PI - Number.EPSILON, prev.phi - deltaY * 0.01));
+				return {
+					...prev,
+					theta: prev.theta - deltaX * 0.01,
+					phi: phi
+				};
+			});
+		};
+
+		const handleMouseUp = () => {
+			dragging.current = false;
+		};
+
+		const handleWheel = (e: WheelEvent) => {
+			setCamera(c => ({
+				...c,
+				rho: Math.max(50, Math.min(1000, c.rho + e.deltaY * 0.2))
+			}));
+		};
+
+		canvas.addEventListener('mousedown', handleMouseDown);
+		canvas.addEventListener('mousemove', handleMouseMove);
+		canvas.addEventListener('mouseup', handleMouseUp);
+		canvas.addEventListener('wheel', handleWheel);
+
+		return () => {
+			canvas.removeEventListener('mousedown', handleMouseDown);
+			canvas.removeEventListener('mousemove', handleMouseMove);
+			canvas.removeEventListener('mouseup', handleMouseUp);
+			canvas.removeEventListener('wheel', handleWheel);
+		};
+	}, [canvasRef.current]);
+
+	useEffect(() => {
+		const { rho, theta, phi } = camera;
+		const x = camera.x + rho * Math.cos(theta) * Math.sin(phi);
+		const y = camera.y + rho * Math.sin(theta) * Math.sin(phi);
+		const z = camera.z + rho * Math.cos(phi);
+
+		console.log(`x: ${x.toPrecision(4)}\ty: ${y.toPrecision(4)}\tz: ${z.toPrecision(4)}`);
+	}, [camera]);
 
 	return {
 		play,
