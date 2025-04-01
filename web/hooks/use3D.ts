@@ -25,7 +25,7 @@ export type CellStateBufferPair = [GPUBuffer, GPUBuffer];
 const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1]);
 
 interface Use3DSettings {
-	size: number
+	size: number;
 }
 
 export default function use3D({ size }: Use3DSettings) {
@@ -147,7 +147,7 @@ export default function use3D({ size }: Use3DSettings) {
 				label: 'Bind Group',
 				layout: bindGroupLayout,
 				entries: []
-			})
+			});
 
 			// All done!
 			setResources({
