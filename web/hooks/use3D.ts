@@ -256,7 +256,7 @@ export default function use3D({ size }: Use3DSettings) {
 
 			setCamera(prev => {
 				// Clamp phi
-				const phi = Math.max(Number.EPSILON, Math.min(Math.PI - Number.EPSILON, prev.phi - deltaY * 0.01));
+				const phi = Math.max(Number.EPSILON, Math.min(Math.PI - Number.EPSILON, prev.phi + deltaY * 0.01));
 				return {
 					...prev,
 					theta: prev.theta - deltaX * 0.01,
@@ -270,12 +270,13 @@ export default function use3D({ size }: Use3DSettings) {
 		};
 
 		const handleWheel = (e: WheelEvent) => {
-			setCamera(c => ({
-				...c,
-				rho: Math.max(50, Math.min(1000, c.rho + e.deltaY * 0.2))
+			setCamera(prev => ({
+				...prev,
+				rho: Math.max(1, Math.min(10, prev.rho + e.deltaY * 0.05))
 			}));
 		};
 
+		canvas.onmousedown = handleMouseDown;
 		canvas.addEventListener('mousedown', handleMouseDown);
 		canvas.addEventListener('mousemove', handleMouseMove);
 		canvas.addEventListener('mouseup', handleMouseUp);
@@ -295,8 +296,9 @@ export default function use3D({ size }: Use3DSettings) {
 		const y = camera.y + rho * Math.sin(theta) * Math.sin(phi);
 		const z = camera.z + rho * Math.cos(phi);
 
+		console.log(`rho: ${camera.rho.toPrecision(4)}\ttheta: ${camera.theta.toPrecision(4)}\tphi: ${camera.phi.toPrecision(4)}`);
 		console.log(`x: ${x.toPrecision(4)}\ty: ${y.toPrecision(4)}\tz: ${z.toPrecision(4)}`);
-	}, [camera]);
+	}, [camera, camera.rho, camera.theta, camera.phi]);
 
 	return {
 		play,

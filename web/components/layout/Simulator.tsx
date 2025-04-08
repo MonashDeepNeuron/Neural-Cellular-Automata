@@ -58,7 +58,7 @@ export default function Simulator({
 			</Card>
 			<Card className='flex justify-center'>
 				<div className='relative aspect-square w-full lg:w-auto lg:h-full max-h-full max-w-full overflow-hidden'>
-					<div className='absolute top-0 left-0 flex items-center justify-center overflow-hidden w-full h-full'>
+					<div className='absolute top-0 left-0 flex items-center justify-center overflow-hidden w-full h-full pointer-events-none'>
 						{error && <p className='text-red-500 px-4 text-center'>{error}</p>}
 					</div>
 					<canvas
@@ -66,7 +66,7 @@ export default function Simulator({
 						width={size}
 						className={clsx('h-full w-full', className)}
 						ref={canvasRef}
-						style={{ imageRendering: 'pixelated' }}
+						style={{ imageRendering: 'pixelated', pointerEvents: 'auto' }}
 					/>
 				</div>
 			</Card>
