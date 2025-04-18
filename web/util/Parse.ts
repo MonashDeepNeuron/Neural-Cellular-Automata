@@ -9,8 +9,6 @@ function isDigit(c: string) {
 	return c >= '0' && c <= '9';
 }
 
-
-
 /**
  * Interprets the rulestring according to the following notation for Larger than Life CA.
  * Rulestring is given as Rr, Cc, Ss Bb, Nn where:
@@ -187,8 +185,6 @@ export function parseLTLRule(raw: string): Uint32Array | null {
 	return RULE;
 }
 
-
-
 /**
  * Interprets the rulestring according to the following notation for Life-Like CA.
  * Rulestring is given as survival/birth where:
@@ -219,8 +215,8 @@ export function parseLifeLikeRule(raw: string): Uint32Array | null {
 		return null;
 	}
 
-	// Radius r is fixed at 1, 
-	// Number of cell states c is fixed at 2 
+	// Radius r is fixed at 1,
+	// Number of cell states c is fixed at 2
 	// Neighbourhood type is fixed at Moore
 	const ruleList: number[] = [1, 0, 0];
 
@@ -231,7 +227,7 @@ export function parseLifeLikeRule(raw: string): Uint32Array | null {
 	ruleList.push(0);
 	const sConditionCountIndex = ruleList.length - 1;
 	while (ruleString[i] !== '/') {
-		console.log(ruleString[i])
+		console.log(ruleString[i]);
 		ruleList.push(Number(ruleString[i]));
 		ruleList.push(Number(ruleString[i]));
 		// Re-push the previous number to account for the fact that
@@ -246,7 +242,7 @@ export function parseLifeLikeRule(raw: string): Uint32Array | null {
 	ruleList.push(0);
 	const bConditionCountIndex = ruleList.length - 1;
 	while (i < ruleString.length) {
-		console.log(ruleString[i])
+		console.log(ruleString[i]);
 		ruleList.push(Number(ruleString[i]));
 		ruleList.push(Number(ruleString[i]));
 		// Re-push the previous number to account for the fact that
@@ -264,7 +260,6 @@ export function parseLifeLikeRule(raw: string): Uint32Array | null {
 
 	return RULE;
 }
-
 
 /**
  * Defines how to display the rulestring (which is formatted according to the

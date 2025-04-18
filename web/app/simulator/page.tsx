@@ -213,8 +213,8 @@ export default function Simulator() {
 			<section className='mb-10'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Life Like Cellular Automata</h2>
 
-				<Link 
-					href='/simulator/lifelike' 
+				<Link
+					href='/simulator/lifelike'
 					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
 				>
 					Explore Life-Like
