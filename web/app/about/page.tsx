@@ -56,15 +56,15 @@ export default function About() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Meet the Team!</h2>
 				<p>Super proud of our amazing team!</p>
 				<div className='grid grid-cols-3 gap-4'>
-					<ProfileCard name='Keren Collins' imageLink='/images/profile/Keren.jpeg' subtitle='Project Lead' description='Biomedical Engineering Student (3rd Year)'/>
-					<ProfileCard name='Chloe Koe' imageLink='/images/profile/Chloe.jpeg' subtitle='Deep Learning Engineer' description='Computer Science'/>
-					<ProfileCard name='Nathan Culshaw' imageLink='/images/profile/Nathan.jpg' subtitle='Member' description=''/>
-					<ProfileCard name='Angus Bosmans' imageLink='/images/profile/Angus.jpg' subtitle='Member' description=''/>
-					<ProfileCard name='Afraz Agul' imageLink='/images/profile/Afraz.jpeg' subtitle='Member' description=''/>
-					<ProfileCard name='Luca Lowndes' imageLink='/images/profile/Luca.jpeg' subtitle='Member' description=''/>
-					<ProfileCard name='Joshua Rianpotura' imageLink='/images/profile/Josh.jpeg' subtitle='Member' description=''/>
-					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpeg' subtitle='Member' description=''/>
-					<ProfileCard name='Alex Mai' imageLink='/images/profile/Empty.jpeg' subtitle='Member' description=''/>
+					<ProfileCard name='Keren Collins' imageLink='/images/profile/Keren.jpeg' subtitle='Project Lead' description='Bachelor of Biomedical Engineering Student (3rd Year)'/>
+					<ProfileCard name='Chloe Koe' imageLink='/images/profile/Chloe.jpeg' subtitle='Deep Learning & Graphics Engineer' description='Bachelor of Computer Science'/>
+					<ProfileCard name='Nathan Culshaw' imageLink='/images/profile/Nathan.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Computer Science Advanced (Honours)'/>
+					<ProfileCard name='Angus Bosmans' imageLink='/images/profile/Angus.jpg' subtitle='Deep Learning & Graphics Engineer' description='Bachelor of Mechatronics Engineering (AI) & Arts'/>
+					<ProfileCard name='Afraz Agul' imageLink='/images/profile/Afraz.jpeg' subtitle='Deep Learning Engineer' description='Bachelor of Science and Computer Science'/>
+					<ProfileCard name='Luca Lowndes' imageLink='/images/profile/Luca.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Computer Science and Engineering '/>
+					<ProfileCard name='Joshua Riantoputra' imageLink='/images/profile/Josh.jpeg' subtitle='Deep Learning Engineer' description=''/>
+					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpeg' subtitle='Deep Learning Engineer' description=''/>
+					<ProfileCard name='Alex Mai' imageLink='/images/profile/Empty.jpeg' subtitle='Web Developer' description='Bachelor of Computer Science'/>
 				</div>
 
 			</section>
