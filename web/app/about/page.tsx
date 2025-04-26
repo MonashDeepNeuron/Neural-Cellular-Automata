@@ -36,7 +36,18 @@ export default function About() {
 				</p>
 			</section>
 
-						{/* Join Us Section */}
+			{/* Project Objectives */}
+			<section className='mb-8'>
+				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Project Objectives</h2>
+				<ol className='list-decimal list-inside space-y-2 text-lg'>
+					<li>What are NCA? How is NCA different from other CA and Neural Networks?</li>
+					<li>What can NCA be used for? Does NCA provide an advantage over other similar architectures?</li>
+					<li>How can NCA be improved?</li>
+				</ol>
+				<p className='mt-4 text-lg'>As a result of answering these questions, we aim to produce a comprehensive research paper.</p>
+			</section>
+
+			{/* Join Us Section */}
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Join Us!</h2>
 				<p className='text-lg'>
@@ -67,17 +78,6 @@ export default function About() {
 					<ProfileCard name='Alex Mai' imageLink='/images/profile/Empty.jpeg' subtitle='Web Developer' description='Bachelor of Computer Science'/>
 				</div>
 
-			</section>
-
-			{/* Project Objectives */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Project Objectives</h2>
-				<ol className='list-decimal list-inside space-y-2 text-lg'>
-					<li>What are NCA? How is NCA different from other CA and Neural Networks?</li>
-					<li>What can NCA be used for? Does NCA provide an advantage over other similar architectures?</li>
-					<li>How can NCA be improved?</li>
-				</ol>
-				<p className='mt-4 text-lg'>As a result of answering these questions, we aim to produce a comprehensive research paper.</p>
 			</section>
 
 			{/* Project Updates */}
