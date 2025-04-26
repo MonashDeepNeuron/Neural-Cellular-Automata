@@ -33,6 +33,13 @@ export default function Troubleshooting() {
 						Can I Use WebGPU?
 					</Link>
 				</p>
+				<p className='mt-2'>
+					If you are on an IOS or IpadOS device, make sure you are using safari, and follow this short tutorial
+					{' '}
+					<Link href='iosSucks' className='text-purple-mdn font-semibold hover:underline'>
+						IOS Tutorial
+					</Link>
+				</p>
 
 				<h3 className='text-lg font-semibold text-gray-600 italic mt-4'>2️⃣ JavaScript Is Turned Off</h3>
 				<p className='leading-7 text-lg mt-2'>
