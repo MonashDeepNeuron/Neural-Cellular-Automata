@@ -1,3 +1,4 @@
+import ProfileCard from '@/components/Profile';
 import createMetadata from '@/util/createMetadata';
 import Link from 'next/link';
 
@@ -23,7 +24,7 @@ export default function About() {
 					>
 						Monash DeepNeuron
 					</Link>
-					, an Engineering/IT student team run by Monash University students. NCA is one of many research projects, which you can read more
+					, an Engineering/IT student team run by Monash University students. Started in November 2023, NCA is one of many research projects, which you can read more
 					about{' '}
 					<Link
 						href='https://www.deepneuron.org/'
@@ -33,6 +34,39 @@ export default function About() {
 					</Link>
 					!
 				</p>
+			</section>
+
+						{/* Join Us Section */}
+			<section className='mb-8'>
+				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Join Us!</h2>
+				<p className='text-lg'>
+					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
+					up. First-year or Master's students — all are welcome!
+				</p>
+				<Link
+					href='https://docs.google.com/forms/d/e/1FAIpQLSckOGpNS-nFOxB4cGHmXC2z04D6_m8j26qKLZee3bZ298vNWg/viewform?usp=sharing'
+					className='inline-block mt-4 px-6 py-2 bg-purple-mdn text-white font-semibold rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300'
+				>
+					Join the Team
+				</Link>
+			</section>
+
+			{/* Meet the Team */}
+			<section className='mb-8'>
+				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Meet the Team!</h2>
+				<p>Super proud of our amazing team!</p>
+				<div className='grid grid-cols-3 gap-4'>
+					<ProfileCard name='Keren Collins' imageLink='/images/profile/Keren.jpeg' subtitle='Project Lead' description='Biomedical Engineering Student (3rd Year)'/>
+					<ProfileCard name='Chloe Koe' imageLink='/images/profile/Chloe.jpeg' subtitle='Deep Learning Engineer' description='Computer Science'/>
+					<ProfileCard name='Nathan Culshaw' imageLink='/images/profile/Nathan.jpg' subtitle='Member' description=''/>
+					<ProfileCard name='Angus Bosmans' imageLink='/images/profile/Angus.jpg' subtitle='Member' description=''/>
+					<ProfileCard name='Afraz Agul' imageLink='/images/profile/Afraz.jpeg' subtitle='Member' description=''/>
+					<ProfileCard name='Luca Lowndes' imageLink='/images/profile/Luca.jpeg' subtitle='Member' description=''/>
+					<ProfileCard name='Joshua Rianpotura' imageLink='/images/profile/Josh.jpeg' subtitle='Member' description=''/>
+					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpeg' subtitle='Member' description=''/>
+					<ProfileCard name='Alex Mai' imageLink='/images/profile/Empty.jpeg' subtitle='Member' description=''/>
+				</div>
+
 			</section>
 
 			{/* Project Objectives */}
@@ -56,21 +90,6 @@ export default function About() {
 					</Link>{' '}
 					page!
 				</p>
-			</section>
-
-			{/* Join Us Section */}
-			<section>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Join Us!</h2>
-				<p className='text-lg'>
-					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
-					up. First-year or Master's students — all are welcome!
-				</p>
-				<Link
-					href='https://www.deepneuron.org/join-us'
-					className='inline-block mt-4 px-6 py-2 bg-purple-mdn text-white font-semibold rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300'
-				>
-					Join the Team
-				</Link>
 			</section>
 		</div>
 	);
