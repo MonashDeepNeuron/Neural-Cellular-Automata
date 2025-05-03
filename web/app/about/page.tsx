@@ -56,7 +56,7 @@ export default function About() {
 				</p>
 				<Link
 					href='https://docs.google.com/forms/d/e/1FAIpQLSckOGpNS-nFOxB4cGHmXC2z04D6_m8j26qKLZee3bZ298vNWg/viewform?usp=sharing'
-					className='inline-block mt-4 px-6 py-2 bg-purple-mdn text-white font-semibold rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300'
+					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
 				>
 					Join the Team
 				</Link>

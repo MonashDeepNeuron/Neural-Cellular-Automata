@@ -63,11 +63,26 @@ export default function Home() {
 
 					{/* Join Us Section */}
 					<div className='mt-4'>
-						<h2 className='text-2xl font-semibold text-gray-700'>🤝 Join Us!</h2>
-						<p className='text-gray-600 mt-1'>Interested in working on this project? We'd love to hear from you!</p>
+					<h2 className='text-2xl font-semibold text-gray-700'>Join Us!</h2>
+						<p className='text-gray-600 mt-1'>
+							Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
+							up. First-year or Master's students — all are welcome!
+						</p>
+						<Link
+							href='https://docs.google.com/forms/d/e/1FAIpQLSckOGpNS-nFOxB4cGHmXC2z04D6_m8j26qKLZee3bZ298vNWg/viewform?usp=sharing'
+							className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
+						>
+							Join the Team
+						</Link>
+					</div>
+					
+					{/* Get In Touch Section */}
+					<div className='mt-4'>
+						<h2 className='text-2xl font-semibold text-gray-700'>Get in Touch</h2>
+						<p className='text-gray-600 mt-1'>Want to learn more about projects like this, or interested in a collaboration?</p>
 						<Link
 							href='https://www.deepneuron.org/contact-us'
-							className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md mt-3 hover:bg-purple-mdn-dark transition'
+							className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
 						>
 							Get in Touch
 						</Link>
