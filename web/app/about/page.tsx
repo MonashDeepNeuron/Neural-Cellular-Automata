@@ -1,3 +1,4 @@
+import ProfileCard from '@/components/Profile';
 import createMetadata from '@/util/createMetadata';
 import Link from 'next/link';
 
@@ -23,7 +24,7 @@ export default function About() {
 					>
 						Monash DeepNeuron
 					</Link>
-					, an Engineering/IT student team run by Monash University students. NCA is one of many research projects, which you can read more
+					, an Engineering/IT student team run by Monash University students. Started in November 2023, NCA is one of many research projects, which you can read more
 					about{' '}
 					<Link
 						href='https://www.deepneuron.org/'
@@ -46,6 +47,39 @@ export default function About() {
 				<p className='mt-4 text-lg'>As a result of answering these questions, we aim to produce a comprehensive research paper.</p>
 			</section>
 
+			{/* Join Us Section */}
+			<section className='mb-8'>
+				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Join Us!</h2>
+				<p className='text-lg'>
+					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
+					up. First-year or Master's students — all are welcome!
+				</p>
+				<Link
+					href='https://docs.google.com/forms/d/e/1FAIpQLSckOGpNS-nFOxB4cGHmXC2z04D6_m8j26qKLZee3bZ298vNWg/viewform?usp=sharing'
+					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
+				>
+					Join the Team
+				</Link>
+			</section>
+
+			{/* Meet the Team */}
+			<section className='mb-8'>
+				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Meet the Team!</h2>
+				<p>Super proud of our amazing team!</p>
+				<div className='grid grid-cols-3 gap-4'>
+					<ProfileCard name='Keren Collins' imageLink='/images/profile/Keren.jpg' subtitle='Project Lead' description='Bachelor of Biomedical Engineering'/>
+					<ProfileCard name='Chloe Koe' imageLink='/images/profile/Chloe.jpg' subtitle='Deep Learning & Graphics Engineer' description='Bachelor of Computer Science'/>
+					<ProfileCard name='Nathan Culshaw' imageLink='/images/profile/Nathan.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Computer Science Advanced (Honours)'/>
+					<ProfileCard name='Angus Bosmans' imageLink='/images/profile/Angus.jpg' subtitle='High Performance Computing Engineer' description='Bachelor of Mechatronics Engineering (AI) & Arts'/>
+					<ProfileCard name='Afraz Agul' imageLink='/images/profile/Afraz.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Science and Computer Science'/>
+					<ProfileCard name='Luca Lowndes' imageLink='/images/profile/Luca.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Computer Science and Engineering '/>
+					<ProfileCard name='Joshua Riantoputra' imageLink='/images/profile/Josh.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Mathematics and Computational Science'/>
+					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpg' subtitle='Deep Learning Engineer' description=''/>
+					<ProfileCard name='Alex Mai' imageLink='/images/profile/Alex.jpg' subtitle='Web Developer' description='Bachelor of Computer Science'/>
+				</div>
+
+			</section>
+
 			{/* Project Updates */}
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Project Updates</h2>
@@ -56,21 +90,6 @@ export default function About() {
 					</Link>{' '}
 					page!
 				</p>
-			</section>
-
-			{/* Join Us Section */}
-			<section>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Join Us!</h2>
-				<p className='text-lg'>
-					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
-					up. First-year or Master's students — all are welcome!
-				</p>
-				<Link
-					href='https://www.deepneuron.org/join-us'
-					className='inline-block mt-4 px-6 py-2 bg-purple-mdn text-white font-semibold rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300'
-				>
-					Join the Team
-				</Link>
 			</section>
 		</div>
 	);
