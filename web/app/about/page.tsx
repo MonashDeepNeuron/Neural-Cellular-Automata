@@ -68,16 +68,15 @@ export default function About() {
 				<p>Super proud of our amazing team!</p>
 				<div className='grid grid-cols-3 gap-4'>
 					<ProfileCard name='Keren Collins' imageLink='/images/profile/Keren.jpg' subtitle='Project Lead' description='Bachelor of Biomedical Engineering'/>
+					<ProfileCard name='Afraz Gul' imageLink='/images/profile/Afraz.jpg' subtitle='Assistant Project Lead' description='Bachelor of Science and Computer Science'/>
 					<ProfileCard name='Chloe Koe' imageLink='/images/profile/Chloe.jpg' subtitle='Deep Learning & Graphics Engineer' description='Bachelor of Computer Science'/>
 					<ProfileCard name='Nathan Culshaw' imageLink='/images/profile/Nathan.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Computer Science Advanced (Honours)'/>
 					<ProfileCard name='Angus Bosmans' imageLink='/images/profile/Angus.jpg' subtitle='High Performance Computing Engineer' description='Bachelor of Mechatronics Engineering (AI) & Arts'/>
-					<ProfileCard name='Afraz Agul' imageLink='/images/profile/Afraz.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Science and Computer Science'/>
 					<ProfileCard name='Luca Lowndes' imageLink='/images/profile/Luca.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Computer Science and Engineering '/>
 					<ProfileCard name='Joshua Riantoputra' imageLink='/images/profile/Josh.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Mathematics and Computational Science'/>
 					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpg' subtitle='Deep Learning Engineer' description=''/>
 					<ProfileCard name='Alex Mai' imageLink='/images/profile/Alex.jpg' subtitle='Web Developer' description='Bachelor of Computer Science'/>
 				</div>
-
 			</section>
 
 			{/* Project Updates */}
