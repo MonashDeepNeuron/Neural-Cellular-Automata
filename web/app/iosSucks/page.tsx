@@ -1,5 +1,3 @@
-import Card from '@/components/Card';
-import { Warning, CompatibilityWarning } from '@/components/Warning';
 import createMetadata from '@/util/createMetadata';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -71,6 +69,12 @@ export default function WebGPUSetup() {
             </ul>
 
             <p>If you're still having issues, please contact us or check back for future updates!</p>
+            {/* Contact Us Link */}
+			<div className='text-left mt-2 mb-2'>
+				<Link href='/contact' className='text-purple-mdn font-bold hover:underline hover:text-purple-mdn transition duration-300'>
+					📩 Contact Us
+				</Link>
+			</div>
         </>
     );
 }
