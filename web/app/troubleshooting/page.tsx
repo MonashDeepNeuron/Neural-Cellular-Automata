@@ -22,10 +22,17 @@ export default function Troubleshooting() {
 					WebGPU yet.
 				</p>
 				<p className='mt-2'>
-					<strong>Unsupported Browsers:</strong> Safari (including all browsers on iPhone/iPad) and Firefox.
+					<strong>Unsupported Browsers:</strong> Firefox.
 				</p>
-				<p>
+				<p className='mt-2'>
 					<strong>Supported Browsers:</strong> Chrome for Windows, Microsoft Edge, and Chrome for Android.
+				</p>
+				<p className='mt-2'>
+				<strong>Experimentally Supported Browsers:</strong> If you are on an IOS or IpadOS device, make sure you are using Safari, and follow this short tutorial
+					{' '}
+					<Link href='iosSucks' className='text-purple-mdn font-semibold hover:underline'>
+						IOS Tutorial
+					</Link>
 				</p>
 				<p className='mt-2'>
 					To check if your browser supports WebGPU, visit{' '}
@@ -33,6 +40,7 @@ export default function Troubleshooting() {
 						Can I Use WebGPU?
 					</Link>
 				</p>
+				
 
 				<h3 className='text-lg font-semibold text-gray-600 italic mt-4'>2️⃣ JavaScript Is Turned Off</h3>
 				<p className='leading-7 text-lg mt-2'>

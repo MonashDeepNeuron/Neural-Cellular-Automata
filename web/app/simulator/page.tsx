@@ -1,5 +1,5 @@
 import Card from '@/components/Card';
-import Warning from '@/components/Warning';
+import { Warning, CompatibilityWarning } from '@/components/Warning';
 import createMetadata from '@/util/createMetadata';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ export default function Simulator() {
 
 			{/* Warning Message */}
 			<Warning />
+			<CompatibilityWarning />
 
 			{/* Model Selection Panel */}
 			<section className='mb-16 mt-5'>
@@ -85,7 +86,7 @@ export default function Simulator() {
 
 				<Link
 					href='simulator/growing'
-					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
+					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
 				>
 					Explore G-NCA
 				</Link>
@@ -125,7 +126,7 @@ export default function Simulator() {
 
 				<Link
 					href='/simulator/texture'
-					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
+					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
 				>
 					Explore Textures
 				</Link>
@@ -167,7 +168,7 @@ export default function Simulator() {
 
 						<Link
 							href='/simulator/conway'
-							className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
+							className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
 						>
 							Explore Conway's Life
 						</Link>
@@ -215,7 +216,7 @@ export default function Simulator() {
 
 				<Link
 					href='/simulator/lifelike'
-					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
+					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
 				>
 					Explore Life-Like
 				</Link>
@@ -242,7 +243,7 @@ export default function Simulator() {
 
 						<Link
 							href='/simulator/larger'
-							className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
+							className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
 						>
 							Explore Larger
 						</Link>
@@ -295,7 +296,7 @@ export default function Simulator() {
 
 				<Link
 					href='/simulator/continuous'
-					className='inline-block bg-purple-mdn text-white px-6 py-2 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300 mb-4'
+					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
 				>
 					Explore Continuous CA
 				</Link>

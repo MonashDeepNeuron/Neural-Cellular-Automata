@@ -24,7 +24,7 @@ export default function Contact() {
 				<p className='text-xl font-semibold mb-2'>Get in Touch:</p>
 				<Link
 					href='https://www.deepneuron.org/contact-us'
-					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition duration-300'
+					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
 				>
 					Visit the Deep Neuron Contact Page
 				</Link>
