@@ -1,3 +1,16 @@
+"""
+PURPOSE: To train the growing NCA model based off the growing
+    stage model in https://distill.pub/2020/growing-ca/.
+FEATURES:
+    - Loads target image from specified file path as well as model if existing model is present
+    - Training the model on specified number of epochs and with 
+        or without CUDA at a specified learning rate
+    - Output of loss as plot
+    - Saves final model weights to the model path.
+    - Visualisation of the model and generation of a GIF file 
+        demonstrating model output
+"""
+
 #### IMPORTS ####
 
 import torch
@@ -11,7 +24,6 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import argparse
-from learning_rate_adjuster import lradj
 
 
 def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
@@ -92,17 +104,19 @@ def load_image(imagePath: str):
 
     ## Reduce existing image to 28*28
     img = torchvision.transforms.functional.resize(
-        img, ((28), (28))
+        img, ((GRID_SIZE - 4), (GRID_SIZE - 4))
     )
+
     ## Pad it to original grid size
-    padding_transform = torchvision.transforms.Pad(18, 18)
+    padding_transform = torchvision.transforms.Pad(2, 2)
     img = padding_transform(img)
+
     img = img.to(dtype=torch.float32) / 255
 
     return img
 
 
-def forward_pass(model: nn.Module, state, updates, record=False):  # TODO
+def forward_pass(model: nn.Module, state, updates, record=False):
     """
     Run a forward pass consisting of `updates` number of updates
     If `record` is true, then records the state in a tensor to animate and saves the video
@@ -143,59 +157,49 @@ def update_pass(model, batch, target, optimiser):
     print(f"batch loss = {batch_losses.cpu().numpy()}")  ## print on cpu
 
 
-def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
+def train(model: nn.Module, target: torch.Tensor, optimiser, record=False): 
+    """
+    TRAINING PROCESS:
+        - Define training data storage variables
+        - For each epoch:
+            - Initialise batch
+            - Forward pass (runs the model on the batch)
+            - Backward pass (calculates loss and updates params)
+            - SANITY CHECK: check current loss and record loss
+            - Save model if this is the best model TODO
+        - Return the trained model
+    """
+
+    ## Obtain device of model, and send all related data to device
     device = next(model.parameters()).device
     target = target.to(device)
 
-    # sample pool starts off as the default seed for all 1024 random samples that we have 
-    sample_pool = [new_seed(1).to(device) for _ in range(POOL_SIZE)]
-
     try:
+        # minibatch epoch =N
         training_losses = []
-        updated_learning_rates = []
-        loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
-
-        for idx, epoch_idx in enumerate(len(EPOCHS)):
-            print(idx)
-            loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
-            if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
-                updated_lr = lradj.get_adjusted_learning_rate(loss_window) 
-                loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
-                ## SET OPTIMISER
-                for param_group in optimiser.param_groups:
-                    param_group["lr"] = updated_lr
-                updated_learning_rates.append(updated_lr)
-
+        for epoch in range(EPOCHS):
             model.train()
             if record:
                 outputs = torch.zeros_like(batch)
 
-            # get a random sample of indices from the poolsize to create a batch
-            batch_indices = random.sample(range(POOL_SIZE), BATCH_SIZE)
-            batch = torch.cat([sample_pool[idx] for idx in batch_indices], dim=0)
-
-            # Replace one sample with the original single-pixel seed state; i actually changed this to ten otherwise it will take way to long to render regular outcome of the model
-            #batch[0] = new_seed(1).to(device)
-            for i in range(5):
-                batch[i] = new_seed(1).to(device)
+            batch = new_seed(BATCH_SIZE)  ## TODO duplicate seed
+            batch = batch.to(device)
 
             ## Optimisation step
             update_pass(model, batch, target, optimiser)
 
-            # Replace samples in the pool with the output states, eg we are updating the pool with the persisting states that we need to train on in future
-            for i, idx in enumerate(batch_indices):
-                sample_pool[idx] = batch[i].unsqueeze(0)
-
-            test_seed = new_seed(1) # test on the default seed state (could be worth also testing on a persisting state ? )
+            test_seed = new_seed(1)
             MODEL.eval()
             test_run = forward_pass(MODEL, test_seed, 64)
             training_losses.append(
                 LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
             )
-            print(f"Epoch {epoch_idx} complete, loss = {training_losses[-1]}")
+            print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
 
-            loss_window[loss_window_idx] = training_losses[-1].item()
-
+            # check modulo minibatch epoch
+            # for input
+            # run lradj.adjust_learning_rate
+            #
 
     except KeyboardInterrupt:
         pass
@@ -204,7 +208,6 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
         return (model, training_losses, outputs)
     else:
         return model, training_losses
-
 
 
 def initialiseGPU(model):
@@ -221,19 +224,9 @@ def initialiseGPU(model):
 if __name__ == "__main__":
 
     TRAINING = True  # Is our purpose to train or are we just looking rn?
-    LOAD_WEIGHTS = False # only load weights if we want to start training from previous
 
-    ## For learning rate adjustmnet
-    ADJUSTMENT_WINDOW = 10
-
-    GRID_SIZE = 64
+    GRID_SIZE = 32
     CHANNELS = 16
-
-    POOL_SIZE=1024
-    BATCH_SIZE=32
-    UPDATES_RANGE=(64, 192)
-
-    print("Initialising model...")
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
@@ -241,39 +234,41 @@ if __name__ == "__main__":
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     BATCH_SIZE = 32
-    UPDATES_RANGE = [64,192] # for longer life
+    UPDATES_RANGE = [64, 96]
 
-    LR = 1e-4
+    LR = 5e-4
 
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    MODEL_PATH = "abc.pth"
+    MODEL_PATH = "model_weights_logo.pthj"
 
-    targetImg = load_image("Signaling/crab.png")
+    targetImg = load_image("./crab.png")
 
     ## Load model weights if available
-    print("Loading model weights...")
-    if LOAD_WEIGHTS:
-        try:
-            MODEL.load_state_dict(
-                torch.load(
-                    MODEL_PATH,
-                    weights_only=True,
-                    map_location=torch.device(
-                        "cuda" if torch.cuda.is_available() else "cpu"
-                    ),
-                )
+    try:
+        MODEL.load_state_dict(
+            torch.load(
+                MODEL_PATH,
+                weights_only=True,
+                map_location=torch.device(
+                    "cuda" if torch.cuda.is_available() else "cpu"
+                ),
             )
-            print("Loaded model weights successfully!")
-        except FileNotFoundError:
-            print("No previous model weights found, training from scratch.")
-            if not TRAINING:
-                exit()
+        )
+        print("Loaded model weights successfully!")
+    except FileNotFoundError:
+        print("No previous model weights found, training from scratch.")
+        if not TRAINING:
+            exit()
 
     if TRAINING:
-        MODEL, losses = pool_train(MODEL, targetImg, optimizer)
+        MODEL, losses = train(MODEL, targetImg, optimizer)
+        # losses_file = open("losses.txt", "a")
+        # losses_file.write(losses)
+        # losses_file.close()
 
+        print(losses)
         ## Plot loss
         plt.plot(range(len(losses)), losses)
 
@@ -285,5 +280,5 @@ if __name__ == "__main__":
 
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
-    video = forward_pass(MODEL, img, 600, record=True)
+    video = forward_pass(MODEL, img, 200, record=True)
     anim = visualise(video, anim=True)
