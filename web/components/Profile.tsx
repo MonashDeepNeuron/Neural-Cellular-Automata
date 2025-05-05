@@ -1,14 +1,12 @@
 import Card from '@/components/Card';
 import Image from 'next/image';
 
-
-
 export interface ProfileData {
-	name:string,
-	imageLink:string,
-	subtitle:string,
-	description:string,
-};
+	name: string;
+	imageLink: string;
+	subtitle: string;
+	description: string;
+}
 
 export default function ProfileCard({ name, imageLink, subtitle, description }: ProfileData) {
 	return (

@@ -63,10 +63,10 @@ export default function Home() {
 
 					{/* Join Us Section */}
 					<div className='mt-4'>
-					<h2 className='text-2xl font-semibold text-gray-700'>Join Us!</h2>
+						<h2 className='text-2xl font-semibold text-gray-700'>Join Us!</h2>
 						<p className='text-gray-600 mt-1'>
-							Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
-							up. First-year or Master's students — all are welcome!
+							Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions
+							open up. First-year or Master's students — all are welcome!
 						</p>
 						<Link
 							href='https://docs.google.com/forms/d/e/1FAIpQLSckOGpNS-nFOxB4cGHmXC2z04D6_m8j26qKLZee3bZ298vNWg/viewform?usp=sharing'
@@ -75,7 +75,7 @@ export default function Home() {
 							Join the Team
 						</Link>
 					</div>
-					
+
 					{/* Get In Touch Section */}
 					<div className='mt-4'>
 						<h2 className='text-2xl font-semibold text-gray-700'>Get in Touch</h2>

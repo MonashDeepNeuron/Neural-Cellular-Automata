@@ -1,5 +1,5 @@
 import Card from '@/components/Card';
-import { Warning, CompatibilityWarning } from '@/components/Warning';
+import { CompatibilityWarning, Warning } from '@/components/Warning';
 import createMetadata from '@/util/createMetadata';
 import Image from 'next/image';
 import Link from 'next/link';

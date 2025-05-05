@@ -3,5 +3,8 @@
 	"javascript": {
 		"globals": ["React"]
 	},
+	"files": {
+		"ignore": ["node_modules", "web/.next", "web/node_modules", "web/out"]
+	},
 	"extends": ["@angablue/biome-config"]
 }

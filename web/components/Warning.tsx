@@ -26,9 +26,8 @@ export function CompatibilityWarning() {
 	const [show, setShow] = useState(false);
 
 	useEffect(() => {
-		const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-			(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-		console.log(navigator.platform)
+		const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+		console.log(navigator.platform);
 		if (isIOS) {
 			setShow(true);
 		}
@@ -39,7 +38,11 @@ export function CompatibilityWarning() {
 	return (
 		<div className='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow-md mb-6 transition-opacity duration-500'>
 			<p className='mb-3'>
-				<strong>⚠️ Notice:</strong> WebGPU is <u>not natively supported</u> on iOS devices. Follow our guide at <a href="/iosSucks" className='text-purple-mdn hover:underline'>/iosSucks</a> to set it up.
+				<strong>⚠️ Notice:</strong> WebGPU is <u>not natively supported</u> on iOS devices. Follow our guide at{' '}
+				<a href='/iosSucks' className='text-purple-mdn hover:underline'>
+					/iosSucks
+				</a>{' '}
+				to set it up.
 			</p>
 			<button
 				type='button'
