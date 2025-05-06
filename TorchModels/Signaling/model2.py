@@ -62,7 +62,6 @@ class GCA(nn.Module):
         5. Apply alive cell masking to `state_grid` to kill of cells with alpha < 0.1
         This yields output_filtered_grid, a tensor with dims: (batch, in_channels, height, width)
         """
-
         if bias:
             input_grid = self.bias(input_grid)
 
