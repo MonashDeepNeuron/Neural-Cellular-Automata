@@ -7,6 +7,7 @@ class GCA(nn.Module):
     SOBEL_X = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32)
     SOBEL_Y = torch.tensor([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype=torch.float32)
     IDENTITY = torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=torch.float32)
+    BIAS = torch.tensor([[0, 0, 0], [0.05, -0.05, 0], [0, 0, 0]], dtype=torch.float32)
     GRID_SIZE = 32
 
     def __init__(self, n_channels=16, hidden_channels=128):
@@ -45,7 +46,7 @@ class GCA(nn.Module):
         self.IDENTITY = self.IDENTITY.to(device)
         return super().to(device)
 
-    def forward(self, input_grid):
+    def forward(self, input_grid, bias):
         """
         Input_grid is tensor with dims: (batch, in_channels, height, width)
         1. Construct `perception_grid` by replacing each cell in input_grid with its feature vector
@@ -61,6 +62,10 @@ class GCA(nn.Module):
         5. Apply alive cell masking to `state_grid` to kill of cells with alpha < 0.1
         This yields output_filtered_grid, a tensor with dims: (batch, in_channels, height, width)
         """
+
+        if bias:
+            input_grid = self.bias(input_grid)
+
 
         ## Add input grid to the device model parameters are on
         input_grid = input_grid.to(next(self.parameters()).device)
@@ -116,6 +121,19 @@ class GCA(nn.Module):
             torch.rand(self.GRID_SIZE, self.GRID_SIZE, device=ds_grid.device) < 0.5
         ).float()
         return ds_grid * rand_mask
+    
+    def bias(self, state_grid):
+        state_grid_padded = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
+        output = f.conv2d(
+            state_grid_padded[:, -1, :, :].unsqueeze(1),
+            self.BIAS.unsqueeze(0),
+            stride=1,
+            padding=0,
+            groups=state_grid_padded.size(1),
+        )
+        state_grid[:, -1, :, :] = state_grid[:, -1, :, :] + output
+        return state_grid
+
 
     def apply_alive_mask(self, state_grid):
         """Applies alive mask to state_grid
