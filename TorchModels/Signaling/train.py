@@ -197,6 +197,12 @@ def train(model: nn.Module, target: torch.Tensor, optimiser, record=False):
             )
             print(f"Epoch {epoch} complete, loss = {training_losses[-1]}")
 
+             # Save weights every 150 epochs
+            if (epoch + 1) % 150 == 0:
+                checkpoint_path = f"model_weights_epoch_{epoch + 1}.pth"
+                torch.save(model.state_dict(), checkpoint_path)
+                print(f"Model weights saved at epoch {epoch + 1} to {checkpoint_path}")
+
             # check modulo minibatch epoch
             # for input
             # run lradj.adjust_learning_rate
@@ -231,7 +237,7 @@ if __name__ == "__main__":
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
-    EPOCHS = 100  # 100 epochs for best results
+    EPOCHS = 5000  # 100 epochs for best results
     ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
     BATCH_SIZE = 32
@@ -242,9 +248,9 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
     LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-    MODEL_PATH = "model_weights_logo.pthj"
+    MODEL_PATH = "model_weights_epoch_150.pth"
 
-    targetImg = load_image("./crab.png")
+    targetImg = load_image("./CRABTRANSPARENT.png")
 
     ## Load model weights if available
     try:

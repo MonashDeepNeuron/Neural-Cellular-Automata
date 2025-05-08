@@ -124,13 +124,13 @@ class GCA(nn.Module):
     def bias(self, state_grid):
         state_grid_padded = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
         output = f.conv2d(
-            state_grid_padded[:, -1, :, :].unsqueeze(1),
-            self.BIAS.unsqueeze(0),
+            state_grid_padded[:, -1:, :, :],  
+            self.BIAS.to(state_grid.device).unsqueeze(0).unsqueeze(0),
             stride=1,
             padding=0,
-            groups=state_grid_padded.size(1),
+            groups=1,  # single channel convolution 
         )
-        state_grid[:, -1, :, :] = state_grid[:, -1, :, :] + output
+        state_grid[:, -1, :, :] = state_grid[:, -1, :, :] + output.squeeze(1)
         return state_grid
 
 
