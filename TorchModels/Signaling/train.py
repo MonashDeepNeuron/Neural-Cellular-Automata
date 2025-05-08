@@ -230,7 +230,7 @@ def initialiseGPU(model):
 
 if __name__ == "__main__":
 
-    TRAINING = True  # Is our purpose to train or are we just looking rn?
+    TRAINING = False # True  # Is our purpose to train or are we just looking rn?
 
     GRID_SIZE = 32
     CHANNELS = 16
