@@ -125,7 +125,7 @@ def forward_pass(model: nn.Module, state, updates, record=False):
     if record:
         frames_array = Tensor(updates, CHANNELS, GRID_SIZE, GRID_SIZE)
         for i in range(updates):
-            bias = True if (20 < updates < 40) else False 
+            bias = True if (20 < i < 40) else False 
             state = model(state, bias)
             frames_array[i] = state
         return frames_array
