@@ -44,6 +44,7 @@ class GCA(nn.Module):
         self.SOBEL_X = self.SOBEL_X.to(device)
         self.SOBEL_Y = self.SOBEL_Y.to(device)
         self.IDENTITY = self.IDENTITY.to(device)
+        self.BIAS = self.BIAS.to(device)
         return super().to(device)
 
     def forward(self, input_grid, bias):
@@ -121,16 +122,40 @@ class GCA(nn.Module):
         ).float()
         return ds_grid * rand_mask
     
-    def bias(self, state_grid):
-        state_grid_padded = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
+    def bias(self, state_grid, target_chan = 15):
+        """
+        Applies small, localized conv nudge to single feature channel, an attempt to recreate L/R signaling
+
+        inputs -
+        
+        state_grid: torch.Tensor of 4D shape (B, C, H, W) representing batch size, # of feat. channels, height, and width
+
+        target_chan: int, index of channel in state_grid where we want to apply the bias, defaults to 15 as we allow 16 channels
+
+        output -
+
+        state_grid: Adjusted torch.Tensor with the same shape but target_chan is incremented by bias layer, all other channels unchanged
+        """
+        # Makes sure that the kernel is the correct shape
+        kernel = self.BIAS.view(1,1,3,3)
+
+        # splices and selects the wanted channel
+        end_chan = state_grid[:, target_chan:target_chan+1, :, :]
+
+        # pads single channel slice with 1 pixel circular wrap (like normal persisting model)
+        padded = f.pad(end_chan, (1,1,1,1), mode = 'circular')
+
+        # convolves the padded slice with small bias kernel, groups = 1 since only 1 in-channel and out-channel, should output back to (B,1,H,W)
         output = f.conv2d(
-            state_grid_padded[:, -1, :, :].unsqueeze(1),
-            self.BIAS.unsqueeze(0),
+            padded,
+            weight=kernel,
             stride=1,
             padding=0,
-            groups=state_grid_padded.size(1),
+            groups=1,
         )
-        state_grid[:, -1, :, :] = state_grid[:, -1, :, :] + output
+
+        # adds convol result back to original splice (creates the nudge in bias)
+        state_grid[:, target_chan:target_chan+1] = end_chan + output
         return state_grid
 
 
