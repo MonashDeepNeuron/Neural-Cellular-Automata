@@ -10,12 +10,12 @@ Our goals can be broken down into answering three topics:
 
 As a result of answering these questions, we aim to produce a research paper.
 
-## Open Source Website!
+## Open Source!
 
-All of our code for <a href="https://neuralca.org">our website</a> and for generating website content is open source and available here! There are two main parts:
+All of our code for <a href="https://neuralca.org">our website</a> and for generating website content is open source can be found in this repository! There are two main parts:
 
 1. **The Training Code:** This produces the weights an biases of our neural network. All implemented in **PyTorch**. There will be multiple versions of this for various experiments. There is a secondary repository for our 3D work which can be found <a href="https://github.com/MonashDeepNeuron/3D-Neural-Cellular-Automata">3D Neural Cellular Automata<a>
-2. **The Website:** Models are rendered in **WebGPU** and **JavaScript.** Output is what you see in front of you!
+2. **The Website:** Models are rendered in **WebGPU** and **TypeScript.** The website itself is built in Next.js. Output of this code is the website.
 
 ## Resources
 
