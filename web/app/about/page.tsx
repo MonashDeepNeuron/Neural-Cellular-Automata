@@ -66,16 +66,20 @@ export default function About() {
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Meet the Team!</h2>
 				<p>Super proud of our amazing team!</p>
-				<div className='grid grid-cols-3 gap-4'>
-					<ProfileCard name='Keren Collins' imageLink='/images/profile/Keren.jpg' subtitle='Project Lead' description='Bachelor of Biomedical Engineering'/>
-					<ProfileCard name='Afraz Gul' imageLink='/images/profile/Afraz.jpg' subtitle='Assistant Project Lead' description='Bachelor of Science and Computer Science'/>
+				<div className='grid grid-cols-3 gap-4 mb-8'>
+					<ProfileCard name='Afraz Gul' imageLink='/images/profile/Afraz.jpg' subtitle='Project Lead' description='Bachelor of Science and Computer Science'/>
 					<ProfileCard name='Chloe Koe' imageLink='/images/profile/Chloe.jpg' subtitle='Deep Learning & Graphics Engineer' description='Bachelor of Computer Science'/>
 					<ProfileCard name='Nathan Culshaw' imageLink='/images/profile/Nathan.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Computer Science Advanced (Honours)'/>
 					<ProfileCard name='Angus Bosmans' imageLink='/images/profile/Angus.jpg' subtitle='High Performance Computing Engineer' description='Bachelor of Mechatronics Engineering (AI) & Arts'/>
 					<ProfileCard name='Luca Lowndes' imageLink='/images/profile/Luca.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Computer Science and Engineering '/>
-					<ProfileCard name='Joshua Riantoputra' imageLink='/images/profile/Josh.jpg' subtitle='Deep Learning Engineer' description='Bachelor of Mathematics and Computational Science'/>
-					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpg' subtitle='Deep Learning Engineer' description=''/>
-					<ProfileCard name='Alex Mai' imageLink='/images/profile/Alex.jpg' subtitle='Web Developer' description='Bachelor of Computer Science'/>
+				</div>
+				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>And our advisors and alumni</h2>
+				<p>Their help has been just as invaluable to the project!</p>
+				<div className='grid grid-cols-3 gap-4'>
+					<ProfileCard name='Keren Collins' imageLink='/images/profile/Keren.jpg' subtitle='Project founder and advisor' description='Bachelor of Biomedical Engineering'/>
+					<ProfileCard name='Joshua Riantoputra' imageLink='/images/profile/Josh.jpg' subtitle='Deep Learning Advisor' description='Bachelor of Mathematics and Computational Science'/>
+					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpg' subtitle='Deep Learning Advisor' description=''/>
+					<ProfileCard name='Alex Mai' imageLink='/images/profile/Alex.jpg' subtitle='Alumni' description='Bachelor of Computer Science'/>
 				</div>
 			</section>
 
