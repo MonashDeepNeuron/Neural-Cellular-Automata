@@ -66,17 +66,11 @@ export default function About() {
 			<section className='mb-8'>
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Meet the Team!</h2>
 				<p>Super proud of our amazing team!</p>
-				<div className='grid grid-cols-3 gap-4'>
-					<ProfileCard
-						name='Keren Collins'
-						imageLink='/images/profile/Keren.jpg'
-						subtitle='Project Lead'
-						description='Bachelor of Biomedical Engineering'
-					/>
+				<div className='grid grid-cols-3 gap-4 mb-8'>
 					<ProfileCard
 						name='Afraz Gul'
 						imageLink='/images/profile/Afraz.jpg'
-						subtitle='Assistant Project Lead'
+						subtitle='Project Lead'
 						description='Bachelor of Science and Computer Science'
 					/>
 					<ProfileCard
@@ -103,17 +97,32 @@ export default function About() {
 						subtitle='Deep Learning Engineer'
 						description='Bachelor of Computer Science and Engineering '
 					/>
-					<ProfileCard
-						name='Joshua Riantoputra'
-						imageLink='/images/profile/Josh.jpg'
-						subtitle='Deep Learning Engineer'
-						description='Bachelor of Mathematics and Computational Science'
+				</div>
+				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Our advisors and alumni</h2>
+				<p>Their help has been just as invaluable to the project!</p>
+				<div className='grid grid-cols-3 gap-4'>
+					<ProfileCard 
+					name='Keren Collins' 
+					imageLink='/images/profile/Keren.jpg' 
+					subtitle='Project founder and advisor' 
+					description='Bachelor of Biomedical Engineering'
 					/>
-					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpg' subtitle='Deep Learning Engineer' description='' />
+					<ProfileCard 
+					name='Joshua Riantoputra' 
+					imageLink='/images/profile/Josh.jpg' 
+					subtitle='Deep Learning Advisor' 
+					description='Bachelor of Mathematics and Computational Science'
+					/>
+					<ProfileCard 
+					name='Nyan Knaw' 
+					imageLink='/images/profile/Nyan.jpg' 
+					subtitle='Deep Learning Advisor' 
+					description=''
+					/>
 					<ProfileCard
 						name='Alex Mai'
 						imageLink='/images/profile/Alex.jpg'
-						subtitle='Web Developer'
+						subtitle='Alumni'
 						description='Bachelor of Computer Science'
 					/>
 				</div>
