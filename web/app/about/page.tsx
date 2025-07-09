@@ -104,13 +104,13 @@ export default function About() {
 					<ProfileCard 
 					name='Keren Collins' 
 					imageLink='/images/profile/Keren.jpg' 
-					subtitle='Project founder and advisor' 
+					subtitle='Deep learning advisor' 
 					description='Bachelor of Biomedical Engineering'
 					/>
 					<ProfileCard 
 					name='Joshua Riantoputra' 
 					imageLink='/images/profile/Josh.jpg' 
-					subtitle='Deep Learning Advisor' 
+					subtitle='Deep Learning Advisor and founder' 
 					description='Bachelor of Mathematics and Computational Science'
 					/>
 					<ProfileCard 
