@@ -1,4 +1,14 @@
-export type Convolution = [number, number, number, number, number, number, number, number, number];
+export type Convolution = [
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+];
 
 interface NCAParameters {
 	convolutions: Convolution[];
@@ -8,7 +18,13 @@ interface NCAParameters {
 	stripe?: boolean;
 }
 
-function nca({ convolutions, channels, hiddenChannels, aliveMasking, stripe }: NCAParameters) {
+function nca({
+	convolutions,
+	channels,
+	hiddenChannels,
+	aliveMasking,
+	stripe,
+}: NCAParameters) {
 	const simulation = /* wgsl */ `
 struct ParameterShape {
   channels: u32,
@@ -32,7 +48,7 @@ const HIDDEN_CHANNELS = ${hiddenChannels};
 const PERCEPTION_VECTOR = CHANNELS * CONVOLUTIONS;
 
 // Perception kernels
-${convolutions.map((conv, i) => `const PERCEPTION_${i}: mat3x3f = mat3x3f(${conv.map(v => v.toFixed(1)).join(', ')});`).join('\n')}
+${convolutions.map((conv, i) => `const PERCEPTION_${i}: mat3x3f = mat3x3f(${conv.map((v) => v.toFixed(1)).join(", ")});`).join("\n")}
 
 @workgroup_size(8, 8)
 @compute
@@ -53,12 +69,12 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3u) {
 
   // Copy identity convolution directly from state
   for (var c = 0u; c < CHANNELS; c++) {
-    perceptions[c${stripe ? ' * CONVOLUTIONS' : ''}] = state[index(c, x, y)];
+    perceptions[c${stripe ? " * CONVOLUTIONS" : ""}] = state[index(c, x, y)];
   }
 
   // Compute convolutions
   for (var c = 0u; c < CHANNELS; c++) {
-    ${convolutions.map((_, i) => `perceptions[c ${stripe ? '* CONVOLUTIONS +' : '+ CHANNELS *'} ${i + 1}] = convolve(c, x, y, PERCEPTION_${i});`).join('\n')}
+    ${convolutions.map((_, i) => `perceptions[c ${stripe ? "* CONVOLUTIONS +" : "+ CHANNELS *"} ${i + 1}] = convolve(c, x, y, PERCEPTION_${i});`).join("\n")}
   }
 
   // Fully connected layers
@@ -84,7 +100,7 @@ fn compute_main(@builtin(global_invocation_id) pos: vec3u) {
   }
 
   // Alive masking
-  ${aliveMasking ? 'alive_mask(x, y);' : ''}
+  ${aliveMasking ? "alive_mask(x, y);" : ""}
 }
 
 // Helper function to perform convolution with a 3x3 kernel for a specific channel
@@ -154,14 +170,14 @@ export const texture = nca({
 	convolutions: [SOBEL_X, SOBEL_Y, LAPLACIAN],
 	channels: 12,
 	hiddenChannels: 96,
-	stripe: true
+	stripe: true,
 });
 
 export const growing = nca({
 	convolutions: [SOBEL_X, SOBEL_Y],
 	channels: 16,
 	hiddenChannels: 128,
-	aliveMasking: true
+	aliveMasking: true,
 });
 
 export default nca;

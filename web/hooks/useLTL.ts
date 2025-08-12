@@ -24,7 +24,7 @@ export interface LTLSettings {
 	shaders: {
 		simulation: string;
 	};
-	parseRuleString: (input: string) => Uint32Array | null;
+	parseRuleString: (input: string) => Uint32Array<ArrayBuffer> | null;
 }
 
 export type CellStateBufferPair = [GPUBuffer, GPUBuffer];
@@ -32,7 +32,7 @@ export type CellStateBindGroupPair = [GPUBindGroup, GPUBindGroup];
 
 const SHAPE_VERTICES = new Float32Array([-1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1]);
 const WORKGROUP_SIZE = 8;
-const defaultRule: Uint32Array = new Uint32Array([1, 0, 2, 2, 3, 2, 3, 3, 0]); // Conway's game of life
+const defaultRule: Uint32Array<ArrayBuffer> = new Uint32Array([1, 0, 2, 2, 3, 2, 3, 3, 0]); // Conway's game of life
 
 export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLSettings) {
 	const [status, setStatus] = useState(CAStatus.ALLOCATING_RESOURCES);
@@ -90,8 +90,8 @@ export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLS
 			});
 
 			// Get rule
-			const parsedRule: Uint32Array | null = parseRuleString(pattern.rule);
-			let rule: Uint32Array = new Uint32Array([]);
+			const parsedRule: Uint32Array<ArrayBuffer> | null = parseRuleString(pattern.rule);
+			let rule: Uint32Array<ArrayBuffer> = new Uint32Array([]);
 			if (parsedRule) {
 				rule = parsedRule;
 			} else {

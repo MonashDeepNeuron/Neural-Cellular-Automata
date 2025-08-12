@@ -30,7 +30,7 @@ export default function WebGPUSetup() {
 							alt='Navigate to Experimental Features'
 							width={150}
 							height={100}
-							className='rounded-md shadow'
+							className='rounded-md shadow-sm'
 						/>
 					</div>
 				</li>
@@ -42,7 +42,7 @@ export default function WebGPUSetup() {
 							alt='Navigate to Experimental Features'
 							width={150}
 							height={100}
-							className='rounded-md shadow'
+							className='rounded-md shadow-sm'
 						/>
 					</div>
 				</li>
@@ -54,14 +54,14 @@ export default function WebGPUSetup() {
 							alt='Navigate to Experimental Features'
 							width={150}
 							height={100}
-							className='rounded-md shadow'
+							className='rounded-md shadow-sm'
 						/>
 					</div>
 				</li>
 				<li>
 					Find <strong>WebGPU</strong> in the list and <strong>turn it on</strong>.
 					<div className='mt-2'>
-						<Image src='/webGPUSetup/Step4.jpg' alt='Enable WebGPU' width={150} height={100} className='rounded-md shadow' />
+						<Image src='/webGPUSetup/Step4.jpg' alt='Enable WebGPU' width={150} height={100} className='rounded-md shadow-sm' />
 					</div>
 				</li>
 				<li>
@@ -72,7 +72,7 @@ export default function WebGPUSetup() {
 				</li>
 			</ol>
 
-			<div className='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow mb-10'>
+			<div className='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow-sm mb-10'>
 				<p className='font-semibold'>⚠️ Important:</p>
 				<p>WebGPU support on iOS is experimental. Some features may be unstable or perform differently compared to desktop browsers.</p>
 			</div>

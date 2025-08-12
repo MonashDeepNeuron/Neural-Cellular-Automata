@@ -46,7 +46,7 @@ export default function Navbar() {
 				</div>
 
 				{/* Hamburger Icon for Mobile */}
-				<button className='md:hidden text-white focus:outline-none' onClick={() => setIsOpen(!isOpen)} type='button'>
+				<button className='md:hidden text-white focus:outline-hidden' onClick={() => setIsOpen(!isOpen)} type='button'>
 					☰
 				</button>
 			</div>

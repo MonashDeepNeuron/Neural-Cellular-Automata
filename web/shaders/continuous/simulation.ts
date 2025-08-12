@@ -2,7 +2,7 @@ interface ContinuousParameters {
 	activation?: string;
 }
 
-const defaultActivation = 'return -1./pow(2., (0.6*pow(x, 2.)))+1.;';
+const defaultActivation = "return -1./pow(2., (0.6*pow(x, 2.)))+1.;";
 
 function continuous(parameters?: ContinuousParameters) {
 	const activation = parameters?.activation || defaultActivation;

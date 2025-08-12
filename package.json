@@ -1,9 +1,11 @@
 {
 	"name": "nca",
 	"version": "1.0.0",
-	"workspaces": ["web"],
+	"workspaces": [
+		"web"
+	],
 	"devDependencies": {
-		"@angablue/biome-config": "^1.0.1",
-		"@biomejs/biome": "^1.9.4"
+		"@angablue/biome-config": "^1.1.0",
+		"@biomejs/biome": "^2.1.4"
 	}
 }

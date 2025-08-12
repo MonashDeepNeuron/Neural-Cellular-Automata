@@ -79,13 +79,13 @@ export default function Research() {
 				<div className='grid grid-cols-2 overflow-y-auto gap-4'>
 					<div>
 						{/* TODO: Check if there is a better way of putting this video in */}
-						<video className='w-full rounded-md shadow' loop autoPlay muted>
+						<video className='w-full rounded-md shadow-sm' loop autoPlay muted>
 							<source src='/images/nca_output.mp4' type='video/mp4' />
 						</video>
 						<p className='text-sm text-center italic'>NCA algorithm in live operation after training.</p>
 					</div>
 					<div>
-						<Image src='/images/knit.jpg' alt='Target Knitted Texture' height={60} width={50} className='w-full rounded-md shadow' />
+						<Image src='/images/knit.jpg' alt='Target Knitted Texture' height={60} width={50} className='w-full rounded-md shadow-sm' />
 						<p className='text-sm text-center italic'>Targeted texture pattern for the NCA to replicate.</p>
 					</div>
 				</div>

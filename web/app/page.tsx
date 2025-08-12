@@ -15,7 +15,7 @@ export default function Home() {
 							alt='Target Knitted Texture'
 							height={60}
 							width={50}
-							className='w-4/5 rounded-md items-center shadow mx-10'
+							className='w-4/5 rounded-md items-center shadow-sm mx-10'
 						/>
 					</Link>
 					<p className='text-gray-600 mt-2'>Experience the dynamics of Neural Cellular Automata in real-time.</p>

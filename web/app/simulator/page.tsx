@@ -39,7 +39,7 @@ export default function Simulator() {
 							<Link
 								key={model.name}
 								href={model.link}
-								className='bg-purple-mdn text-white text-center py-3 rounded-md shadow hover:bg-purple-mdn-dark hover:scale-105 transition-transform duration-300'
+								className='bg-purple-mdn text-white text-center py-3 rounded-md shadow-sm hover:bg-purple-mdn-dark hover:scale-105 transition-transform duration-300'
 							>
 								{model.name}
 							</Link>
@@ -203,7 +203,7 @@ export default function Simulator() {
 							alt='The neighbourhood of each cell consists of the cells in contact with it.'
 							height={60}
 							width={50}
-							className='w-full rounded-md shadow'
+							className='w-full rounded-md shadow-sm'
 						/>
 						<p className='text-sm text-center italic'>The neighbourhood of each cell consists of the cells in contact with it.</p>
 					</div>
@@ -270,7 +270,7 @@ export default function Simulator() {
 							cells within a specified distance from the target cell'
 							height={60}
 							width={50}
-							className='w-full rounded-md shadow'
+							className='w-full rounded-md shadow-sm'
 						/>
 						<p className='text-sm text-center italic'>
 							Neighbourhood of a target cell in Larger than Life when the neighbourhood radius is set to 2 cells
@@ -281,7 +281,7 @@ export default function Simulator() {
 							alt='The neighbourhood of each cell consists of the cells in contact with it.'
 							height={60}
 							width={50}
-							className='w-full rounded-md shadow'
+							className='w-full rounded-md shadow-sm'
 						/>
 						<p className='text-sm text-center italic'>
 							Different neighbourhood shapes/different ways of determining a cell's distance from the target cell
