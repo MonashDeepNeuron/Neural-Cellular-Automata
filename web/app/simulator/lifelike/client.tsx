@@ -13,9 +13,7 @@ export default function Client() {
 		shaders: {
 			simulation
 		},
-		parseRuleString: (input: string) => {
-			return parseLifeLikeRule(input);
-		}
+		parseRuleString: parseLifeLikeRule
 	});
 
 	return <Simulator name='Life-like' size={SIZE} {...controls} />;

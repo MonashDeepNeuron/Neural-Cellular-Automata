@@ -13,9 +13,7 @@ export default function Client() {
 		shaders: {
 			simulation
 		},
-		parseRuleString: (input: string) => {
-			return parseLTLRule(input);
-		}
+		parseRuleString: parseLTLRule
 	});
 
 	return <Simulator name='LTL' size={SIZE} {...controls} />;

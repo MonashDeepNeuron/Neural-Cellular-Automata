@@ -90,10 +90,9 @@ export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLS
 			});
 
 			// Get rule
-
 			const parsedRule: Uint32Array | null = parseRuleString(pattern.rule);
 			let rule: Uint32Array = new Uint32Array([]);
-			if (parsedRule != null) {
+			if (parsedRule) {
 				rule = parsedRule;
 			} else {
 				rule = defaultRule;
@@ -286,7 +285,7 @@ export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLS
 			// Destroy device & associated buffers
 			resources?.device.destroy();
 		};
-	}, [size, pattern, shaders.simulation, resources]);
+	}, [size, pattern, shaders.simulation, parseRuleString, resources]);
 
 	useEffect(() => {
 		if (status !== CAStatus.READY || !resources) return;
