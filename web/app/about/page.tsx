@@ -1,6 +1,6 @@
+import Link from 'next/link';
 import ProfileCard from '@/components/Profile';
 import createMetadata from '@/util/createMetadata';
-import Link from 'next/link';
 
 export const metadata = createMetadata({
 	title: 'About',
@@ -101,30 +101,20 @@ export default function About() {
 				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Our advisors and alumni</h2>
 				<p>Their help has been just as invaluable to the project!</p>
 				<div className='grid grid-cols-3 gap-4'>
-					<ProfileCard 
-					name='Keren Collins' 
-					imageLink='/images/profile/Keren.jpg' 
-					subtitle='Deep learning advisor' 
-					description='Bachelor of Biomedical Engineering'
-					/>
-					<ProfileCard 
-					name='Joshua Riantoputra' 
-					imageLink='/images/profile/Josh.jpg' 
-					subtitle='Deep Learning Advisor and founder' 
-					description='Bachelor of Mathematics and Computational Science'
-					/>
-					<ProfileCard 
-					name='Nyan Knaw' 
-					imageLink='/images/profile/Nyan.jpg' 
-					subtitle='Deep Learning Advisor' 
-					description=''
+					<ProfileCard
+						name='Keren Collins'
+						imageLink='/images/profile/Keren.jpg'
+						subtitle='Deep learning advisor'
+						description='Bachelor of Biomedical Engineering'
 					/>
 					<ProfileCard
-						name='Alex Mai'
-						imageLink='/images/profile/Alex.jpg'
-						subtitle='Alumni'
-						description='Bachelor of Computer Science'
+						name='Joshua Riantoputra'
+						imageLink='/images/profile/Josh.jpg'
+						subtitle='Deep Learning Advisor and founder'
+						description='Bachelor of Mathematics and Computational Science'
 					/>
+					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpg' subtitle='Deep Learning Advisor' description='' />
+					<ProfileCard name='Alex Mai' imageLink='/images/profile/Alex.jpg' subtitle='Alumni' description='Bachelor of Computer Science' />
 				</div>
 			</section>
 

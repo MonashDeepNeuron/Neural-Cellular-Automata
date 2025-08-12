@@ -1,8 +1,8 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import type { Pattern } from '@/patterns/pattern';
 import cell from '@/shaders/discrete/cell';
-import { useEffect, useRef, useState } from 'react';
 import { CAStatus } from './useNCA';
 
 export interface GPUResources {

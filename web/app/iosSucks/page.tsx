@@ -1,6 +1,6 @@
-import createMetadata from '@/util/createMetadata';
 import Image from 'next/image';
 import Link from 'next/link';
+import createMetadata from '@/util/createMetadata';
 
 export const metadata = createMetadata({
 	title: 'WebGPU Setup',

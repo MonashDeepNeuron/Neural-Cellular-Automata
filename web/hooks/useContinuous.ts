@@ -1,7 +1,7 @@
 'use client';
 
-import cell from '@/shaders/continuous/cell';
 import { useEffect, useRef, useState } from 'react';
+import cell from '@/shaders/continuous/cell';
 import { CAStatus } from './useNCA';
 
 export interface GPUResources {

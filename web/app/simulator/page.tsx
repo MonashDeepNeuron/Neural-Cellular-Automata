@@ -1,8 +1,8 @@
+import Image from 'next/image';
+import Link from 'next/link';
 import Card from '@/components/Card';
 import { CompatibilityWarning, Warning } from '@/components/Warning';
 import createMetadata from '@/util/createMetadata';
-import Image from 'next/image';
-import Link from 'next/link';
 
 export const metadata = createMetadata({
 	title: 'Simulators',

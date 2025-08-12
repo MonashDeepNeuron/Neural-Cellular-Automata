@@ -1,7 +1,7 @@
 'use client';
-import { CAStatus, type NCAControls } from '@/hooks/useNCA';
 import clsx from 'clsx';
 import { useId } from 'react';
+import { CAStatus, type NCAControls } from '@/hooks/useNCA';
 import Card from '../Card';
 import FramerateSlider from '../FramerateSlider';
 

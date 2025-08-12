@@ -1,12 +1,12 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-purple-mdn: #7065f9;
-  --color-purple-mdn-dark: #4838d6;
-  --color-purple-mdn-lighter: #7f90f9;
-  --color-purple-mdn-light: #afc0f2;
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-purple-mdn: #7065f9;
+	--color-purple-mdn-dark: #4838d6;
+	--color-purple-mdn-lighter: #7f90f9;
+	--color-purple-mdn-light: #afc0f2;
 }
 
 /*
@@ -18,13 +18,13 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentcolor);
+	}
 }
 
 h1 {

@@ -1,5 +1,5 @@
-import Card from '@/components/Card';
 import Image from 'next/image';
+import Card from '@/components/Card';
 
 export interface ProfileData {
 	name: string;

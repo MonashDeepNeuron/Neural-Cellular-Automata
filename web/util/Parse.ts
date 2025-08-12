@@ -1,12 +1,12 @@
 export const NEIGHBOURHOOD_TYPES: Record<string, number> = {
 	M: 0, // Moore/square
 	N: 1, // Neumann/diamond/radius measured by Manhatten distance
-	C: 2, // Centre of cell within sqrt(dx^2 + dy^2)
+	C: 2 // Centre of cell within sqrt(dx^2 + dy^2)
 };
 
 /** Convenience function, probably exists in a library*/
 function isDigit(c: string) {
-	return c >= "0" && c <= "9";
+	return c >= '0' && c <= '9';
 }
 
 /**
@@ -30,7 +30,7 @@ function isDigit(c: string) {
  * @todo rulestring validation function - pretty much accounted for in current interface setup though
  */
 export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
-	const ruleString = raw.replace(/\s/g, "").toUpperCase(); // Cut out white space and assert uppercase
+	const ruleString = raw.replace(/\s/g, '').toUpperCase(); // Cut out white space and assert uppercase
 
 	// console.log("Getting RULE...");
 	// ruleString is given by the user. it is a string
@@ -48,7 +48,7 @@ export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
 	const ruleList: number[] = [];
 
 	let i = 0;
-	if (ruleString[i] !== "R") {
+	if (ruleString[i] !== 'R') {
 		// console.log("ERROR");
 		return null;
 	}
@@ -78,7 +78,7 @@ export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
 
 	// Parse survival cases
 
-	while (ruleString[i] !== "S") {
+	while (ruleString[i] !== 'S') {
 		i++;
 	}
 	ruleList.push(0);
@@ -90,11 +90,11 @@ export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
 	// 2-4, 34-36, B3-4, ...
 	//    ^ -----
 
-	while (ruleString[lastS] !== "B") {
+	while (ruleString[lastS] !== 'B') {
 		lastS++;
 	}
 	lastS -= 3;
-	while (ruleString[lastS] !== "," && ruleString[lastS] !== "S") {
+	while (ruleString[lastS] !== ',' && ruleString[lastS] !== 'S') {
 		lastS--;
 	}
 
@@ -106,12 +106,12 @@ export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
 		ruleList.push(nextNumber());
 		ruleList[sConditionCountIndex]++;
 
-		while (ruleString[i] !== "-" && ruleString[i] !== ",") {
+		while (ruleString[i] !== '-' && ruleString[i] !== ',') {
 			//console.log(`Rejected ${ruleString[i]} in survive parse`);
 			i++;
 		}
 
-		if (ruleString[i] === "-") {
+		if (ruleString[i] === '-') {
 			i++; // Exclude dash to prevent misinterpretation as negative
 			ruleList.push(nextNumber());
 			ruleList[sConditionCountIndex]++;
@@ -133,11 +133,11 @@ export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
 	// 2-4, 34-36, B3-4, ...
 	//    ^ -----
 
-	while (ruleString[lastB] !== "N") {
+	while (ruleString[lastB] !== 'N') {
 		lastB++;
 	}
 	lastB -= 3;
-	while (ruleString[lastB] !== "," && ruleString[lastB] !== "B") {
+	while (ruleString[lastB] !== ',' && ruleString[lastB] !== 'B') {
 		lastB--;
 	}
 
@@ -149,11 +149,11 @@ export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
 		ruleList.push(nextNumber());
 		ruleList[bConditionCountIndex]++;
 
-		while (ruleString[i] !== "-" && ruleString[i] !== ",") {
+		while (ruleString[i] !== '-' && ruleString[i] !== ',') {
 			i++;
 		}
 
-		if (ruleString[i] === "-") {
+		if (ruleString[i] === '-') {
 			ruleList.push(nextNumber());
 			ruleList[bConditionCountIndex]++;
 		} else {
@@ -166,7 +166,7 @@ export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
 	// from i: ,Nn, S..., B...,
 	// Assume n is a single character
 
-	while (ruleString[i] !== "N") {
+	while (ruleString[i] !== 'N') {
 		i++;
 	}
 	i++;
@@ -201,7 +201,7 @@ export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
  * @todo rulestring validation function - pretty much accounted for in current interface setup though
  */
 export function parseLifeLikeRule(raw: string): Uint32Array<ArrayBuffer> | null {
-	const ruleString = raw.replace(/\s/g, "").toUpperCase(); // Cut out white space and assert uppercase
+	const ruleString = raw.replace(/\s/g, '').toUpperCase(); // Cut out white space and assert uppercase
 
 	// console.log("Getting RULE...");
 	// ruleString is given by the user. it is a string
@@ -226,7 +226,7 @@ export function parseLifeLikeRule(raw: string): Uint32Array<ArrayBuffer> | null 
 	// Parse survival cases
 	ruleList.push(0);
 	const sConditionCountIndex = ruleList.length - 1;
-	while (ruleString[i] !== "/") {
+	while (ruleString[i] !== '/') {
 		console.log(ruleString[i]);
 		ruleList.push(Number(ruleString[i]));
 		ruleList.push(Number(ruleString[i]));
@@ -278,79 +278,79 @@ export function displayLTLRule(ruleString: string) {
 	// console.log(`Displaying ${ruleString}`);
 
 	let i = 0;
-	while (ruleString[i] !== "R") {
+	while (ruleString[i] !== 'R') {
 		i++;
 	}
 	i++;
 
-	let R = "";
+	let R = '';
 
-	while (ruleString[i] !== ",") {
+	while (ruleString[i] !== ',') {
 		R += ruleString[i];
 		i++;
 	}
 
-	const inputR = document.getElementById("simulationInputR");
+	const inputR = document.getElementById('simulationInputR');
 	if (inputR) (inputR as HTMLInputElement).value = R;
 
-	while (ruleString[i] !== "C") {
+	while (ruleString[i] !== 'C') {
 		i++;
 	}
 	i++;
 
-	let C = "";
+	let C = '';
 
-	while (ruleString[i] !== ",") {
+	while (ruleString[i] !== ',') {
 		C += ruleString[i];
 		i++;
 	}
 
-	const inputC = document.getElementById("simulationInputC");
+	const inputC = document.getElementById('simulationInputC');
 	if (inputC) (inputC as HTMLInputElement).value = C;
 
-	while (ruleString[i] !== "S") {
+	while (ruleString[i] !== 'S') {
 		i++;
 	}
 	i++;
 
 	const sStart = i;
 
-	while (ruleString[i] !== "B") {
+	while (ruleString[i] !== 'B') {
 		i++;
 	}
 
-	while (ruleString[i] !== ",") {
+	while (ruleString[i] !== ',') {
 		i--;
 	}
 
 	const S = ruleString.substring(sStart, i);
-	const inputS = document.getElementById("simulationInputS");
+	const inputS = document.getElementById('simulationInputS');
 	if (inputS) (inputS as HTMLInputElement).value = S;
 
-	while (ruleString[i] !== "B") {
+	while (ruleString[i] !== 'B') {
 		i++;
 	}
 	i++;
 
 	const bStart = i;
 
-	while (ruleString[i] !== "N") {
+	while (ruleString[i] !== 'N') {
 		i++;
 	}
 
-	while (ruleString[i] !== ",") {
+	while (ruleString[i] !== ',') {
 		i--;
 	}
 
 	const B = ruleString.substring(bStart, i);
-	const inputB = document.getElementById("simulationInputB");
+	const inputB = document.getElementById('simulationInputB');
 	if (inputB) (inputB as HTMLInputElement).value = B;
 
-	while (ruleString[i] !== "N") {
+	while (ruleString[i] !== 'N') {
 		i++;
 	}
 	i++;
 
-	const inputN = document.getElementById("simulationInputN");
+	const inputN = document.getElementById('simulationInputN');
 	if (inputN) (inputN as HTMLInputElement).value = ruleString[i];
 }
