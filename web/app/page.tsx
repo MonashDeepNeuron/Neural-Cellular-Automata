@@ -1,6 +1,8 @@
 import { Navigation } from "@/components/Navigation";
 import { Content } from "@/components/Content";
 import { About } from "@/components/About";
+import { Explore } from "@/components/Explore";
+
 
 export default function Home() {
 	return (
@@ -8,6 +10,7 @@ export default function Home() {
 			<Navigation />
 			<Content />
 			<About />
+			<Explore />
     	</div>
 	);
 }
