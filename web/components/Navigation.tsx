@@ -1,8 +1,10 @@
-"use client";
+'use client'
 
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
+import logoImage from "@/public/images/mdn-logo.png";
 
 const navLinks = [
   { label: "Home", href: "#home" },
@@ -21,8 +23,13 @@ export const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary" />
-            <span className="font-bold text-lg text-white">Neural<span className="text-white/90">CA</span></span>
+            {/* <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary" /> */}
+            {/* <span className="font-bold text-lg text-white">Neural<span className="text-white/90">CA</span></span> */}
+            <Image
+              src={logoImage}
+              alt="Monash DeepNeuron Logo"
+              className="h-16 w-16 object-contain"
+            />
           </div>
 
           {/* Desktop Navigation */}

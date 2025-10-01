@@ -29,8 +29,8 @@ export const Content = () => {
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-xl">
-              Experience the dynamics of Neural Cellular Automata in real-time. 
-              Exploring the intersection of neural networks and cellular systems.
+              We are a research project team under Monash DeepNeuron, exploring the potential of Neural Cellular Automata (NCA) for various applications.
+              Our goal is to understand, simulate, and improve NCA models.
             </p>
             
             <div className="flex flex-wrap gap-4">
@@ -55,7 +55,7 @@ export const Content = () => {
               />
               <div className="absolute bottom-8 left-8 right-8 bg-background/80 backdrop-blur-md rounded-lg p-4 border border-primary/20">
                 <p className="text-sm text-muted-foreground">
-                  NCA Generated Cat Image
+                  Experience the dynamics of Neural Cellular Automata in real-time.
                 </p>
               </div>
             </div>
