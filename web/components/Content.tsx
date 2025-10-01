@@ -1,0 +1,67 @@
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Sparkles } from "lucide-react";
+import Image from "next/image";
+import catImage from "@/public/images/semitrained-cat.png";
+
+export const Content = () => {
+  return (
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Animated gradient mesh background */}
+      <div className="absolute inset-0 gradient-mesh opacity-50" />
+      
+      {/* Grid pattern overlay */}
+      <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-10" />
+      
+      {/* Content */}
+      <div className="container relative z-10 mx-auto px-6 py-32">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left column - Text */}
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm text-foreground/80">Monash DeepNeuron Research</span>
+            </div>
+            
+            <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
+              <span className="gradient-text">Neural Cellular</span>
+              <br />
+              <span className="text-foreground">Automata Simulator</span>
+            </h1>
+            
+            <p className="text-xl text-muted-foreground max-w-xl">
+              Experience the dynamics of Neural Cellular Automata in real-time. 
+              Exploring the intersection of neural networks and cellular systems.
+            </p>
+            
+            <div className="flex flex-wrap gap-4">
+              <Button variant="hero" size="lg" className="group">
+                Try the Simulator
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button variant="outline" size="lg">
+                Learn More
+              </Button>
+            </div>
+          </div>
+          
+          {/* Right column - Image */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-3xl blur-3xl animate-glow-pulse" />
+            <div className="relative rounded-2xl overflow-hidden border border-primary/20 bg-card/50 backdrop-blur-sm p-4 animate-float">
+              <Image 
+                src={catImage} 
+                alt="Neural Cellular Automata visualization" 
+                className="w-full h-auto rounded-xl"
+              />
+              <div className="absolute bottom-8 left-8 right-8 bg-background/80 backdrop-blur-md rounded-lg p-4 border border-primary/20">
+                <p className="text-sm text-muted-foreground">
+                  NCA Generated Cat Image
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
