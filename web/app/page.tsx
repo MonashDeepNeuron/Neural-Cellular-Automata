@@ -1,8 +1,8 @@
-import { Navigation } from "@/components/Navigation";
-import { Content } from "@/components/Content";
-import { About } from "@/components/About";
-import { Explore } from "@/components/Explore";
-import { Contact } from "@/components/Contact";
+import { Navigation } from "@/components/layout/Navigation";
+import { Content } from "@/app/home/Content";
+import { About } from "@/app/home/About";
+import { Explore } from "@/app/home/Explore";
+import { Contact } from "@/app/home/Contact";
 
 
 export default function Home() {
