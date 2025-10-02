@@ -31,7 +31,7 @@ const simulatorModels = [
     description: "Instead of using binary dead or alive states, Continuous CA uses a continuous range of values.",
     details: "The new cell state value is calculated by multiplying each neighbour by a weight, adding this together and applying a basic mathematical function to it. Can display behaviours similar to basic organisms and population level behaviours of bacteria.",
     demoVideo: "/model_demos/continuous.webm"
-  }
+  },
   {
     title: "Growing NCA",
     link: "/simulator/growing",
