@@ -96,7 +96,7 @@ const Simulator = () => {
               {simulatorModels.map((model) => (
                 <Card 
                   key={model.title}
-                  className="overflow-hidden bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 flex flex-col"
+                  className="overflow-hidden bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 flex flex-col pt-0"
                 >
                   {/* Video Demo */}
                   <div className="w-full aspect-square bg-muted relative overflow-hidden">
@@ -111,7 +111,7 @@ const Simulator = () => {
                   </div>
                   
                   {/* Content */}
-                  <div className="p-6 flex flex-col flex-grow">
+                  <div className="px-6 flex flex-col flex-grow">
                     <h3 className="text-xl font-bold mb-3">{model.title}</h3>
                     <p className="text-sm text-muted-foreground mb-4 flex-grow">
                       {model.description}
