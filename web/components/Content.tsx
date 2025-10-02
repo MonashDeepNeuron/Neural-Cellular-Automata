@@ -33,7 +33,7 @@ export const Content = () => {
             </p>
             
             <div className="flex flex-wrap gap-4">
-              <Button variant="hero" size="lg" className="group">
+              <Button variant="glow" size="lg" className="group">
                 Try the Simulator
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>

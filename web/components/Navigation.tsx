@@ -7,11 +7,11 @@ import Image from "next/image";
 import logoImage from "@/public/images/mdn-logo.png";
 
 const navLinks = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Simulator", href: "#simulator" },
-  { label: "Learn", href: "#learn" },
-  { label: "Research", href: "#research" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Simulator", href: "/simulator" },
+  { label: "Learn", href: "/learn" },
+  { label: "Research", href: "/research" },
 ];
 
 export const Navigation = () => {
@@ -43,9 +43,6 @@ export const Navigation = () => {
                 {link.label}
               </a>
             ))}
-            <Button variant="glow" size="sm">
-              Get Started
-            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -71,9 +68,6 @@ export const Navigation = () => {
                   {link.label}
                 </a>
               ))}
-              <Button variant="glow" size="sm" className="w-full">
-                Get Started
-              </Button>
             </div>
           </div>
         )}
