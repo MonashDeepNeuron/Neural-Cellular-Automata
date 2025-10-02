@@ -145,15 +145,13 @@ const Simulator = () => {
                 If you're experiencing issues with the simulator, check out our troubleshooting guide.
               </p>
               <Button asChild variant="default">
-                <a 
+                <Link
                   href="/troubleshooting"
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-2"
                 >
                   Go to Troubleshooting
                   <ExternalLink className="w-4 h-4" />
-                </a>
+                </Link>
               </Button>
             </Card>
           </div>

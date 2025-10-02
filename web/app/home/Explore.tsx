@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { FlaskConical, BookOpen, Microscope } from "lucide-react";
+import Link from "next/link";
 
 const features = [
   {
@@ -60,12 +61,12 @@ export const Explore = () => {
                   {feature.description}
                 </p>
                 
-                <a href={feature.link} target="_self" rel='noopener noreferrer'>
+                <Link href={feature.link}>
                   <div className="flex items-center gap-2 text-primary font-medium group-hover:gap-3 transition-all duration-300">
                     <span className="text-sm">Learn more</span>
                     <span className="text-lg">→</span>
                   </div>
-                </a>
+                </Link>
               </div>
             </Card>
           ))}
