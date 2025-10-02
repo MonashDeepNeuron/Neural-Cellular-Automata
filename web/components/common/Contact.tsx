@@ -23,10 +23,11 @@ export const Contact = () => {
                   Reach out to be informed when new positions open up. First-year or Master's students — all are welcome!
                 </p>
               </div>
-              
-              <Button variant="glow" size="lg" className="w-full">
-                Join the Team
-              </Button>
+              <a href='https://docs.google.com/forms/d/e/1FAIpQLSckOGpNS-nFOxB4cGHmXC2z04D6_m8j26qKLZee3bZ298vNWg/viewform?usp=sharing' target='_blank' rel='noopener noreferrer'>
+                <Button variant="glow" size="lg" className="w-full">
+                  Join the Team
+                </Button>
+              </a>
             </div>
           </Card>
 
@@ -46,10 +47,11 @@ export const Contact = () => {
                   We'd love to hear from you.
                 </p>
               </div>
-              
-              <Button variant="glow" size="lg" className="w-full">
-                Contact Us
-              </Button>
+              <a href='https://deepneuron.org/contact-us' target='_blank' rel='noopener noreferrer'>
+                <Button variant="glow" size="lg" className="w-full">
+                  Contact Us
+                </Button>
+              </a>
             </div>
           </Card>
         </div>

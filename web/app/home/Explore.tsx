@@ -12,7 +12,7 @@ const features = [
     icon: Microscope,
     title: "Our Research & Latest Findings",
     description: "Top 5 Papers in the field, summarised by us!",
-    link: "/research",
+    link: "/learn/research",
   },
   {
     icon: FlaskConical,
@@ -60,10 +60,12 @@ export const Explore = () => {
                   {feature.description}
                 </p>
                 
-                <div className="flex items-center gap-2 text-primary font-medium group-hover:gap-3 transition-all duration-300">
-                  <span className="text-sm">Learn more</span>
-                  <span className="text-lg">→</span>
-                </div>
+                <a href={feature.link} target="_self" rel='noopener noreferrer'>
+                  <div className="flex items-center gap-2 text-primary font-medium group-hover:gap-3 transition-all duration-300">
+                    <span className="text-sm">Learn more</span>
+                    <span className="text-lg">→</span>
+                  </div>
+                </a>
               </div>
             </Card>
           ))}
