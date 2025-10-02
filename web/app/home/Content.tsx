@@ -18,9 +18,9 @@ export const Content = () => {
             </div>
             
             <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
-              <span className="text-primary">Neural Cellular</span>
+              <span className="text-primary">Neural Cellular Automata</span>
               <br />
-              <span className="text-foreground">Automata Simulator</span>
+              <span className="text-foreground">Simulator</span>
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-xl">
