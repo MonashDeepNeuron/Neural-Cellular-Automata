@@ -6,11 +6,6 @@ import catImage from "@/public/images/semitrained-cat.png";
 export const Content = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Animated gradient mesh background */}
-      <div className="absolute inset-0 gradient-mesh opacity-50" />
-      
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-10" />
       
       {/* Content */}
       <div className="container relative z-10 mx-auto px-6 py-32">

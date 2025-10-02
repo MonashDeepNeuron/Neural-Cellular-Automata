@@ -6,7 +6,7 @@ import { Contact } from "@/app/home/Contact";
 
 export default function Home() {
 	return (
-		<div className="min-h-screen">
+		<div>
 			<Content />
 			<Blurb />
 			<Explore />
