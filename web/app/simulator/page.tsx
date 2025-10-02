@@ -114,7 +114,7 @@ const Simulator = () => {
 									</Link>
 
 									{/* Content */}
-									<div className='p-6 pb-0 flex flex-col flex-grow'>
+									<div className='px-6 pb-0 flex flex-col flex-grow'>
 										<h3 className='text-xl font-bold mb-3'>{model.title}</h3>
 										<p className='text-sm text-muted-foreground mb-4 flex-grow'>{model.description}</p>
 										<div className='pt-4 border-t border-border'>
