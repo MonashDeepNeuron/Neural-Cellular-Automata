@@ -7,7 +7,7 @@ export const About = () => {
         <Card className="max-w-4xl mx-auto p-12 bg-card/50 backdrop-blur-sm border-primary/20">
           <div className="space-y-6">
             <h2 className="text-3xl lg:text-4xl font-bold">
-              Welcome to <span className="gradient-text">Neural Cellular Automata</span>
+              Welcome to <span className="text-primary">Neural Cellular Automata</span>
             </h2>
             
             <p className="text-lg text-muted-foreground leading-relaxed">

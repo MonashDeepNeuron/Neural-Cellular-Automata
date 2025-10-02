@@ -23,7 +23,7 @@ export const Content = () => {
             </div>
             
             <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
-              <span className="gradient-text">Neural Cellular</span>
+              <span className="text-primary">Neural Cellular</span>
               <br />
               <span className="text-foreground">Automata Simulator</span>
             </h1>

@@ -31,7 +31,7 @@ export const Explore = () => {
       <div className="container relative z-10 mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-            <span className="gradient-text">Explore More</span>
+            <span className="text-primary">Explore More</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Dive deep into the world of Neural Cellular Automata

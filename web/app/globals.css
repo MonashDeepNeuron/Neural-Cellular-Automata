@@ -200,11 +200,6 @@
   }
   
   /* Utility classes for gradients and effects */
-  .gradient-text {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-primary);
-  }
-  
   .gradient-mesh {
     background-image: var(--gradient-mesh);
   }
