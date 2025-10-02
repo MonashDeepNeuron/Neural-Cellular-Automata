@@ -1,7 +1,7 @@
 import { Content } from "@/app/home/Content";
 import { Blurb } from "@/app/home/Blurb";
 import { Explore } from "@/app/home/Explore";
-import { Contact } from "@/components/common/Contact";
+import { Contact } from "@/app/home/Contact";
 
 
 export default function Home() {

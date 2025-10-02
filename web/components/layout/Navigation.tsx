@@ -24,13 +24,13 @@ export const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <a href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer'>
+            <Link href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer'>
               <Image
                 src={logoImage}
                 alt="Monash DeepNeuron Logo"
                 className="h-16 w-16 object-contain"
               />
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -60,14 +60,14 @@ export const Navigation = () => {
           <div className="md:hidden py-4 border-t border-primary/10">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.href}
                   href={link.href}
                   className="text-sm text-white/80 hover:text-white transition-colors duration-200 py-2"
                   onClick={() => setIsOpen(false)}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </div>
           </div>

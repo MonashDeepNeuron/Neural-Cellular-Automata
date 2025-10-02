@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
-import { Contact } from "@/components/common/Contact";
+import { Contact } from "@/app/home/Contact";
+import Link from "next/link";
 
 const teamMembers = [
   {
@@ -77,24 +78,24 @@ const About = () => {
 				<h3 className="text-2xl font-bold mb-4">Who Are We?</h3>
 				<p className="text-lg text-muted-foreground leading-relaxed mb-6">
 				We are a project team under{" "}
-				<a 
+				<Link
 					href="https://www.deepneuron.org/" 
 					target="_blank" 
 					rel="noopener noreferrer"
 					className="text-primary hover:underline font-semibold"
 				>
 					Monash DeepNeuron
-				</a>
+				</Link>
 				, an Engineering/IT student team run by Monash University students. Started in November 2023, 
 				NCA is one of many research projects, which you can read more about{" "}
-				<a 
+				<Link
 					href="https://www.deepneuron.org/" 
 					target="_blank" 
 					rel="noopener noreferrer"
 					className="text-primary hover:underline"
 				>
 					here
-				</a>
+				</Link>
 				!
 				</p>
 

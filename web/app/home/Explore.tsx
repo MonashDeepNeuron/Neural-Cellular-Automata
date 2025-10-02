@@ -43,12 +43,12 @@ export const Explore = () => {
           {features.map((feature, index) => (
             <Card 
               key={index}
-              className="group relative p-8 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-2 cursor-pointer"
+              className="group relative p-8 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-2 cursor-pointer flex flex-col"
             >
               {/* Glow effect on hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               
-              <div className="relative space-y-4">
+              <div className="relative space-y-4 flex-1 flex flex-col">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
                   <feature.icon className="w-6 h-6 text-primary" />
                 </div>
@@ -57,11 +57,11 @@ export const Explore = () => {
                   {feature.title}
                 </h3>
                 
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground flex-1">
                   {feature.description}
                 </p>
                 
-                <Link href={feature.link}>
+                <Link href={feature.link} target="_self" rel='noopener noreferrer' className="mt-auto">
                   <div className="flex items-center gap-2 text-primary font-medium group-hover:gap-3 transition-all duration-300">
                     <span className="text-sm">Learn more</span>
                     <span className="text-lg">→</span>

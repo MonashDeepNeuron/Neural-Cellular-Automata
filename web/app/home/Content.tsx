@@ -29,14 +29,14 @@ export const Content = () => {
             </p>
             
             <div className="flex flex-wrap gap-4">
-              <Link href='/simulator'>
-                <Button variant="glow" size="lg" className="group">
+              <Link href='/simulator' target="_self" rel='noopener noreferrer'>
+                <Button variant="glow" size="lg" className="group cursor-pointer">
                   Try the Simulator
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href='/learn'>
-                <Button variant="outline" size="lg">
+              <Link href='/learn' target="_self" rel='noopener noreferrer'>
+                <Button variant="outline" size="lg" className="cursor-pointer hover:bg-primary/90 hover:text-black border-primary/30 hover:border-primary">
                   Learn More
                 </Button>
               </Link>
@@ -47,7 +47,7 @@ export const Content = () => {
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-3xl blur-3xl animate-glow-pulse" />
             <div className="relative rounded-2xl overflow-hidden border border-primary/20 bg-card/50 backdrop-blur-sm p-4 animate-float">
-              <Link href='/simulator'>
+              <Link href='/simulator' target="_self" rel='noopener noreferrer'>
                 <Image
                   src={catImage}
                   alt="Neural Cellular Automata visualization"

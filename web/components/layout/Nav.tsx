@@ -24,9 +24,9 @@ export default function Navbar() {
 			<div className='max-w-full mx-auto px-4 py-3 flex items-center justify-between'>
 				{/* Logo */}
 				<div className='flex items-center space-x-4'>
-					<a href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer'>
+					<Link href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer'>
 						<Image src='/images/mdn-logo.png' alt='Deep Neuron Logo' height={40} width={80} />
-					</a>
+					</Link>
 
 					{/* Navigation Links */}
 					<div className='hidden md:flex items-center space-x-6'>

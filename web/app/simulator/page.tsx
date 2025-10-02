@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle, ArrowRight, ExternalLink } from "lucide-react";
+import { AlertTriangle, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 const simulatorModels = [
@@ -112,7 +112,7 @@ const Simulator = () => {
                   </div>
                   
                   {/* Content */}
-                  <div className="px-6 flex flex-col flex-grow">
+                  <div className="p-6 pb-0 flex flex-col flex-grow">
                     <h3 className="text-xl font-bold mb-3">{model.title}</h3>
                     <p className="text-sm text-muted-foreground mb-4 flex-grow">
                       {model.description}
@@ -121,13 +121,18 @@ const Simulator = () => {
                       <p className="text-xs text-muted-foreground mb-4">
                         {model.details}
                       </p>
-                      <Button asChild variant="outline" className="w-full">
+                      <Button 
+                        asChild 
+                        variant="outline" 
+                        className="w-full hover:bg-primary/90 hover:text-black border-primary/30 hover:border-primary"
+                      >
                         <Link
                           href={model.link}
+                          rel="noopener noreferrer"
                           className="inline-flex items-center justify-center gap-2"
                         >
                           Explore {model.title}
-                          <ArrowRight className="w-4 h-4" />
+                          <ExternalLink className="w-4 h-4" />
                         </Link>
                       </Button>
                     </div>
