@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 
-export const About = () => {
+export const Blurb = () => {
   return (
     <section className="relative py-24 overflow-hidden">
       <div className="container relative z-10 mx-auto px-6">
