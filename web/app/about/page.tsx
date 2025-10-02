@@ -32,6 +32,12 @@ const teamMembers = [
     role: "Deep Learning Engineer",
     degree: "Bachelor of Computer Science and Engineering",
     image: "/images/profile/Luca.jpg"
+  },
+  {
+    name: "Alexander Mai",
+    role: "Web Developer & UI Designer",
+    degree: "Bachelor of Commerce and Computer Science",
+    image: "/images/profile/Alex.jpg"
   }
 ];
 
@@ -54,12 +60,6 @@ const advisors = [
     degree: "Bachelor of Engineering",
     image: "/images/profile/Nyan.jpg"
   },
-  {
-    name: "Alexander Mai",
-    role: "Alumni",
-    degree: "Bachelor of Computer Science",
-    image: "/images/profile/Alex.jpg"
-  }
 ];
 
 const About = () => {
@@ -140,7 +140,7 @@ const About = () => {
 			<h3 className="text-3xl font-bold mb-4 text-center">Our Advisors and Alumni</h3>
 			<p className="text-center text-muted-foreground mb-12">Their help has been just as invaluable to the project!</p>
 			
-			<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+			<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
 				{advisors.map((advisor) => (
 				<Card 
 					key={advisor.name}
