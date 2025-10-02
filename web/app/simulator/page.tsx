@@ -1,4 +1,4 @@
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -107,9 +107,11 @@ const Simulator = () => {
 									className='overflow-hidden bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 flex flex-col pt-0'
 								>
 									{/* Video Demo */}
-									<div className='w-full aspect-square bg-muted relative overflow-hidden'>
-										<video src={model.demoVideo} autoPlay loop muted playsInline className='w-full h-full object-cover' />
-									</div>
+									<Link href={model.link}>
+										<div className='w-full aspect-square bg-muted relative overflow-hidden'>
+											<video src={model.demoVideo} autoPlay loop muted playsInline className='w-full h-full object-cover' />
+										</div>
+									</Link>
 
 									{/* Content */}
 									<div className='p-6 pb-0 flex flex-col flex-grow'>
@@ -122,9 +124,9 @@ const Simulator = () => {
 												variant='outline'
 												className='w-full hover:bg-primary/90 hover:text-black border-primary/30 hover:border-primary'
 											>
-												<Link href={model.link} rel='noopener noreferrer' className='inline-flex items-center justify-center gap-2'>
+												<Link href={model.link} className='inline-flex items-center justify-center gap-2'>
 													Explore {model.title}
-													<ExternalLink className='w-4 h-4' />
+													<ArrowRight className='w-4 h-4' />
 												</Link>
 											</Button>
 										</div>
