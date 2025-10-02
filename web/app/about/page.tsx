@@ -13,25 +13,25 @@ const teamMembers = [
     name: "Chloe Koe",
     role: "Deep Learning & Graphics Engineer",
     degree: "Bachelor of Computer Science",
-    image: "https://www.neuralca.org/images/profile/Chloe.jpg"
+    image: "/images/profile/Chloe.jpg"
   },
   {
     name: "Nathan Culshaw",
     role: "Deep Learning Engineer",
     degree: "Bachelor of Computer Science Advanced (Honours)",
-    image: "https://www.neuralca.org/images/profile/Nathan.jpg"
+    image: "/images/profile/Nathan.jpg"
   },
   {
     name: "Angus Bosmans",
     role: "High Performance Computing Engineer",
     degree: "Bachelor of Mechatronics Engineering (AI) & Arts",
-    image: "https://www.neuralca.org/images/profile/Angus.jpg"
+    image: "/images/profile/Angus.jpg"
   },
   {
     name: "Luca Lowndes",
     role: "Deep Learning Engineer",
     degree: "Bachelor of Computer Science and Engineering",
-    image: "https://www.neuralca.org/images/profile/Luca.jpg"
+    image: "/images/profile/Luca.jpg"
   }
 ];
 
@@ -40,25 +40,25 @@ const advisors = [
     name: "Keren Collins",
     role: "Deep Learning Advisor",
     degree: "Bachelor of Biomedical Engineering",
-    image: "https://www.neuralca.org/images/profile/Keren.jpg"
+    image: "/images/profile/Keren.jpg"
   },
   {
     name: "Joshua Riantoputra",
     role: "Deep Learning Advisor and founder",
     degree: "Bachelor of Mathematics and Computational Science",
-    image: "https://www.neuralca.org/images/profile/Josh.jpg"
+    image: "/images/profile/Josh.jpg"
   },
   {
     name: "Nyan Knaw",
     role: "Deep Learning Advisor",
     degree: "Bachelor of Engineering",
-    image: "https://www.neuralca.org/images/profile/Nyan.jpg"
+    image: "/images/profile/Nyan.jpg"
   },
   {
     name: "Alexander Mai",
     role: "Alumni",
     degree: "Bachelor of Computer Science",
-    image: "https://www.neuralca.org/images/profile/Alex.jpg"
+    image: "/images/profile/Alex.jpg"
   }
 ];
 

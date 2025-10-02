@@ -6,37 +6,37 @@ import { AlertTriangle, ExternalLink } from "lucide-react";
 const simulatorModels = [
   {
     title: "Growing NCA",
-    link: "https://www.neuralca.org/simulator/growing",
+    link: "/simulator/growing",
     description: "One of the best examples of NCA is Growing Neural Cellular Automata (A. Mordvintsev et al., 2020), where they trained NCA to 'grow' target images from a single seed cell.",
     details: "The Growing-NCA model emphasises that the perception of only neighbouring cells bears parallels with how natural cells communicate within living organisms. Interestingly, this results in Growing Neural Cellular Automata (and other NCA) also showing natural regenerative properties when the image is disturbed during generation."
   },
   {
     title: "Texture NCA",
-    link: "https://www.neuralca.org/simulator/texture",
+    link: "/simulator/texture",
     description: "Based on Self Organising Textures (A. Mordvintsev et al., 2021), where they trained NCA to 'grow' target images from a single seed cell.",
     details: "The main difference between Texture NCA and Growing NCA is that it aims to replicate image features on a small scale. It shares properties of regeneration, as well as independence of grid location, resulting in textures that can be smoothly and cohesively replicated over grids of any size and shape."
   },
   {
     title: "Classic Conway's Game of Life",
-    link: "https://www.neuralca.org/simulator/conway",
+    link: "/simulator/conway",
     description: "The most famous example of cellular automata operating on simple rules: All cells are either alive or dead (1 or 0).",
     details: "A living cell with 2 or 3 neighbors survives. A dead cell with exactly 3 neighbors becomes alive. In all other cases, the cell dies or remains dead. Even with such simple rules, complex behaviors can emerge."
   },
   {
     title: "Life-Like Cellular Automata",
-    link: "https://www.neuralca.org/simulator/lifelike",
+    link: "/simulator/lifelike",
     description: "Operates very similarly to the Game of Life in that all cells are either alive or dead. However, Life Like gives you the freedom to choose how many cells must be alive.",
     details: "The rule string format uses survival/birth notation. In this notation, the original Game of Life would be expressed as 23/3, where 2 or 3 cells in the neighbourhood are required for survival of a living cell, and 3 cells are required for a dead cell to come to life."
   },
   {
     title: "Larger than Life",
-    link: "https://www.neuralca.org/simulator/larger",
+    link: "/simulator/larger",
     description: "Builds on Life Like CA by introducing even more flexibility with specifiable neighbourhood radius, shapes, and minimum lifespan of living cells.",
     details: "The neighbourhood radius can encompass cells that are further than one cell away. Different neighbourhood shapes allow for different ways of determining a cell's distance from the target cell."
   },
   {
     title: "Continuous Cellular Automata",
-    link: "https://www.neuralca.org/simulator/continuous",
+    link: "/simulator/continuous",
     description: "Instead of using binary dead or alive states, Continuous CA uses a continuous range of values.",
     details: "The new cell state value is calculated by multiplying each neighbour by a weight, adding this together and applying a basic mathematical function to it. Can display behaviours similar to basic organisms and population level behaviours of bacteria."
   }
@@ -125,7 +125,7 @@ const Simulator = () => {
               </p>
               <Button asChild variant="default">
                 <a 
-                  href="https://www.neuralca.org/troubleshooting"
+                  href="/troubleshooting"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2"
