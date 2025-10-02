@@ -48,7 +48,12 @@ export default function Simulator({
 					onChange={() => setStepsPerFrame(stepsPerFrame === 1 ? 2 : 1)}
 				/>
 				<label htmlFor={checkboxId}>Skip every second frame</label>
-				<Button variant={play ? "pause" : "play"} className="mt-4 block px-4 py-2 text-white min-w-24 rounded-md font-bold" onClick={() => setPlay(!play)} disabled={status !== CAStatus.READY}>
+				<Button
+					variant={play ? 'pause' : 'play'}
+					className='mt-4 block px-4 py-2 text-white min-w-24 rounded-md font-bold'
+					onClick={() => setPlay(!play)}
+					disabled={status !== CAStatus.READY}
+				>
 					{play ? 'Pause' : 'Play'}
 				</Button>
 			</Card>

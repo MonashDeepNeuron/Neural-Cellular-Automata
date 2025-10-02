@@ -1,8 +1,7 @@
-import { Content } from "@/app/home/Content";
-import { Blurb } from "@/app/home/Blurb";
-import { Explore } from "@/app/home/Explore";
-import { Contact } from "@/app/home/Contact";
-
+import { Blurb } from '@/app/home/Blurb';
+import { Contact } from '@/app/home/Contact';
+import { Content } from '@/app/home/Content';
+import { Explore } from '@/app/home/Explore';
 
 export default function Home() {
 	return (
@@ -11,6 +10,6 @@ export default function Home() {
 			<Blurb />
 			<Explore />
 			<Contact />
-    	</div>
+		</div>
 	);
 }

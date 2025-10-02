@@ -2,8 +2,8 @@ import { Poppins } from 'next/font/google';
 import './globals.css';
 import clsx from 'clsx';
 import type { Viewport } from 'next';
-import createMetadata from '@/util/createMetadata';
 import { Navigation } from '@/components/layout/Navigation';
+import createMetadata from '@/util/createMetadata';
 
 const poppins = Poppins({
 	weight: ['500', '400'],
