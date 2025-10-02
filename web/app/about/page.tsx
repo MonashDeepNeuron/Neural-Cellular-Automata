@@ -50,7 +50,7 @@ const advisors = [
   },
   {
     name: "Joshua Riantoputra",
-    role: "Deep Learning Advisor and founder",
+    role: "Deep Learning Advisor and Founder",
     degree: "Bachelor of Mathematics and Computational Science",
     image: "/images/profile/Josh.jpg"
   },
