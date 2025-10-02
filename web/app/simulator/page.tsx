@@ -5,20 +5,6 @@ import { AlertTriangle, ExternalLink } from "lucide-react";
 
 const simulatorModels = [
   {
-    title: "Growing NCA",
-    link: "/simulator/growing",
-    description: "One of the best examples of NCA is Growing Neural Cellular Automata (A. Mordvintsev et al., 2020), where they trained NCA to 'grow' target images from a single seed cell.",
-    details: "The Growing-NCA model emphasises that the perception of only neighbouring cells bears parallels with how natural cells communicate within living organisms. Interestingly, this results in Growing Neural Cellular Automata (and other NCA) also showing natural regenerative properties when the image is disturbed during generation.",
-    demoVideo: "/model_demos/growing.webm"
-  },
-  {
-    title: "Texture NCA",
-    link: "/simulator/texture",
-    description: "Based on Self Organising Textures (A. Mordvintsev et al., 2021), where they trained NCA to 'grow' target images from a single seed cell.",
-    details: "The main difference between Texture NCA and Growing NCA is that it aims to replicate image features on a small scale. It shares properties of regeneration, as well as independence of grid location, resulting in textures that can be smoothly and cohesively replicated over grids of any size and shape.",
-    demoVideo: "/model_demos/texture.webm"
-  },
-  {
     title: "Classic Conway's Game of Life",
     link: "/simulator/conway",
     description: "The most famous example of cellular automata operating on simple rules: All cells are either alive or dead (1 or 0).",
@@ -32,7 +18,7 @@ const simulatorModels = [
     details: "The rule string format uses survival/birth notation. In this notation, the original Game of Life would be expressed as 23/3, where 2 or 3 cells in the neighbourhood are required for survival of a living cell, and 3 cells are required for a dead cell to come to life.",
     demoVideo: "/model_demos/lifelike.webm"
   },
-  {
+    {
     title: "Larger than Life",
     link: "/simulator/larger",
     description: "Builds on Life Like CA by introducing even more flexibility with specifiable neighbourhood radius, shapes, and minimum lifespan of living cells.",
@@ -46,6 +32,21 @@ const simulatorModels = [
     details: "The new cell state value is calculated by multiplying each neighbour by a weight, adding this together and applying a basic mathematical function to it. Can display behaviours similar to basic organisms and population level behaviours of bacteria.",
     demoVideo: "/model_demos/continuous.webm"
   }
+  {
+    title: "Growing NCA",
+    link: "/simulator/growing",
+    description: "One of the best examples of NCA is Growing Neural Cellular Automata (A. Mordvintsev et al., 2020), where they trained NCA to 'grow' target images from a single seed cell.",
+    details: "The Growing-NCA model emphasises that the perception of only neighbouring cells bears parallels with how natural cells communicate within living organisms. Interestingly, this results in Growing Neural Cellular Automata (and other NCA) also showing natural regenerative properties when the image is disturbed during generation.",
+    demoVideo: "/model_demos/growing.webm"
+  },
+  {
+    title: "Texture NCA",
+    link: "/simulator/texture",
+    description: "Based on Self Organising Textures (A. Mordvintsev et al., 2021), where they trained NCA to 'grow' target images from a single seed cell.",
+    details: "The main difference between Texture NCA and Growing NCA is that it aims to replicate image features on a small scale. It shares properties of regeneration, as well as independence of grid location, resulting in textures that can be smoothly and cohesively replicated over grids of any size and shape.",
+    demoVideo: "/model_demos/texture.webm"
+  },
+
 ];
 
 const Simulator = () => {
