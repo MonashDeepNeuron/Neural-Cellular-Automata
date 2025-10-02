@@ -110,9 +110,6 @@ const About = () => {
 			</Card>
 			</div>
 
-			{/* Contact Us */}
-			<Contact />
-
 			{/* Team Members */}
 			<div className="mb-20">
 			<h3 className="text-3xl font-bold mb-4 text-center">Meet the Team!</h3>

@@ -40,7 +40,7 @@ export const Contact = () => {
               </div>
               
               <div>
-                <h3 className="text-2xl font-bold mb-3">Join Us!</h3>
+                <h3 className="text-2xl font-bold mb-3">Contact Us!</h3>
                 <p className="text-muted-foreground">
                   Want to learn more about projects like this, or interested in a collaboration? 
                   We'd love to hear from you.

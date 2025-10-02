@@ -12,6 +12,7 @@ const navLinks = [
   { label: "Simulator", href: "/simulator" },
   { label: "Learn", href: "/learn" },
   { label: "Troubleshooting", href: "/troubleshooting" },
+  { label: "Contact", href: "/contact" }
 ];
 
 export const Navigation = () => {
