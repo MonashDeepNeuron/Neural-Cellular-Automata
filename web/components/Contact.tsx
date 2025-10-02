@@ -29,25 +29,25 @@ export const Contact = () => {
               </Button>
             </div>
           </Card>
-          
-          {/* Get in Touch Card */}
-          <Card className="relative p-10 bg-card/50 backdrop-blur-sm border-secondary/20 overflow-hidden group hover:border-secondary/40 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          {/* Contact Us Card */}
+          <Card className="relative p-10 bg-card/50 backdrop-blur-sm border-primary/20 overflow-hidden group hover:border-primary/40 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
             <div className="relative space-y-6">
-              <div className="w-14 h-14 rounded-xl bg-secondary/10 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Mail className="w-7 h-7 text-secondary" />
               </div>
               
               <div>
-                <h3 className="text-2xl font-bold mb-3">Get in Touch</h3>
+                <h3 className="text-2xl font-bold mb-3">Join Us!</h3>
                 <p className="text-muted-foreground">
                   Want to learn more about projects like this, or interested in a collaboration? 
                   We'd love to hear from you.
                 </p>
               </div>
               
-              <Button variant="outline" size="lg" className="w-full border-secondary/50 text-secondary hover:bg-secondary/10">
+              <Button variant="glow" size="lg" className="w-full">
                 Contact Us
               </Button>
             </div>
