@@ -42,8 +42,8 @@ const simulatorModels = [
   {
     title: "Texture NCA",
     link: "/simulator/texture",
-    description: "Based on Self Organising Textures (A. Mordvintsev et al., 2021), where they trained NCA to 'grow' target images from a single seed cell.",
-    details: "The main difference between Texture NCA and Growing NCA is that it aims to replicate image features on a small scale. It shares properties of regeneration, as well as independence of grid location, resulting in textures that can be smoothly and cohesively replicated over grids of any size and shape.",
+    description: "Based on Self Organising Textures (A. Mordvintsev et al., 2021), where they trained NCA to mimic target textures from a random initial state.",
+    details: "The main difference between Texture NCA and Growing NCA is that it aims to replicate image features on a small scale. It shares properties of regeneration, as well as independence of grid location, resulting in textures that can be smoothly and cohesively replicated over graphs of any size and shape.",
     demoVideo: "/model_demos/texture.webm"
   },
 
