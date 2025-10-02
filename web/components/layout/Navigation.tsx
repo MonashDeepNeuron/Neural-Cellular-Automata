@@ -1,10 +1,10 @@
 'use client'
 
-import { Button } from "@/components/ui/button";
-import { Link, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import logoImage from "@/public/images/mdn-logo.png";
+import Link from 'next/link';
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -36,13 +36,13 @@ export const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 className="text-sm text-white/80 hover:text-white transition-colors duration-200"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
 
