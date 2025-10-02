@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle, ExternalLink } from "lucide-react";
+import { AlertTriangle, ArrowRight, ExternalLink } from "lucide-react";
+import Link from "next/link";
 
 const simulatorModels = [
   {
@@ -121,15 +122,13 @@ const Simulator = () => {
                         {model.details}
                       </p>
                       <Button asChild variant="outline" className="w-full">
-                        <a 
+                        <Link
                           href={model.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="inline-flex items-center justify-center gap-2"
                         >
                           Explore {model.title}
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
                       </Button>
                     </div>
                   </div>
