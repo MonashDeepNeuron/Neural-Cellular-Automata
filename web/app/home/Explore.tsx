@@ -38,9 +38,9 @@ export const Explore = () => {
 				</div>
 
 				<div className='grid md:grid-cols-3 gap-8 max-w-6xl mx-auto'>
-					{features.map((feature, index) => (
+					{features.map(feature => (
 						<Card
-							key={index}
+							key={feature.link}
 							className='group relative p-8 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-2 cursor-pointer flex flex-col'
 						>
 							{/* Glow effect on hover */}

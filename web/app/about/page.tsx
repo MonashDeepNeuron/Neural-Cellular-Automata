@@ -1,14 +1,13 @@
-import { ExternalLink } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { Contact } from '@/app/home/Contact';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 const teamMembers = [
 	{
 		name: 'Afraz Gul',
 		role: 'Project Lead',
-		degree: 'Bachelor of Science and Computer Science'
+		degree: 'Bachelor of Science and Computer Science',
+		image: ''
 	},
 	{
 		name: 'Chloe Koe',
@@ -66,7 +65,7 @@ const advisors = [
 const About = () => {
 	return (
 		<div>
-			<section id='about' className='relative py-24 overflow-hidden'>
+			<section className='relative py-24 overflow-hidden'>
 				<div className='container relative z-10 mx-auto px-6'>
 					{/* Who Are We */}
 					<div className='max-w-4xl mx-auto mb-16'>
@@ -117,7 +116,7 @@ const About = () => {
 									className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300'
 								>
 									<div className='aspect-square mb-4 overflow-hidden rounded-lg'>
-										<img src={member.image} alt={member.name} className='w-full h-full object-cover' />
+										<Image src={member.image} alt={member.name} className='w-full h-full object-cover' />
 									</div>
 									<h4 className='text-xl font-bold mb-1'>{member.name}</h4>
 									<p className='text-sm text-primary font-semibold mb-2'>{member.role}</p>
@@ -139,7 +138,7 @@ const About = () => {
 									className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300'
 								>
 									<div className='aspect-square mb-4 overflow-hidden rounded-lg'>
-										<img src={advisor.image} alt={advisor.name} className='w-full h-full object-cover' />
+										<Image src={advisor.image} alt={advisor.name} className='w-full h-full object-cover' />
 									</div>
 									<h4 className='text-lg font-bold mb-1'>{advisor.name}</h4>
 									<p className='text-sm text-primary font-semibold mb-2'>{advisor.role}</p>
