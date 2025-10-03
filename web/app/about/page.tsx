@@ -1,6 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
+import createMetadata from '@/util/createMetadata';
+
+export const metadata = createMetadata({
+	title: 'About',
+	description: 'We are a project team under Monash DeepNeuron, an Engineering/IT student team run by Monash University students.'
+});
 
 const teamMembers = [
 	{
