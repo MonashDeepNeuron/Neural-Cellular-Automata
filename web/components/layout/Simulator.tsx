@@ -30,7 +30,7 @@ export default function Simulator({
 	const checkboxId = useId();
 
 	return (
-		<div className='grid gap-4 grid-rows-[1fr_auto] grid-cols-1 max-w-full lg:grid-rows-1 lg:grid-cols-[24rem_1fr] lg:h-[calc(100vh-6rem)]'>
+		<div className='grid pt-12 gap-4 grid-rows-[1fr_auto] grid-cols-1 max-w-full lg:grid-rows-1 lg:grid-cols-[24rem_1fr] lg:h-[calc(100vh-6rem)]'>
 			<Card>
 				<h1 className='font-bold'>{name}</h1>
 				<p>
