@@ -13,7 +13,7 @@ const teamMembers = [
 		name: 'Afraz Gul',
 		role: 'Project Lead',
 		degree: 'Bachelor of Science and Computer Science',
-		image: ''
+		image: 'images/profile/default.jpg'
 	},
 	{
 		name: 'Chloe Koe',

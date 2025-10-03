@@ -17,5 +17,5 @@ export default function Client() {
 		parseRuleString: parseLTLRule
 	});
 
-	return <Simulator name='LTL' size={SIZE} {...controls} />;
+	return <Simulator name='Larger than Life' size={SIZE} {...controls} />;
 }
