@@ -145,7 +145,7 @@ const Simulator = () => {
 							</p>
 							<Button asChild variant='default'>
 								<Link href='/troubleshooting' className='inline-flex items-center gap-2'>
-									Go to Troubleshooting
+									<span className='truncate'>Go to Troubleshooting</span>
 									<ExternalLink className='w-4 h-4' />
 								</Link>
 							</Button>

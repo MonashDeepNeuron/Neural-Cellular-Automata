@@ -47,7 +47,7 @@ const Contact = () => {
 										rel='noopener noreferrer'
 										className='inline-flex items-center gap-2'
 									>
-										Visit Deep Neuron Contact Page
+										<span className='truncate'>Visit Deep Neuron Contact Page</span>
 										<ExternalLink className='w-4 h-4' />
 									</Link>
 								</Button>

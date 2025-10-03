@@ -66,7 +66,7 @@ export default function Learn() {
 							<Button asChild variant='default' size='lg'>
 								<Link href='/learn/research' className='inline-flex items-center gap-2'>
 									<BookOpen className='w-5 h-5' />
-									Explore Research Papers
+									<span className='truncate'>Explore Research Papers</span>
 									<ExternalLink className='w-4 h-4' />
 								</Link>
 							</Button>
