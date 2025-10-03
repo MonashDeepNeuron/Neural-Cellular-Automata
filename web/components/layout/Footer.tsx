@@ -1,4 +1,4 @@
-import { Github, Linkedin } from 'lucide-react';
+import { FiLinkedin, FiGithub } from "react-icons/fi";
 import Link from 'next/link';
 
 export const Footer = () => {
@@ -65,18 +65,18 @@ export const Footer = () => {
 						<h4 className='font-semibold mb-4'>Connect</h4>
 						<div className='flex gap-4'>
 							<Link
-								href='https://github.com/MonashDeepNeuron/Neural-Cellular-Automata'
-								target='_blank'
-								className='w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors'
-							>
-								<Github className='w-5 h-5' />
-							</Link>
-							<Link
 								href='https://au.linkedin.com/company/monashdeepneuron'
 								target='_blank'
 								className='w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors'
 							>
-								<Linkedin className='w-5 h-5' />
+								<FiLinkedin className='w-5 h-5' />
+							</Link>
+							<Link
+								href='https://github.com/MonashDeepNeuron/Neural-Cellular-Automata'
+								target='_blank'
+								className='w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors'
+							>
+								<FiGithub className='w-5 h-5' />
 							</Link>
 						</div>
 					</div>
