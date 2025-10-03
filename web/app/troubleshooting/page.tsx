@@ -42,7 +42,7 @@ const Troubleshooting = () => {
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
                     <li><strong className="text-foreground">Unsupported Browsers:</strong> Firefox</li>
                     <li><strong className="text-foreground">Supported Browsers:</strong> Chrome for Windows, Microsoft Edge, and Chrome for Android</li>
-                    <li><strong className="text-foreground">Experimentally Supported Browsers:</strong> If you are on an iOS or iPadOS device, make sure you are using Safari, and follow this short tutorial: <Link href="/ios-tutorial" className="text-primary hover:underline">iOS Tutorial</Link></li>
+                    <li><strong className="text-foreground">Experimentally Supported Browsers:</strong> If you are on an iOS or iPadOS device, make sure you are using Safari, and follow this short tutorial: <Link href="/ios-sucks" className="text-primary hover:underline">iOS Tutorial</Link></li>
                   </ul>
                   <p className="mt-3 text-muted-foreground">
                     To check if your browser supports WebGPU, visit <a href="https://caniuse.com/webgpu" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Can I Use WebGPU?</a>
