@@ -125,7 +125,7 @@ const Simulator = () => {
 												className='w-full hover:bg-primary/90 hover:text-black border-primary/30 hover:border-primary'
 											>
 												<Link href={model.link} className='inline-flex items-center justify-center gap-2'>
-													Explore {model.title}
+													<span className='truncate'>Explore {model.title}</span>
 													<ArrowRight className='w-4 h-4' />
 												</Link>
 											</Button>
