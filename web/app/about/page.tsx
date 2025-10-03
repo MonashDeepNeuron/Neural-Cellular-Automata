@@ -122,7 +122,7 @@ const About = () => {
 									className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300'
 								>
 									<div className='aspect-square mb-4 overflow-hidden rounded-lg'>
-										<Image src={member.image} alt={member.name} className='w-full h-full object-cover' />
+										<Image src={member.image} alt={member.name} width={500} height={500} className='w-full h-full object-cover' />
 									</div>
 									<h4 className='text-xl font-bold mb-1'>{member.name}</h4>
 									<p className='text-sm text-primary font-semibold mb-2'>{member.role}</p>
@@ -144,7 +144,7 @@ const About = () => {
 									className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300'
 								>
 									<div className='aspect-square mb-4 overflow-hidden rounded-lg'>
-										<Image src={advisor.image} alt={advisor.name} className='w-full h-full object-cover' />
+										<Image src={advisor.image} alt={advisor.name} width={500} height={500} className='w-full h-full object-cover' />
 									</div>
 									<h4 className='text-lg font-bold mb-1'>{advisor.name}</h4>
 									<p className='text-sm text-primary font-semibold mb-2'>{advisor.role}</p>
