@@ -17,5 +17,5 @@ export default function Client() {
 		parseRuleString: parseLifeLikeRule
 	});
 
-	return <Simulator name='Life-like' size={SIZE} {...controls} />;
+	return <Simulator name='Life-Like' size={SIZE} {...controls} />;
 }
