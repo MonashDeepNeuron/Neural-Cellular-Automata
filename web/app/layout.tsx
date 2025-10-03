@@ -26,7 +26,7 @@ export default function RootLayout({
 		<html lang='en'>
 			<body className={clsx(poppins.className, 'antialiased text-black overflow-x-hidden max-w-screen')}>
 				<Navigation />
-				<main className='min-h-screen pt-4 p-4 max-w-full'>
+				<main className='min-h-screen pt-4 max-w-full'>
 					{children}
 				</main>
 				<Footer />
