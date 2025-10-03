@@ -114,6 +114,7 @@ const About = () => {
 					{/* Team Members */}
 					<div className='mb-20'>
 						<h3 className='text-3xl font-bold mb-4 text-center'>Meet the Team!</h3>
+						<p className='text-center text-muted-foreground mb-12'>Super proud of our amazing team!</p>
 
 						<div className='grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto'>
 							{teamMembers.map(member => (
