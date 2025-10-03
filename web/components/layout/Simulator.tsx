@@ -75,11 +75,12 @@ export default function Simulator({
 					</div>
 
 					{/* Skip Frame */}
-					<div className='flex items-center gap-3 p-3 mb-6 rounded-lg bg-muted/50 border border-border/50'>
+					<div className='flex items-center gap-3 p-3 mb-6 rounded-lg bg-muted/50 border border-border/50 cursor-pointer'>
 						<Checkbox
 							id={checkboxId}
 							checked={stepsPerFrame === 2}
 							onCheckedChange={(checked) => setStepsPerFrame(checked ? 2 : 1)}
+							className='cursor-pointer'
 						/>
 						<Label htmlFor={checkboxId} className='cursor-pointer'>
 							Skip every second frame
@@ -90,7 +91,7 @@ export default function Simulator({
 					<Button
 						variant={play ? 'pause' : 'play'}
 						size='lg'
-						className='w-full'
+						className='w-full cursor-pointer'
 						onClick={() => setPlay(!play)}
 						disabled={status !== CAStatus.READY}
 					>

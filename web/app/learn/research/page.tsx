@@ -167,16 +167,15 @@ const Research = () => {
 											<CardTitle className='text-2xl mb-1'>{paper.title}</CardTitle>
 											<CardDescription className='text-base italic'>{paper.subtitle}</CardDescription>
 										</div>
-										<Button asChild variant='outline' size='sm'>
-											<a
-												href={paper.doiLink}
-												target='_blank'
-												rel='noopener noreferrer'
-												className='inline-flex items-center gap-2 whitespace-nowrap'
+										<Link href={paper.doiLink} target='_self' rel='noopener noreferrer'>
+											<Button
+												variant='outline'
+												size='lg'
+												className='cursor-pointer hover:bg-primary/90 hover:text-black border-primary/30 hover:border-primary'
 											>
 												DOI <ExternalLink className='w-3 h-3' />
-											</a>
-										</Button>
+											</Button>
+										</Link>
 									</div>
 									<div className='text-sm text-muted-foreground space-y-1'>
 										<p>
