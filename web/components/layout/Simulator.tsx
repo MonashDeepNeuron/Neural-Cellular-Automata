@@ -1,19 +1,20 @@
 'use client';
 import clsx from 'clsx';
-import { useId } from 'react';
+import { AlertCircle, Pause, Play } from 'lucide-react';
+import { type ReactNode, useId } from 'react';
 import { CAStatus, type NCAControls } from '@/hooks/useNCA';
+import { Alert, AlertDescription } from '../ui/alert';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { Slider } from '../ui/slider';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
-import { Play, Pause, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '../ui/alert';
+import { Slider } from '../ui/slider';
 
 interface SimulatorProps extends NCAControls {
 	name: string;
 	className?: string;
 	size: number;
+	children?: ReactNode;
 }
 
 export default function Simulator({
@@ -29,7 +30,8 @@ export default function Simulator({
 	status,
 	stepsPerFrame,
 	setStepsPerFrame,
-	className
+	className,
+	children
 }: SimulatorProps) {
 	const checkboxId = useId();
 
@@ -39,17 +41,19 @@ export default function Simulator({
 				{/* Controls Panel */}
 				<Card className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 h-full'>
 					<h1 className='text-2xl font-bold'>{name}</h1>
-					
+
 					{/* Status */}
 					<div className='space-y-2 pb-6 border-b border-border'>
 						<div className='flex items-center justify-between text-sm'>
 							<span className='text-muted-foreground'>Status</span>
-							<span className={clsx(
-								'font-medium',
-								status === CAStatus.READY && 'text-green-500',
-								status === CAStatus.ALLOCATING_RESOURCES && 'text-yellow-500',
-								status === CAStatus.FAILED && 'text-destructive'
-							)}>
+							<span
+								className={clsx(
+									'font-medium',
+									status === CAStatus.READY && 'text-green-500',
+									status === CAStatus.ALLOCATING_RESOURCES && 'text-yellow-500',
+									status === CAStatus.FAILED && 'text-destructive'
+								)}
+							>
 								{status}
 							</span>
 						</div>
@@ -65,13 +69,7 @@ export default function Simulator({
 							<Label>Frame Rate</Label>
 							<span className='text-sm font-mono text-muted-foreground'>{FPS} FPS</span>
 						</div>
-						<Slider
-							value={[FPS]}
-							onValueChange={(value) => setFPS(value[0])}
-							max={240}
-							min={1}
-							step={1}
-						/>
+						<Slider value={[FPS]} onValueChange={value => setFPS(value[0])} max={240} min={1} step={1} />
 					</div>
 
 					{/* Skip Frame */}
@@ -79,13 +77,15 @@ export default function Simulator({
 						<Checkbox
 							id={checkboxId}
 							checked={stepsPerFrame === 2}
-							onCheckedChange={(checked) => setStepsPerFrame(checked ? 2 : 1)}
+							onCheckedChange={checked => setStepsPerFrame(checked ? 2 : 1)}
 							className='cursor-pointer'
 						/>
 						<Label htmlFor={checkboxId} className='cursor-pointer'>
 							Skip every second frame
 						</Label>
 					</div>
+
+					{children}
 
 					{/* Play/Pause */}
 					<Button

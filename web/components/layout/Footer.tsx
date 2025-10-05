@@ -1,5 +1,5 @@
-import { FiLinkedin, FiGithub } from "react-icons/fi";
 import Link from 'next/link';
+import { FiGithub, FiLinkedin } from 'react-icons/fi';
 
 export const Footer = () => {
 	return (

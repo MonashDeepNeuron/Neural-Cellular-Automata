@@ -21,6 +21,7 @@ export interface GPUResources {
 	buffers: {
 		vertex: GPUBuffer;
 		seed: GPUBuffer;
+		cells: CellStateBufferPair;
 	};
 }
 
@@ -271,7 +272,6 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 
 			// Write buffers
 			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
-			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
 			if (seed) {
 				const centre = 3 * size * size + Math.floor(size / 2) * size + Math.floor(size / 2);
 				cellState[centre] = 1;
@@ -322,7 +322,8 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 				},
 				buffers: {
 					vertex: vertexBuffer,
-					seed: seedBuffer
+					seed: seedBuffer,
+					cells: cellStateBuffers
 				}
 			});
 			setStatus(CAStatus.READY);
@@ -407,6 +408,25 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 		};
 	}, [play, FPS, resources, status, size, step, stepsPerFrame]);
 
+	function resetState() {
+		if (!resources) return;
+
+		// Reset cell buffers
+		const {
+			device,
+			buffers: { cells }
+		} = resources;
+		const cellState = new Float32Array(channels * size * size).fill(0);
+		if (seed) {
+			const centre = 3 * size * size + Math.floor(size / 2) * size + Math.floor(size / 2);
+			cellState[centre] = 1;
+		}
+		device.queue.writeBuffer(cells[0], 0, cellState);
+
+		// Reset step
+		setStep(0);
+	}
+
 	return {
 		play,
 		setPlay,
@@ -420,7 +440,8 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 		setFPS,
 		stepsPerFrame,
 		setStepsPerFrame,
-		canvasRef
+		canvasRef,
+		resetState
 	};
 }
 
