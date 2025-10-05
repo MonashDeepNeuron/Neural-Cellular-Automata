@@ -10,7 +10,9 @@ import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import { Slider } from '../ui/slider';
 
-interface SimulatorProps extends NCAControls {
+type Controls = Omit<NCAControls, 'resetState'> & Partial<Pick<NCAControls, 'resetState'>>
+
+interface SimulatorProps extends Controls {
 	name: string;
 	className?: string;
 	size: number;
