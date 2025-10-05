@@ -37,11 +37,11 @@ export default function Simulator({
 		<div className='container mx-auto px-6 py-24'>
 			<div className='grid lg:grid-cols-[20rem_1fr] gap-6 max-w-7xl mx-auto'>
 				{/* Controls Panel */}
-				<Card className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 h-fit'>
-					<h1 className='text-2xl font-bold mb-6'>{name}</h1>
+				<Card className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 h-full'>
+					<h1 className='text-2xl font-bold'>{name}</h1>
 					
 					{/* Status */}
-					<div className='space-y-2 mb-6 pb-6 border-b border-border'>
+					<div className='space-y-2 pb-6 border-b border-border'>
 						<div className='flex items-center justify-between text-sm'>
 							<span className='text-muted-foreground'>Status</span>
 							<span className={clsx(
@@ -60,7 +60,7 @@ export default function Simulator({
 					</div>
 
 					{/* Frame Rate */}
-					<div className='space-y-3 mb-6'>
+					<div className='space-y-3'>
 						<div className='flex items-center justify-between'>
 							<Label>Frame Rate</Label>
 							<span className='text-sm font-mono text-muted-foreground'>{FPS} FPS</span>
@@ -75,7 +75,7 @@ export default function Simulator({
 					</div>
 
 					{/* Skip Frame */}
-					<div className='flex items-center gap-3 p-3 mb-6 rounded-lg bg-muted/50 border border-border/50 cursor-pointer'>
+					<div className='flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50 cursor-pointer'>
 						<Checkbox
 							id={checkboxId}
 							checked={stepsPerFrame === 2}
@@ -91,7 +91,7 @@ export default function Simulator({
 					<Button
 						variant={play ? 'pause' : 'play'}
 						size='lg'
-						className='w-full cursor-pointer'
+						className='w-full cursor-pointer mt-auto'
 						onClick={() => setPlay(!play)}
 						disabled={status !== CAStatus.READY}
 					>
