@@ -2,8 +2,13 @@
 import clsx from 'clsx';
 import { useId } from 'react';
 import { CAStatus, type NCAControls } from '@/hooks/useNCA';
-import Card from '../Card';
-import FramerateSlider from '../FramerateSlider';
+import { Button } from '../ui/button';
+import { Card } from '../ui/card';
+import { Slider } from '../ui/slider';
+import { Checkbox } from '../ui/checkbox';
+import { Label } from '../ui/label';
+import { Play, Pause, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '../ui/alert';
 
 interface SimulatorProps extends NCAControls {
 	name: string;
@@ -29,47 +34,100 @@ export default function Simulator({
 	const checkboxId = useId();
 
 	return (
-		<div className='grid gap-4 grid-rows-[1fr_auto] grid-cols-1 max-w-full lg:grid-rows-1 lg:grid-cols-[24rem_1fr] lg:h-[calc(100vh-6rem)]'>
-			<Card>
-				<h1 className='font-bold'>{name}</h1>
-				<p>
-					<b>Status</b>: {status}
-				</p>
-				<p>
-					<b>Step</b>: {step}
-				</p>
-				<FramerateSlider state={FPS} setState={setFPS} max={240} />
-				<input
-					type='checkbox'
-					id={checkboxId}
-					checked={stepsPerFrame === 2}
-					className='mr-2'
-					onChange={() => setStepsPerFrame(stepsPerFrame === 1 ? 2 : 1)}
-				/>
-				<label htmlFor={checkboxId}>Skip every second frame</label>
-				<button
-					type='button'
-					disabled={status !== CAStatus.READY}
-					className={clsx('mt-4 block px-4 py-2 text-white min-w-24 rounded-md font-bold', play ? 'bg-red-700' : 'bg-green-700')}
-					onClick={() => setPlay(!play)}
-				>
-					{play ? 'Pause' : 'Play'}
-				</button>
-			</Card>
-			<Card className='flex justify-center'>
-				<div className='relative aspect-square w-full lg:w-auto lg:h-full max-h-full max-w-full overflow-hidden'>
-					<div className='absolute top-0 left-0 flex items-center justify-center overflow-hidden w-full h-full'>
-						{error && <p className='text-red-500 px-4 text-center'>{error}</p>}
+		<div className='container mx-auto px-6 py-24'>
+			<div className='grid lg:grid-cols-[20rem_1fr] gap-6 max-w-7xl mx-auto'>
+				{/* Controls Panel */}
+				<Card className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 h-full'>
+					<h1 className='text-2xl font-bold'>{name}</h1>
+					
+					{/* Status */}
+					<div className='space-y-2 pb-6 border-b border-border'>
+						<div className='flex items-center justify-between text-sm'>
+							<span className='text-muted-foreground'>Status</span>
+							<span className={clsx(
+								'font-medium',
+								status === CAStatus.READY && 'text-green-500',
+								status === CAStatus.ALLOCATING_RESOURCES && 'text-yellow-500',
+								status === CAStatus.FAILED && 'text-destructive'
+							)}>
+								{status}
+							</span>
+						</div>
+						<div className='flex items-center justify-between text-sm'>
+							<span className='text-muted-foreground'>Step</span>
+							<span className='font-mono'>{step}</span>
+						</div>
 					</div>
-					<canvas
-						height={size}
-						width={size}
-						className={clsx('h-full w-full', className)}
-						ref={canvasRef}
-						style={{ imageRendering: 'pixelated' }}
-					/>
-				</div>
-			</Card>
+
+					{/* Frame Rate */}
+					<div className='space-y-3'>
+						<div className='flex items-center justify-between'>
+							<Label>Frame Rate</Label>
+							<span className='text-sm font-mono text-muted-foreground'>{FPS} FPS</span>
+						</div>
+						<Slider
+							value={[FPS]}
+							onValueChange={(value) => setFPS(value[0])}
+							max={240}
+							min={1}
+							step={1}
+						/>
+					</div>
+
+					{/* Skip Frame */}
+					<div className='flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50 cursor-pointer'>
+						<Checkbox
+							id={checkboxId}
+							checked={stepsPerFrame === 2}
+							onCheckedChange={(checked) => setStepsPerFrame(checked ? 2 : 1)}
+							className='cursor-pointer'
+						/>
+						<Label htmlFor={checkboxId} className='cursor-pointer'>
+							Skip every second frame
+						</Label>
+					</div>
+
+					{/* Play/Pause */}
+					<Button
+						variant={play ? 'pause' : 'play'}
+						size='lg'
+						className='w-full cursor-pointer mt-auto'
+						onClick={() => setPlay(!play)}
+						disabled={status !== CAStatus.READY}
+					>
+						{play ? (
+							<>
+								<Pause className='w-4 h-4 mr-2' />
+								Pause
+							</>
+						) : (
+							<>
+								<Play className='w-4 h-4 mr-2' />
+								Start
+							</>
+						)}
+					</Button>
+				</Card>
+
+				{/* Canvas */}
+				<Card className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 flex items-center justify-center'>
+					<div className='relative w-full max-w-xl aspect-square'>
+						{error && (
+							<Alert variant='destructive' className='absolute top-0 left-0 right-0 z-10 m-4'>
+								<AlertCircle className='h-4 w-4' />
+								<AlertDescription>{error}</AlertDescription>
+							</Alert>
+						)}
+						<canvas
+							height={size}
+							width={size}
+							className={clsx('w-full h-full rounded-lg', error && 'opacity-50', className)}
+							ref={canvasRef}
+							style={{ imageRendering: 'pixelated' }}
+						/>
+					</div>
+				</Card>
+			</div>
 		</div>
 	);
 }

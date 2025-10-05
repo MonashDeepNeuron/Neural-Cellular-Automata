@@ -7,163 +7,193 @@ export const metadata = createMetadata({
 	description: "Read summaries of research paper's we find interesting!"
 });
 
-export default function Research() {
-	return (
-		<div className='max-w-4xl mx-auto px-6 py-10 text-gray-800'>
-			{/* Main Content */}
-			<h1 className='text-4xl font-bold mb-4 text-center'>Neural Cellular Automata</h1>
-			<h3 className='text-lg text-gray-600 text-center mb-2'>- Top 5 Papers, Summarised!</h3>
-			<p className='text-center text-gray-400 italic'>Last updated Mar 2025</p>
+import { BookOpen, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-			{/* Paper 1: Growing NCA */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mt-6'>Growing Neural Cellular Automata</h2>
-				<p>
-					Differentiable Model of Morphogenesis, <i>Feb. 11, 2020</i>. doi:{' '}
-					<Link
-						href='https://doi.org/10.23915/distill.00023'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						10.23915/distill.00023
-					</Link>
-				</p>
-				<h4 className='italic text-gray-600'>Alexander Mordvintsev, Ettore Randazzo, Eyvind Niklasson, Michael Levin</h4>
-				<p className='py-3'>
+const Research = () => {
+	const papers = [
+		{
+			title: 'Growing Neural Cellular Automata',
+			subtitle: 'Differentiable Model of Morphogenesis',
+			date: 'Feb. 11, 2020',
+			doi: '10.23915/distill.00023',
+			doiLink: 'https://doi.org/10.23915/distill.00023',
+			authors: 'Alexander Mordvintsev, Ettore Randazzo, Eyvind Niklasson, Michael Levin',
+			description: (
+				<>
 					Neural Cellular Automata (NCA) are used here to simulate individual cells. In particular, the paper demonstrated the capacity of
-					NCA to model multicellular morphogenesis, or how a single cell can split, differentiate, and become a complete living being. To
-					achieve behaviour resembling real biology, the following techniques are used:
-				</p>
-				<ul className='list-disc list-inside ml-4'>
-					<li>
-						<b>Convolutional Network architecture:</b> The neural net is trained such that all cells in the simulation have the same model,
-						similar to how all biological cells in an organism have the same DNA.
-					</li>
-					<li>
-						<b>Hidden channels:</b> The state of a cell is represented as a 16 channel vector, of which only the first 4 are visualised. The
-						12 other channels are intended to simulate inter-cell communication such as hormone signalling or electrical pulses
-					</li>
-					<li>
-						<b>Alive masking:</b> the alpha value (4th channel) is used to encode whether the cell is alive. Cells deemed as "dead" do not
-						update. The simulation begins with a single live cell.
-					</li>
-					<li>
-						<b>Stochastic updates:</b> cell updates trigger randomly, mimicking how biological cells may split or change at different times.
-					</li>
-				</ul>
-			</section>
-
-			{/* Paper 2: Texture NCA */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn'>Self-Organising Textures</h2>
-				<p>
-					Neural Cellular Automata Model of Pattern Formation, <i>Feb. 11, 2021</i>. doi:{' '}
-					<Link
-						href='https://doi.org/10.23915/distill.00027.003'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						10.23915/distill.00027.003
-					</Link>
-				</p>
-				<h4 className='italic text-gray-600'>Eyvind Niklasson, Alexander Mordvintsev, Ettore Randazzo, Michael Levin</h4>
-				<p className='py-3'>
+					NCA to model multicellular morphogenesis, or how a single cell can split, differentiate, and become a complete living being.
+					<br />
+					<br />
+					<ul className='list-disc list-inside text-muted-foreground'>
+						<li className='leading-relaxed'>
+							<strong>Convolutional Network architecture:</strong> The neural net is trained such that all cells in the simulation have the
+							same model, similar to how all biological cells in an organism have the same DNA.
+						</li>
+						<li className='leading-relaxed'>
+							<strong>Hidden channels:</strong> The state of a cell is represented as a 16 channel vector, of which only the first 4 are
+							visualised. The 12 other channels are intended to simulate inter-cell communication such as hormone signalling or electrical
+							pulses.
+						</li>
+						<li className='leading-relaxed'>
+							<strong>Alive masking:</strong> the alpha value (4th channel) is used to encode whether the cell is alive. Cells deemed as
+							"dead" do not update. The simulation begins with a single live cell.
+						</li>
+						<li className='leading-relaxed'>
+							<strong>Stochastic updates:</strong> cell updates trigger randomly, mimicking how biological cells may split or change at
+							different times.
+						</li>
+					</ul>
+				</>
+			)
+		},
+		{
+			title: 'Self-Organising Textures',
+			subtitle: 'Neural Cellular Automata Model of Pattern Formation',
+			date: 'Feb. 11, 2021',
+			doi: '10.23915/distill.00027.003',
+			doiLink: 'https://doi.org/10.23915/distill.00027.003',
+			authors: 'Eyvind Niklasson, Alexander Mordvintsev, Ettore Randazzo, Michael Levin',
+			description: (
+				<>
 					NCA are used to generate cohesive textures, rather than specific complex images. The results demonstrate how NCA are suitable for
 					mimicking and replicating patterns. In particular, images generated by NCA share features and similarities with the original image
 					without being pixel perfect copies. Further, due to the incremental updating nature of the simulation, NCA continuously generate
 					smooth animations from a single image.
-				</p>
-				<p className='py-3'>
+					<br />
+					<br />
 					The unique contribution of this paper is primarily its success using pre-trained CNN (VGG-16) as the loss function for NCA.
-				</p>
-				<p className='py-3'>Below are the results from our re-implementation:</p>
-
-				<div className='grid grid-cols-2 overflow-y-auto gap-4'>
-					<div>
-						{/* TODO: Check if there is a better way of putting this video in */}
-						<video className='w-full rounded-md shadow-sm' loop autoPlay muted>
-							<source src='/images/nca_output.mp4' type='video/mp4' />
-						</video>
-						<p className='text-sm text-center italic'>NCA algorithm in live operation after training.</p>
+					<br />
+					<br />
+					Below are the results from our re-implementation:
+					<div className='grid grid-cols-2 gap-4 mt-4'>
+						<div>
+							<div className='w-full aspect-square bg-muted relative overflow-hidden'>
+								<video src='/images/nca_output.mp4' autoPlay loop muted playsInline className='w-full h-full object-cover' />
+							</div>
+							<p className='text-sm text-center italic mt-2'>NCA algorithm in live operation after training.</p>
+						</div>
+						<div>
+							<div className='w-full aspect-square bg-muted relative overflow-hidden'>
+								<img src='/images/knit.jpg' className='w-full h-full object-cover' />
+							</div>
+							<p className='text-sm text-center italic mt-2'>Targeted texture pattern for the NCA to replicate.</p>
+						</div>
 					</div>
-					<div>
-						<Image src='/images/knit.jpg' alt='Target Knitted Texture' height={60} width={50} className='w-full rounded-md shadow-sm' />
-						<p className='text-sm text-center italic'>Targeted texture pattern for the NCA to replicate.</p>
-					</div>
-				</div>
-			</section>
-
-			{/* Paper 3: Mesh NCA */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn'>Mesh Neural Cellular Automata</h2>
-				<p>
-					<i>Jul. 19, 2024</i>. doi:{' '}
-					<Link
-						href='https://doi.org/10.1145/3658127'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						10.1145/3658127
-					</Link>
-				</p>
-				<h4 className='italic text-gray-600'>
-					Ehsan Pajouheshgar, Yitao Xu, Alexander Mordvintsev, Eyvind Niklasson, Tong Zhang, Sabine Süsstrunk
-				</h4>
-				<p className='py-3'>
+				</>
+			)
+		},
+		{
+			title: 'Mesh Neural Cellular Automata',
+			subtitle: '3D Texture Generation on Graphs',
+			date: 'Jul. 19, 2024',
+			doi: '10.1145/3658127',
+			doiLink: 'https://doi.org/10.1145/3658127',
+			authors: 'Ehsan Pajouheshgar, Yitao Xu, Alexander Mordvintsev, Eyvind Niklasson, Tong Zhang, Sabine Süsstrunk',
+			description: (
+				<>
 					This paper focuses on 3D texture generation, moving NCA onto a mesh or graph. Each cell is now a node, with its neighbours defined
 					by graph connections. This allows those textures to seamlessly wrap around 3D objects. In the demonstrations from this paper,
 					there are still some flaws in the sharpest corners, however overall the resultant texture is smooth and continuous.
-				</p>
-			</section>
-
-			{/* Paper 4: DyNCA */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn'>DyNCA</h2>
-				<p>
-					Dynamic Texture Synthesis Using Neural Cellular Automata, <i>Mar. 30, 2023</i>. doi:{' '}
-					<Link
-						href='https://doi.org/10.48550/arXiv.2211.11417'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						10.48550/arXiv.2211.11417
-					</Link>
-				</p>
-				<h4 className='italic text-gray-600'>Ehsan Pajouheshgar, Yitao Xu, Tong Zhang, Sabine Süsstrunk</h4>
-				<p className='py-3'>
-					This paper takes NCA into the video generation realm. Also based off <i>Self Organising Textures</i> this paper aimed to create
-					dynamic directable video-like textures. While this technique was not suited for fast motion scenes, it performed well for
-					scenarios such as fire and rising smoke, suitable for background textures.
-				</p>
-			</section>
-
-			{/* Paper 5: Med-NCA */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn'>Med-NCA</h2>
-				<p>
-					Robust and Lightweight Segmentation with Neural Cellular Automata, <i>Feb. 7, 2023</i>. doi:{' '}
-					<Link
-						href='https://doi.org/10.48550/arXiv.2211.11417'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						10.48550/arXiv.2211.11417
-					</Link>
-				</p>
-				<h4 className='italic text-gray-600'>
-					John Kalkhof, Camila González & Anirban Mukhopadhyay <br />
-				</h4>
-				<p className='py-3'>
-					Med-NCA is an image segmentation model, which builds off another proceeding paper <i>Image segmentation via Cellular Automata</i>{' '}
+				</>
+			)
+		},
+		{
+			title: 'DyNCA',
+			subtitle: 'Dynamic Texture Synthesis Using Neural Cellular Automata',
+			date: 'Mar. 30, 2023',
+			doi: '10.48550/arXiv.2211.11417',
+			doiLink: 'https://doi.org/10.48550/arXiv.2211.11417',
+			authors: 'Ehsan Pajouheshgar, Yitao Xu, Tong Zhang, Sabine Süsstrunk',
+			description: (
+				<>
+					This paper takes NCA into the video generation realm. Also based off Self Organising Textures this paper aimed to create dynamic
+					directable video-like textures. While this technique was not suited for fast motion scenes, it performed well for scenarios such
+					as fire and rising smoke, suitable for background textures.
+				</>
+			)
+		},
+		{
+			title: 'Med-NCA',
+			subtitle: 'Robust and Lightweight Segmentation with Neural Cellular Automata',
+			date: 'Feb. 7, 2023',
+			doi: '10.48550/arXiv.2211.11417',
+			doiLink: 'https://doi.org/10.48550/arXiv.2211.11417',
+			authors: 'John Kalkhof, Camila González & Anirban Mukhopadhyay',
+			description: (
+				<>
+					Med-NCA is an image segmentation model, which builds off another proceeding paper Image segmentation via Cellular Automata
 					(Sandler M. et al) and is a part of a series of papers that investigate Neural Cellular Automata as a low-resource medical
 					segmentation model. Med-NCA is the first paper to pose NCA as a low memory solution for image segmentation, due to the small model
 					sizes, and demonstrates than NCA can effectively segmentation medical grade images while running on Raspberry Pi Zero.
-				</p>
-				<p className='py-3'>
-					Med-NCA's most notable contribution though is usage of a two stage architecture that includes a low and high resolution layer,
-					which highlights the issue that NCAs struggle with long-distance communication of information across images, as this architectural
+					<br />
+					<br />
+					Med-NCA's most notable contribution is usage of a two stage architecture that includes a low and high resolution layer, which
+					highlights the issue that NCAs struggle with long-distance communication of information across images, as this architectural
 					change sped up the image segmentation process drastically.
-				</p>
-				<p className='py-3'>
-					The authors follow-up this paper by taking NCA to 3D medical scans in{' '}
-					<i>M3D-NCA, Robust 3D Segmentation with built in quality control</i>.
-				</p>
-			</section>
+					<br />
+					<br />
+					The authors follow-up this paper by taking NCA to 3D medical scans in M3D-NCA, Robust 3D Segmentation with built in quality
+					control.
+				</>
+			)
+		}
+	];
+
+	return (
+		<div className='min-h-screen bg-background'>
+			<main className='pt-24 pb-16'>
+				<div className='container mx-auto px-6'>
+					{/* Header */}
+					<div className='max-w-4xl mx-auto mb-12 text-center'>
+						<div className='inline-flex items-center justify-center p-3 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full mb-4'>
+							<BookOpen className='w-8 h-8 text-primary' />
+						</div>
+						<h1 className='text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
+							Neural Cellular Automata
+						</h1>
+						<p className='text-2xl font-semibold text-foreground mb-2'>Top 5 Papers, Summarised!</p>
+						<p className='text-sm text-muted-foreground'>Last updated Mar 2025</p>
+					</div>
+
+					{/* Papers */}
+					<div className='max-w-4xl mx-auto space-y-8'>
+						{papers.map((paper, index) => (
+							<Card key={index} className='border-2 hover:border-primary/50 transition-colors'>
+								<CardHeader>
+									<div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-2'>
+										<div className='flex-1'>
+											<CardTitle className='text-2xl mb-1'>{paper.title}</CardTitle>
+											<CardDescription className='text-base italic'>{paper.subtitle}</CardDescription>
+										</div>
+										<Link href={paper.doiLink} target='_self' rel='noopener noreferrer'>
+											<Button
+												variant='outline'
+												size='lg'
+												className='cursor-pointer hover:bg-primary/90 hover:text-black border-primary/30 hover:border-primary'
+											>
+												DOI <ExternalLink className='w-3 h-3' />
+											</Button>
+										</Link>
+									</div>
+									<div className='text-sm text-muted-foreground space-y-1'>
+										<p>
+											{paper.date} • doi: {paper.doi}
+										</p>
+										<p className='font-medium text-foreground'>{paper.authors}</p>
+									</div>
+								</CardHeader>
+								<CardContent className='space-y-4'>
+									<div className='text-muted-foreground'>{paper.description}</div>
+								</CardContent>
+							</Card>
+						))}
+					</div>
+				</div>
+			</main>
 		</div>
 	);
-}
+};
+
+export default Research;

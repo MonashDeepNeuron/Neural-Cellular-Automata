@@ -1,5 +1,6 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import ProfileCard from '@/components/Profile';
+import { Card } from '@/components/ui/card';
 import createMetadata from '@/util/createMetadata';
 
 export const metadata = createMetadata({
@@ -7,128 +8,156 @@ export const metadata = createMetadata({
 	description: 'We are a project team under Monash DeepNeuron, an Engineering/IT student team run by Monash University students.'
 });
 
-export default function About() {
+const teamMembers = [
+	{
+		name: 'Afraz Gul',
+		role: 'Project Lead',
+		degree: 'Bachelor of Science and Computer Science',
+		image: 'images/profile/default.jpg'
+	},
+	{
+		name: 'Chloe Koe',
+		role: 'Deep Learning & Graphics Engineer',
+		degree: 'Bachelor of Computer Science',
+		image: '/images/profile/Chloe.jpg'
+	},
+	{
+		name: 'Nathan Culshaw',
+		role: 'Deep Learning Engineer',
+		degree: 'Bachelor of Computer Science Advanced (Honours)',
+		image: '/images/profile/Nathan.jpg'
+	},
+	{
+		name: 'Angus Bosmans',
+		role: 'High Performance Computing Engineer',
+		degree: 'Bachelor of Mechatronics Engineering (AI) & Arts',
+		image: '/images/profile/Angus.jpg'
+	},
+	{
+		name: 'Luca Lowndes',
+		role: 'Deep Learning Engineer',
+		degree: 'Bachelor of Computer Science and Engineering',
+		image: '/images/profile/Luca.jpg'
+	},
+	{
+		name: 'Alexander Mai',
+		role: 'Web Developer & UI Designer',
+		degree: 'Bachelor of Commerce and Computer Science',
+		image: '/images/profile/Alex.jpg'
+	}
+];
+
+const advisors = [
+	{
+		name: 'Keren Collins',
+		role: 'Deep Learning Advisor',
+		degree: 'Bachelor of Biomedical Engineering',
+		image: '/images/profile/Keren.jpg'
+	},
+	{
+		name: 'Joshua Riantoputra',
+		role: 'Deep Learning Advisor and Founder',
+		degree: 'Bachelor of Mathematics and Computational Science',
+		image: '/images/profile/Josh.jpg'
+	},
+	{
+		name: 'Nyan Knaw',
+		role: 'Deep Learning Advisor',
+		degree: 'Bachelor of Engineering',
+		image: '/images/profile/Nyan.jpg'
+	}
+];
+
+const About = () => {
 	return (
-		<div className='max-w-3xl mx-auto px-6 py-10 text-gray-800'>
-			{/* Title */}
-			<h1 className='text-4xl font-bold mb-6 text-center'>About Us</h1>
+		<div>
+			<section className='relative py-24 overflow-hidden'>
+				<div className='container relative z-10 mx-auto px-6'>
+					{/* Who Are We */}
+					<div className='max-w-4xl mx-auto mb-16'>
+						<h2 className='text-4xl lg:text-5xl font-bold mb-8 text-center'>
+							About <span className='gradient-text'>Us</span>
+						</h2>
 
-			{/* Who Are We Section */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Who Are We?</h2>
-				<p className='leading-7 text-lg'>
-					We are a project team under{' '}
-					<Link
-						href='https://www.deepneuron.org/'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						Monash DeepNeuron
-					</Link>
-					, an Engineering/IT student team run by Monash University students. Started in November 2023, NCA is one of many research
-					projects, which you can read more about{' '}
-					<Link
-						href='https://www.deepneuron.org/'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						here
-					</Link>
-					!
-				</p>
-			</section>
+						<Card className='p-8 bg-card/50 backdrop-blur-sm border-primary/20'>
+							<h3 className='text-2xl font-bold mb-4'>Who Are We?</h3>
+							<p className='text-lg text-muted-foreground leading-relaxed mb-6'>
+								We are a project team under{' '}
+								<Link
+									href='https://www.deepneuron.org/'
+									target='_blank'
+									rel='noopener noreferrer'
+									className='text-primary hover:underline font-semibold'
+								>
+									Monash DeepNeuron
+								</Link>
+								, an Engineering/IT student team run by Monash University students. Started in November 2023, NCA is one of many research
+								projects, which you can read more about{' '}
+								<Link href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer' className='text-primary hover:underline'>
+									here
+								</Link>
+								!
+							</p>
 
-			{/* Project Objectives */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Project Objectives</h2>
-				<ol className='list-decimal list-inside space-y-2 text-lg'>
-					<li>What are NCA? How is NCA different from other CA and Neural Networks?</li>
-					<li>What can NCA be used for? Does NCA provide an advantage over other similar architectures?</li>
-					<li>How can NCA be improved?</li>
-				</ol>
-				<p className='mt-4 text-lg'>As a result of answering these questions, we aim to produce a comprehensive research paper.</p>
-			</section>
+							<h3 className='text-2xl font-bold mb-4 mt-8'>Project Objectives</h3>
+							<ol className='list-decimal list-inside space-y-2 text-muted-foreground mb-6'>
+								<li>What are NCA? How is NCA different from other CA and Neural Networks?</li>
+								<li>What can NCA be used for? Does NCA provide an advantage over other similar architectures?</li>
+								<li>How can NCA be improved?</li>
+							</ol>
+							<p className='text-muted-foreground'>
+								As a result of answering these questions, we aim to produce a comprehensive research paper.
+							</p>
+						</Card>
+					</div>
 
-			{/* Join Us Section */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Join Us!</h2>
-				<p className='text-lg'>
-					Are you a Monash Engineering or IT student interested in working on this project? Reach out to be informed when new positions open
-					up. First-year or Master's students — all are welcome!
-				</p>
-				<Link
-					href='https://docs.google.com/forms/d/e/1FAIpQLSckOGpNS-nFOxB4cGHmXC2z04D6_m8j26qKLZee3bZ298vNWg/viewform?usp=sharing'
-					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
-				>
-					Join the Team
-				</Link>
-			</section>
+					{/* Team Members */}
+					<div className='mb-20'>
+						<h3 className='text-3xl font-bold mb-4 text-center'>Meet the Team!</h3>
+						<p className='text-center text-muted-foreground mb-12'>Super proud of our amazing team!</p>
 
-			{/* Meet the Team */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Meet the Team!</h2>
-				<p>Super proud of our amazing team!</p>
-				<div className='grid grid-cols-3 gap-4 mb-8'>
-					<ProfileCard
-						name='Afraz Gul'
-						imageLink='/images/profile/Afraz.jpg'
-						subtitle='Project Lead'
-						description='Bachelor of Science and Computer Science'
-					/>
-					<ProfileCard
-						name='Chloe Koe'
-						imageLink='/images/profile/Chloe.jpg'
-						subtitle='Deep Learning & Graphics Engineer'
-						description='Bachelor of Computer Science'
-					/>
-					<ProfileCard
-						name='Nathan Culshaw'
-						imageLink='/images/profile/Nathan.jpg'
-						subtitle='Deep Learning Engineer'
-						description='Bachelor of Computer Science Advanced (Honours)'
-					/>
-					<ProfileCard
-						name='Angus Bosmans'
-						imageLink='/images/profile/Angus.jpg'
-						subtitle='High Performance Computing Engineer'
-						description='Bachelor of Mechatronics Engineering (AI) & Arts'
-					/>
-					<ProfileCard
-						name='Luca Lowndes'
-						imageLink='/images/profile/Luca.jpg'
-						subtitle='Deep Learning Engineer'
-						description='Bachelor of Computer Science and Engineering '
-					/>
+						<div className='grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto'>
+							{teamMembers.map(member => (
+								<Card
+									key={member.name}
+									className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300'
+								>
+									<div className='aspect-square mb-4 overflow-hidden rounded-lg'>
+										<Image src={member.image} alt={member.name} width={500} height={500} className='w-full h-full object-cover' />
+									</div>
+									<h4 className='text-xl font-bold mb-1'>{member.name}</h4>
+									<p className='text-sm text-primary font-semibold mb-2'>{member.role}</p>
+									<p className='text-sm text-muted-foreground'>{member.degree}</p>
+								</Card>
+							))}
+						</div>
+					</div>
+
+					{/* Advisors & Alumni */}
+					<div>
+						<h3 className='text-3xl font-bold mb-4 text-center'>Our Advisors and Alumni</h3>
+						<p className='text-center text-muted-foreground mb-12'>Their help has been just as invaluable to the project!</p>
+
+						<div className='grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto'>
+							{advisors.map(advisor => (
+								<Card
+									key={advisor.name}
+									className='p-6 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300'
+								>
+									<div className='aspect-square mb-4 overflow-hidden rounded-lg'>
+										<Image src={advisor.image} alt={advisor.name} width={500} height={500} className='w-full h-full object-cover' />
+									</div>
+									<h4 className='text-lg font-bold mb-1'>{advisor.name}</h4>
+									<p className='text-sm text-primary font-semibold mb-2'>{advisor.role}</p>
+									{advisor.degree && <p className='text-sm text-muted-foreground'>{advisor.degree}</p>}
+								</Card>
+							))}
+						</div>
+					</div>
 				</div>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Our advisors and alumni</h2>
-				<p>Their help has been just as invaluable to the project!</p>
-				<div className='grid grid-cols-3 gap-4'>
-					<ProfileCard
-						name='Keren Collins'
-						imageLink='/images/profile/Keren.jpg'
-						subtitle='Deep learning advisor'
-						description='Bachelor of Biomedical Engineering'
-					/>
-					<ProfileCard
-						name='Joshua Riantoputra'
-						imageLink='/images/profile/Josh.jpg'
-						subtitle='Deep Learning Advisor and founder'
-						description='Bachelor of Mathematics and Computational Science'
-					/>
-					<ProfileCard name='Nyan Knaw' imageLink='/images/profile/Nyan.jpg' subtitle='Deep Learning Advisor' description='' />
-					<ProfileCard name='Alex Mai' imageLink='/images/profile/Alex.jpg' subtitle='Alumni' description='Bachelor of Computer Science' />
-				</div>
-			</section>
-
-			{/* Project Updates */}
-			<section className='mb-8'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-2'>Project Updates</h2>
-				<p className='text-lg'>
-					Stay up-to-date with our latest progress by visiting the{' '}
-					<Link href='/keeping-up' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
-						Project Updates
-					</Link>{' '}
-					page!
-				</p>
 			</section>
 		</div>
 	);
-}
+};
+
+export default About;
