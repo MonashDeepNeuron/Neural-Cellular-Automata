@@ -1,8 +1,8 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import cell from '@/shaders/nca/cell';
 import loadWeights from '@/util/loadWeights';
-import { useEffect, useRef, useState } from 'react';
 
 export enum CAStatus {
 	ALLOCATING_RESOURCES = 'Allocating Resources',

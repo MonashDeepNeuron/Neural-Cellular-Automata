@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -23,9 +24,9 @@ export default function Navbar() {
 			<div className='max-w-full mx-auto px-4 py-3 flex items-center justify-between'>
 				{/* Logo */}
 				<div className='flex items-center space-x-4'>
-					<a href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer'>
-						<img src='/images/mdn-logo.png' alt='Deep Neuron Logo' height={40} width={80} />
-					</a>
+					<Link href='https://www.deepneuron.org/' target='_blank' rel='noopener noreferrer'>
+						<Image src='/images/mdn-logo.png' alt='Deep Neuron Logo' height={40} width={80} />
+					</Link>
 
 					{/* Navigation Links */}
 					<div className='hidden md:flex items-center space-x-6'>
@@ -46,7 +47,7 @@ export default function Navbar() {
 				</div>
 
 				{/* Hamburger Icon for Mobile */}
-				<button className='md:hidden text-white focus:outline-none' onClick={() => setIsOpen(!isOpen)} type='button'>
+				<button className='md:hidden text-white focus:outline-hidden' onClick={() => setIsOpen(!isOpen)} type='button'>
 					☰
 				</button>
 			</div>

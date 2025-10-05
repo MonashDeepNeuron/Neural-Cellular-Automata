@@ -1,9 +1,14 @@
 {
 	"name": "nca",
 	"version": "1.0.0",
-	"workspaces": ["web"],
+	"workspaces": [
+		"web"
+	],
+	"scripts": {
+		"lint": "biome check --fix --error-on-warnings"
+	},
 	"devDependencies": {
-		"@angablue/biome-config": "^1.0.1",
-		"@biomejs/biome": "^1.9.4"
+		"@angablue/biome-config": "^1.1.1",
+		"@biomejs/biome": "^2.2.5"
 	}
 }

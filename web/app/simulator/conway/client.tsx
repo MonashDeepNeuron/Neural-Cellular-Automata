@@ -1,8 +1,7 @@
 'use client';
 import Simulator from '@/components/layout/Simulator';
 import useLTL from '@/hooks/useLTL'; // Note: Conway's life is a subset of Larger than Life
-import patterns from '@/patterns/conway'; // Different patterns for Conway's life
-import { CONWAYS_LIFE } from '@/patterns/conway'; // Different rulestring format for Conway's life
+import patterns, { CONWAYS_LIFE } from '@/patterns/conway'; // Different rulestring format for Conway's life
 import { simulation } from '@/shaders/discrete/simulation';
 
 function parseRuleString(_input: string) {
@@ -21,5 +20,5 @@ export default function Client() {
 		parseRuleString
 	});
 
-	return <Simulator name='Conways life' size={SIZE} {...controls} />;
+	return <Simulator name="Conway's Life" size={SIZE} {...controls} />;
 }

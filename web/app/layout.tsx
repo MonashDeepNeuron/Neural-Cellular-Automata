@@ -1,9 +1,10 @@
 import { Poppins } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/layout/Nav';
-import createMetadata from '@/util/createMetadata';
 import clsx from 'clsx';
 import type { Viewport } from 'next';
+import { Footer } from '@/components/layout/Footer';
+import { Navigation } from '@/components/layout/Navigation';
+import createMetadata from '@/util/createMetadata';
 
 const poppins = Poppins({
 	weight: ['500', '400'],
@@ -24,11 +25,9 @@ export default function RootLayout({
 	return (
 		<html lang='en'>
 			<body className={clsx(poppins.className, 'antialiased text-black overflow-x-hidden max-w-screen')}>
-				<Navbar />
-				<main className='min-h-screen p-4 pt-20 max-w-full'>
-					{/* Added 'pt-20' for top padding */}
-					{children}
-				</main>
+				<Navigation />
+				<main className='min-h-screen pt-4 max-w-full'>{children}</main>
+				<Footer />
 			</body>
 		</html>
 	);

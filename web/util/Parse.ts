@@ -29,7 +29,7 @@ function isDigit(c: string) {
  * @todo BUG - When no given birth or survival cases given, results in error
  * @todo rulestring validation function - pretty much accounted for in current interface setup though
  */
-export function parseLTLRule(raw: string): Uint32Array | null {
+export function parseLTLRule(raw: string): Uint32Array<ArrayBuffer> | null {
 	const ruleString = raw.replace(/\s/g, '').toUpperCase(); // Cut out white space and assert uppercase
 
 	// console.log("Getting RULE...");
@@ -200,7 +200,7 @@ export function parseLTLRule(raw: string): Uint32Array | null {
  * @todo BUG - When no given birth or survival cases given, results in error
  * @todo rulestring validation function - pretty much accounted for in current interface setup though
  */
-export function parseLifeLikeRule(raw: string): Uint32Array | null {
+export function parseLifeLikeRule(raw: string): Uint32Array<ArrayBuffer> | null {
 	const ruleString = raw.replace(/\s/g, '').toUpperCase(); // Cut out white space and assert uppercase
 
 	// console.log("Getting RULE...");

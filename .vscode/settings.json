@@ -1,4 +1,4 @@
 {
-  "remote.autoForwardPortsFallback": 0,
-  "liveServer.settings.port": 5501
+	"remote.autoForwardPortsFallback": 0,
+	"liveServer.settings.port": 5501
 }

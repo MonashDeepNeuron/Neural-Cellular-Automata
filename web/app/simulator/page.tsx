@@ -1,313 +1,166 @@
-import Card from '@/components/Card';
-import { CompatibilityWarning, Warning } from '@/components/Warning';
-import createMetadata from '@/util/createMetadata';
-import Image from 'next/image';
+import { AlertTriangle, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import createMetadata from '@/util/createMetadata';
+
+const simulatorModels = [
+	{
+		title: "Classic Conway's Game of Life",
+		link: '/simulator/conway',
+		description: 'The most famous example of cellular automata operating on simple rules: All cells are either alive or dead (1 or 0).',
+		details:
+			'A living cell with 2 or 3 neighbors survives. A dead cell with exactly 3 neighbors becomes alive. In all other cases, the cell dies or remains dead. Even with such simple rules, complex behaviors can emerge.',
+		demoVideo: '/model_demos/conway.webm'
+	},
+	{
+		title: 'Life-Like Cellular Automata',
+		link: '/simulator/lifelike',
+		description:
+			'Operates very similarly to the Game of Life in that all cells are either alive or dead. However, Life Like gives you the freedom to choose how many cells must be alive.',
+		details:
+			'The rule string format uses survival/birth notation. In this notation, the original Game of Life would be expressed as 23/3, where 2 or 3 cells in the neighbourhood are required for survival of a living cell, and 3 cells are required for a dead cell to come to life.',
+		demoVideo: '/model_demos/lifelike.webm'
+	},
+	{
+		title: 'Larger than Life',
+		link: '/simulator/larger',
+		description:
+			'Builds on Life Like CA by introducing even more flexibility with specifiable neighbourhood radius, shapes, and minimum lifespan of living cells.',
+		details:
+			"The neighbourhood radius can encompass cells that are further than one cell away. Different neighbourhood shapes allow for different ways of determining a cell's distance from the target cell.",
+		demoVideo: '/model_demos/larger.webm'
+	},
+	{
+		title: 'Continuous Cellular Automata',
+		link: '/simulator/continuous',
+		description: 'Instead of using binary dead or alive states, Continuous CA uses a continuous range of values.',
+		details:
+			'The new cell state value is calculated by multiplying each neighbour by a weight, adding this together and applying a basic mathematical function to it. Can display behaviours similar to basic organisms and population level behaviours of bacteria.',
+		demoVideo: '/model_demos/continuous.webm'
+	},
+	{
+		title: 'Growing NCA',
+		link: '/simulator/growing',
+		description:
+			"One of the best examples of NCA is Growing Neural Cellular Automata (A. Mordvintsev et al., 2020), where they trained NCA to 'grow' target images from a single seed cell.",
+		details:
+			'The Growing-NCA model emphasises that the perception of only neighbouring cells bears parallels with how natural cells communicate within living organisms. Interestingly, this results in Growing Neural Cellular Automata (and other NCA) also showing natural regenerative properties when the image is disturbed during generation.',
+		demoVideo: '/model_demos/growing.webm'
+	},
+	{
+		title: 'Texture NCA',
+		link: '/simulator/texture',
+		description:
+			'Based on Self Organising Textures (A. Mordvintsev et al., 2021), where they trained NCA to mimic target textures from a random initial state.',
+		details:
+			'The main difference between Texture NCA and Growing NCA is that it aims to replicate image features on a small scale. It shares properties of regeneration, as well as independence of grid location, resulting in textures that can be smoothly and cohesively replicated over graphs of any size and shape.',
+		demoVideo: '/model_demos/texture.webm'
+	}
+];
 
 export const metadata = createMetadata({
-	title: 'Simulators',
-	description: 'Explore dynamic models in real-time with our cellular automata simulators.'
+	title: 'Simulator',
+	description: 'Explore dynamic models in real-time!'
 });
 
-export default function Simulator() {
+const Simulator = () => {
 	return (
-		<div className='max-w-4xl mx-auto px-6 py-10 text-gray-800'>
-			{/* Title */}
-			<div className='text-center mb-8'>
-				<h1 className='text-4xl font-extrabold text-gray-800'>Neural Cellular Automata Simulator</h1>
-				<p className='text-md text-gray-600 mt-2'>Explore dynamic models in real-time!</p>
-			</div>
+		<div className='min-h-screen'>
+			<main className='pt-24 pb-16'>
+				<div className='container mx-auto px-6'>
+					{/* Header */}
+					<div className='max-w-4xl mx-auto text-center mb-12'>
+						<h1 className='text-4xl lg:text-5xl font-bold mb-6'>
+							Neural Cellular Automata <span className='gradient-text'>Simulator</span>
+						</h1>
+						<p className='text-xl text-muted-foreground mb-8'>Explore dynamic models in real-time!</p>
 
-			{/* Warning Message */}
-			<Warning />
-			<CompatibilityWarning />
-
-			{/* Model Selection Panel */}
-			<section className='mb-16 mt-5'>
-				<Card className='bg-gray-100'>
-					<h3 className='text-2xl font-semibold text-gray-800 mb-4'>Select a Model:</h3>
-
-					<div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-						{[
-							{ name: 'Classic Conway', link: 'simulator/conway' },
-							{ name: 'Life-Like', link: 'simulator/lifelike' },
-							{ name: 'Larger', link: 'simulator/larger' },
-							{ name: 'Continuous', link: 'simulator/continuous' },
-							{ name: 'Growing NCA', link: 'simulator/growing' },
-							{ name: 'Texture NCA', link: 'simulator/texture' }
-						].map(model => (
-							<Link
-								key={model.name}
-								href={model.link}
-								className='bg-purple-mdn text-white text-center py-3 rounded-md shadow hover:bg-purple-mdn-dark hover:scale-105 transition-transform duration-300'
-							>
-								{model.name}
-							</Link>
-						))}
-					</div>
-				</Card>
-
-				{/* Navigation to Troubleshooting */}
-				<div className='text-center mt-8'>
-					<Link
-						href='/troubleshooting'
-						className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
-					>
-						🛠️ Go to Troubleshooting
-					</Link>
-				</div>
-			</section>
-
-			{/* Title */}
-			<h1 className='text-4xl font-bold mb-6 text-center'>Cellular Automata Models</h1>
-
-			{/* Neural Cellular Automata Section */}
-			<section className='mb-10'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Neural Cellular Automata (NCA)</h2>
-
-				<p className='leading-7 text-lg mt-4'>
-					Neural Cellular Automata (NCA) are a category of cellular automata that involve using a neural network as the cell’s update rule.
-					The neural network can be trained to determine how to update the cell’s value in coordination with other cells, operating on the
-					same rule to produce a target behavior.
-				</p>
-
-				<p className='leading-7 text-lg mt-4'>
-					From a deep learning perspective, NCA can be characterized as a Recurrent Convolutional Neural Network. Learn more about this{' '}
-					<Link href='/learn' className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'>
-						here
-					</Link>
-					.
-				</p>
-			</section>
-
-			{/* Growing Neural Cellular Automata Section */}
-			<section className='mb-10'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Growing NCA</h2>
-
-				<Link
-					href='simulator/growing'
-					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
-				>
-					Explore G-NCA
-				</Link>
-
-				<p className='leading-7 text-lg mt-4'>
-					One of the best examples of NCA is{' '}
-					<Link
-						href='https://distill.pub/2020/growing-ca/'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						Growing Neural Cellular Automata
-					</Link>{' '}
-					(A. Mordvintsev et al., 2020), where they trained NCA to ‘grow’ target images from a single seed cell.
-				</p>
-
-				<p className='leading-7 text-lg mt-4'>
-					The Growing-NCA model emphasises that the perception of only neighbouring cells bears parallels with how natural cells communicate
-					within living organisms. Interestingly, this results in Growing Neural Cellular Automata (and other NCA) also showing natural
-					regenerative properties when the image is disturbed during generation.
-				</p>
-
-				<p className='leading-7 text-lg mt-4'>
-					Designed to cut the model back to as simple and small a system as possible, Growing NCA is designed as a demonstration of how
-					exceedingly simple systems can robustly self-organise into a very complex system without a large amount of information and very
-					simple instructions.
-				</p>
-
-				<p className='leading-7 text-lg mt-4'>
-					Understanding this model is a good foundation for Neural Cellular Automata, as a large portion of NCA use a very similar base
-					structure, with varying objective functions. They incorporate relevant optimisations and recombination.
-				</p>
-			</section>
-
-			{/* Texture NCA */}
-			<section className='mb-10'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Texture NCA</h2>
-
-				<Link
-					href='/simulator/texture'
-					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
-				>
-					Explore Textures
-				</Link>
-
-				<p className='leading-7 text-lg mt-4'>
-					Texture NCA is based off the paper{' '}
-					<Link
-						href='https://arxiv.org/pdf/2105.07299'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						Self Organising Textures
-					</Link>{' '}
-					(A. Mordvintsev et al., 2021), where they trained NCA to ‘grow’ target images from a single seed cell.
-				</p>
-
-				<p className='leading-7 text-lg mt-4'>
-					The main difference between Texture NCA and Growing NCA is that it aims to replicate image features on a small scale - an
-					application that takes advantage of the short-range communication and organisational capabilities of NCA.
-				</p>
-
-				<p className='leading-7 text-lg mt-4'>
-					It shares properties of regeneration, as well as independence of grid location, resulting in textures that can be smoothly and
-					cohesively replicated over grids of any size and shape - or even onto 3D graphs, as the paper{' '}
-					<Link
-						href='https://doi.org/10.1145/3658127'
-						className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-					>
-						Mesh Neural Cellular Automata
-					</Link>{' '}
-					(E. Pajouheshgar et al., 2024) expands.
-				</p>
-			</section>
-
-			{/* Game of Life Section */}
-			<section className='mb-10'>
-				<div className='grid grid-cols-2 overflow-y-auto gap-4'>
-					<div>
-						<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>John Conway’s Game of Life</h2>
-
-						<Link
-							href='/simulator/conway'
-							className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
-						>
-							Explore Conway's Life
-						</Link>
-
-						<p className='leading-7 text-lg mt-4'>
-							This is probably the most famous example of cellular automata. The Game of Life operates on these simple rules:
-						</p>
-
-						<ul className='list-disc list-inside space-y-2 text-lg mt-4'>
-							<li>All cells are either alive or dead (1 or 0).</li>
-							<li>A living cell with 2 or 3 neighbors survives.</li>
-							<li>A dead cell with exactly 3 neighbors becomes alive.</li>
-							<li>In all other cases, the cell dies or remains dead.</li>
-						</ul>
-
-						<p className='leading-7 text-lg mt-4'>
-							Even with such simple rules, complex behaviors can emerge. Many self-sustaining patterns have been discovered. A more
-							sophisticated version can be found{' '}
-							<Link
-								href='https://playgameoflife.com/'
-								className='text-purple-mdn font-semibold hover:underline hover:text-purple-mdn-dark transition'
-							>
-								here
-							</Link>
-							.
-						</p>
+						{/* Warning Alert */}
+						<Alert className='mb-8 border-destructive/50 bg-destructive/5 text-left'>
+							<AlertTriangle className='h-4 w-4' />
+							<AlertDescription className='text-left'>
+								<strong>Warning:</strong> This website contains content that may flash at high frequencies. Please use discretion when
+								selecting frame rates if sensitive to flashing visuals.
+							</AlertDescription>
+						</Alert>
 					</div>
 
-					<div>
-						<Image
-							src='/images/GoL neighbourhood.png'
-							alt='The neighbourhood of each cell consists of the cells in contact with it.'
-							height={60}
-							width={50}
-							className='w-full rounded-md shadow'
-						/>
-						<p className='text-sm text-center italic'>The neighbourhood of each cell consists of the cells in contact with it.</p>
+					{/* Introduction */}
+					<div className='max-w-4xl mx-auto mb-16'>
+						<Card className='p-8 bg-card/50 backdrop-blur-sm border-primary/20'>
+							<h2 className='text-3xl font-bold mb-4'>What are Neural Cellular Automata?</h2>
+							<p className='text-lg text-muted-foreground leading-relaxed mb-4'>
+								Neural Cellular Automata (NCA) are a category of cellular automata that involve using a neural network as the cell's update
+								rule. The neural network can be trained to determine how to update the cell's value in coordination with other cells,
+								operating on the same rule to produce a target behavior.
+							</p>
+							<p className='text-muted-foreground'>
+								From a deep learning perspective, NCA can be characterized as a Recurrent Convolutional Neural Network.
+							</p>
+						</Card>
+					</div>
+
+					{/* Simulator Models Grid */}
+					<div className='mb-12'>
+						<h2 className='text-3xl font-bold mb-8 text-center'>Select a Model</h2>
+
+						<div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6'>
+							{simulatorModels.map(model => (
+								<Card
+									key={model.title}
+									className='overflow-hidden bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-all duration-300 flex flex-col pt-0'
+								>
+									{/* Video Demo */}
+									<Link href={model.link}>
+										<div className='w-full aspect-square bg-muted relative overflow-hidden'>
+											<video src={model.demoVideo} autoPlay loop muted playsInline className='w-full h-full object-cover' />
+										</div>
+									</Link>
+
+									{/* Content */}
+									<div className='px-6 pb-0 flex flex-col flex-grow'>
+										<h3 className='text-xl font-bold mb-3'>{model.title}</h3>
+										<p className='text-sm text-muted-foreground mb-4 flex-grow'>{model.description}</p>
+										<div className='pt-4 border-t border-border'>
+											<p className='text-xs text-muted-foreground mb-4'>{model.details}</p>
+											<Button
+												asChild
+												variant='outline'
+												className='w-full hover:bg-primary/90 hover:text-black border-primary/30 hover:border-primary'
+											>
+												<Link href={model.link} className='inline-flex items-center justify-center gap-2'>
+													<span className='truncate'>Explore {model.title}</span>
+													<ArrowRight className='w-4 h-4' />
+												</Link>
+											</Button>
+										</div>
+									</div>
+								</Card>
+							))}
+						</div>
+					</div>
+
+					{/* Additional Info */}
+					<div className='max-w-4xl mx-auto text-center'>
+						<Card className='p-8 bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20'>
+							<h3 className='text-2xl font-bold mb-4'>Need Help?</h3>
+							<p className='text-muted-foreground mb-6'>
+								If you're experiencing issues with the simulator, check out our troubleshooting guide.
+							</p>
+							<Button asChild variant='default'>
+								<Link href='/troubleshooting' className='inline-flex items-center gap-2'>
+									<span className='truncate'>Go to Troubleshooting</span>
+									<ExternalLink className='w-4 h-4' />
+								</Link>
+							</Button>
+						</Card>
 					</div>
 				</div>
-			</section>
-
-			{/* Life-Like Section */}
-			<section className='mb-10'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Life Like Cellular Automata</h2>
-
-				<Link
-					href='/simulator/lifelike'
-					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
-				>
-					Explore Life-Like
-				</Link>
-
-				<p className='leading-7 text-lg mt-4'>
-					Life like CA operate very similarly to the Game of Life in that all cells are either alive or dead. However, Life Like gives you
-					the freedom to choose how many cells must be alive in the neighbourhood to either survive or be born. This is specified by a{' '}
-					<i>rule string</i>.
-				</p>
-
-				<p className='leading-7 text-lg mt-4'>
-					The rule string format we have used is <i>survival/birth notation.</i> In this notation, the original Game of Life would be
-					expressed as <b>23/3</b> (we don’t worry about spacing between numbers because they can only be the numbers 0-8), where 2 or 3
-					cells in the neighbourhood are required for survival of a living cell, and 3 cells in the neighbourhood are required for a dead
-					cell to come to life/be born.
-				</p>
-			</section>
-
-			{/* Larger than Life Section */}
-			<section className='mb-10'>
-				<div className='grid grid-cols-2 overflow-y-auto gap-4'>
-					<div>
-						<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Larger than Life</h2>
-
-						<Link
-							href='/simulator/larger'
-							className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
-						>
-							Explore Larger
-						</Link>
-
-						<p className='leading-7 text-lg mt-4'>
-							Larger than Life builds on Life Like CA by introducing even more flexibility. This means the following are now specifiable in
-							the rule string:
-						</p>
-
-						<ul className='list-disc list-inside space-y-2 text-lg mt-4'>
-							<li>The neighbourhood radius to encompass cells that are further than one cell away.</li>
-							<li>Neighbourhood shape.</li>
-							<li>
-								Minimum lifespan of living cells (basically living cells have HP that is deducted from every time it’s exposed to death
-								conditions)
-							</li>
-						</ul>
-					</div>
-
-					<div className='grid grid-cols-1 overflow-y-auto gap-4'>
-						<Image
-							src='/images/LargerRadius2.png'
-							alt='The neighbourhood in larger than life also contains all the 
-							cells within a specified distance from the target cell'
-							height={60}
-							width={50}
-							className='w-full rounded-md shadow'
-						/>
-						<p className='text-sm text-center italic'>
-							Neighbourhood of a target cell in Larger than Life when the neighbourhood radius is set to 2 cells
-						</p>
-
-						<Image
-							src='/images/LargerNeighbourhoodTypes.png'
-							alt='The neighbourhood of each cell consists of the cells in contact with it.'
-							height={60}
-							width={50}
-							className='w-full rounded-md shadow'
-						/>
-						<p className='text-sm text-center italic'>
-							Different neighbourhood shapes/different ways of determining a cell's distance from the target cell
-						</p>
-					</div>
-				</div>
-			</section>
-
-			{/* Continuous Cellular Automata Section */}
-			<section className='mb-10'>
-				<h2 className='text-2xl font-semibold text-purple-mdn mb-3'>Continuous Cellular Automata</h2>
-
-				<Link
-					href='/simulator/continuous'
-					className='inline-block bg-purple-mdn text-white px-6 py-3 rounded-md shadow-md hover:bg-purple-mdn-dark transition-transform duration-300 transform hover:scale-105'
-				>
-					Explore Continuous CA
-				</Link>
-
-				<p className='leading-7 text-lg mt-4'>
-					Continuous CA also builds on Life Like CA. The main difference is that instead of using the binary dead or alive as states, we use
-					a continuous range of values. The new cell state value is calculated in by multiplying each neighbour by a weight, adding this
-					together and applying a basic mathematical function to it. Continuous CA can display behaviours similar to basic organisms and
-					population level behaviours of bacteria etc. that have simple behavioural patterns.
-				</p>
-			</section>
+			</main>
 		</div>
 	);
-}
+};
+
+export default Simulator;
