@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import createMetadata from '@/util/createMetadata';
 
 const simulatorModels = [
 	{
@@ -58,6 +59,11 @@ const simulatorModels = [
 		demoVideo: '/model_demos/texture.webm'
 	}
 ];
+
+export const metadata = createMetadata({
+	title: 'Simulator',
+	description: 'Explore dynamic models in real-time!'
+});
 
 const Simulator = () => {
 	return (
