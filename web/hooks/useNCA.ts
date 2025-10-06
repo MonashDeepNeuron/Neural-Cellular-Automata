@@ -411,17 +411,13 @@ export default function useNCA({ size, channels, hiddenChannels, convolutions, s
 	function resetState() {
 		if (!resources) return;
 
-		// Reset cell buffers
-		const {
-			device,
-			buffers: { cells }
-		} = resources;
+		// Reset cell buffer
 		const cellState = new Float32Array(channels * size * size).fill(0);
 		if (seed) {
 			const centre = 3 * size * size + Math.floor(size / 2) * size + Math.floor(size / 2);
 			cellState[centre] = 1;
 		}
-		device.queue.writeBuffer(cells[0], 0, cellState);
+		resources.device.queue.writeBuffer(resources.buffers.cells[0], 0, cellState);
 
 		// Reset step
 		setStep(0);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Pattern } from '@/patterns/pattern';
 import cell from '@/shaders/discrete/cell';
 import { CAStatus } from './useNCA';
@@ -15,6 +15,7 @@ export interface GPUResources {
 	};
 	buffers: {
 		vertex: GPUBuffer;
+		cells: CellStateBufferPair;
 	};
 }
 
@@ -44,6 +45,29 @@ export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLS
 	const [stepsPerFrame, setStepsPerFrame] = useState(1);
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+
+	const initState = useCallback(
+		(cellState: Uint32Array<ArrayBuffer>) => {
+			// Prepare starting state data for first buffer
+			if (pattern.pattern == null) {
+				// If there is no pre-determined pattern, randomise the grid
+				for (let i = 0; i < cellState.length; i++) {
+					cellState[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
+				}
+			} else {
+				// Copy the starting pattern in
+				const centreOffset = Math.floor((size - pattern.cols) / 2);
+				for (let i = 0; i < pattern.cols; i++) {
+					for (let j = 0; j < pattern.rows; j++) {
+						cellState[i + centreOffset + (j + centreOffset) * size] = pattern.pattern[i + j * pattern.cols];
+					}
+				}
+			}
+
+			return cellState;
+		},
+		[pattern.pattern, size, pattern.rows, pattern.cols]
+	);
 
 	useEffect(() => {
 		async function init() {
@@ -218,24 +242,7 @@ export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLS
 
 			// Write buffers
 			device.queue.writeBuffer(shapeBuffer, 0, shapeArray);
-			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
-
-			// Prepare starting state data for first buffer
-			if (pattern.pattern == null) {
-				// If there is no pre-determined pattern, randomise the grid
-				for (let i = 0; i < cellState.length; i++) {
-					cellState[i] = Math.random() > 0.6 ? 1 : 0; // random starting position
-				}
-			} else {
-				// Copy the starting pattern in
-				const centreOffset = Math.floor((size - pattern.cols) / 2);
-				for (let i = 0; i < pattern.cols; i++) {
-					for (let j = 0; j < pattern.rows; j++) {
-						cellState[i + centreOffset + (j + centreOffset) * size] = pattern.pattern[i + j * pattern.cols];
-					}
-				}
-			}
-			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
+			device.queue.writeBuffer(cellStateBuffers[0], 0, initState(cellState));
 			device.queue.writeBuffer(ruleBuffer, 0, rule);
 
 			// Create Bind Group
@@ -272,7 +279,8 @@ export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLS
 					simulation: simulationPipeline
 				},
 				buffers: {
-					vertex: vertexBuffer
+					vertex: vertexBuffer,
+					cells: cellStateBuffers
 				}
 			});
 			setStatus(CAStatus.READY);
@@ -285,7 +293,7 @@ export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLS
 			// Destroy device & associated buffers
 			resources?.device.destroy();
 		};
-	}, [size, pattern, shaders.simulation, parseRuleString, resources]);
+	}, [size, pattern, shaders.simulation, parseRuleString, resources, initState]);
 
 	useEffect(() => {
 		if (status !== CAStatus.READY || !resources) return;
@@ -351,6 +359,17 @@ export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLS
 		};
 	}, [play, FPS, resources, status, size, step]);
 
+	function resetState() {
+		if (!resources) return;
+
+		// Reset cell buffer
+		const cellState = new Uint32Array(size * size).fill(0);
+		resources.device.queue.writeBuffer(resources.buffers.cells[0], 0, initState(cellState));
+
+		// Reset step
+		setStep(0);
+	}
+
 	return {
 		play,
 		setPlay,
@@ -364,7 +383,8 @@ export default function useLTL({ size, pattern, shaders, parseRuleString }: LTLS
 		setStatus,
 		FPS,
 		setFPS,
-		canvasRef
+		canvasRef,
+		resetState
 	};
 }
 

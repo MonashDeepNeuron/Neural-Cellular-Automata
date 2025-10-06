@@ -20,5 +20,5 @@ export default function Client() {
 		parseRuleString
 	});
 
-	return <Simulator name="Conway's Life" size={SIZE} {...controls} />;
+	return <Simulator name="Conway's Life" size={SIZE} resetStateStep={1000} {...controls} />;
 }

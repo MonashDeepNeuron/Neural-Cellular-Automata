@@ -1,7 +1,7 @@
 'use client';
 import clsx from 'clsx';
 import { AlertCircle, Pause, Play } from 'lucide-react';
-import { type ReactNode, useId } from 'react';
+import { type ReactNode, useEffect, useId, useState } from 'react';
 import { CAStatus, type NCAControls } from '@/hooks/useNCA';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Button } from '../ui/button';
@@ -10,13 +10,12 @@ import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import { Slider } from '../ui/slider';
 
-type Controls = Omit<NCAControls, 'resetState'> & Partial<Pick<NCAControls, 'resetState'>>
-
-interface SimulatorProps extends Controls {
+interface SimulatorProps extends NCAControls {
 	name: string;
 	className?: string;
 	size: number;
 	children?: ReactNode;
+	resetStateStep?: number;
 }
 
 export default function Simulator({
@@ -33,9 +32,18 @@ export default function Simulator({
 	stepsPerFrame,
 	setStepsPerFrame,
 	className,
-	children
+	children,
+	resetState,
+	resetStateStep = 0
 }: SimulatorProps) {
-	const checkboxId = useId();
+	const skipId = useId();
+	const resetId = useId();
+
+	const [reset, setReset] = useState(false);
+
+	useEffect(() => {
+		if (reset && resetStateStep && step > resetStateStep) resetState();
+	}, [reset, step, resetState, resetStateStep]);
 
 	return (
 		<div className='container mx-auto px-6 py-24'>
@@ -77,15 +85,25 @@ export default function Simulator({
 					{/* Skip Frame */}
 					<div className='flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50 cursor-pointer'>
 						<Checkbox
-							id={checkboxId}
+							id={skipId}
 							checked={stepsPerFrame === 2}
 							onCheckedChange={checked => setStepsPerFrame(checked ? 2 : 1)}
 							className='cursor-pointer'
 						/>
-						<Label htmlFor={checkboxId} className='cursor-pointer'>
+						<Label htmlFor={skipId} className='cursor-pointer'>
 							Skip every second frame
 						</Label>
 					</div>
+
+					{/* Reset State */}
+					{resetStateStep > 0 && (
+						<div className='flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50 cursor-pointer'>
+							<Checkbox id={resetId} checked={reset} onCheckedChange={checked => setReset(Boolean(checked))} className='cursor-pointer' />
+							<Label htmlFor={resetId} className='cursor-pointer'>
+								Reset state periodically
+							</Label>
+						</div>
+					)}
 
 					{children}
 

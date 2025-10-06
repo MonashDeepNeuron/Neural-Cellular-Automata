@@ -14,6 +14,7 @@ export interface GPUResources {
 	};
 	buffers: {
 		vertex: GPUBuffer;
+		cells: CellStateBufferPair;
 	};
 }
 
@@ -212,7 +213,6 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 			// Write buffers
 			device.queue.writeBuffer(sizeBuffer, 0, sizeArray);
 			device.queue.writeBuffer(cellStateBuffers[0], 0, cellState);
-			device.queue.writeBuffer(cellStateBuffers[1], 0, cellState);
 			device.queue.writeBuffer(kernelBuffer, 0, kernelArray);
 
 			// Create Bind Group
@@ -249,7 +249,8 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 					simulation: simulationPipeline
 				},
 				buffers: {
-					vertex: vertexBuffer
+					vertex: vertexBuffer,
+					cells: cellStateBuffers
 				}
 			});
 			setStatus(CAStatus.READY);
@@ -330,6 +331,17 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 		};
 	}, [play, FPS, resources, status, size, step, stepsPerFrame]);
 
+	function resetState() {
+		if (!resources) return;
+
+		// Reset cell buffer
+		const cellState = new Float32Array(size * size).fill(0).map(() => Math.random());
+		resources.device.queue.writeBuffer(resources.buffers.cells[0], 0, cellState);
+
+		// Reset step
+		setStep(0);
+	}
+
 	return {
 		play,
 		setPlay,
@@ -343,7 +355,8 @@ export default function useContinuous({ size, shaders }: ContinuousSettings) {
 		setFPS,
 		stepsPerFrame,
 		setStepsPerFrame,
-		canvasRef
+		canvasRef,
+		resetState
 	};
 }
 
