@@ -357,10 +357,10 @@ if __name__ == "__main__":
 
     print("Initialising model...")
 
-    MODEL = GCA()
+    MODEL = Directional_GCA()
     MODEL = initialiseGPU(MODEL)
 
-    # targetImg = load_image("./cat.png")
+    targetImg = load_image("./images/diagonal-1.png")
 
     ## Load model weights if available
     if LOAD_WEIGHTS:
