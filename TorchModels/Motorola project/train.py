@@ -116,11 +116,11 @@ def connectivity_loss(state):
     source = state[:, -2:-1]
     target = state[:, -1:]
 
-    reach = (alpha * target).max()
+    reach = (alpha * target).mean(dim=(1,2,3))
     reach_loss = 1 - reach
 
-    sparsity = alpha.mean()
-    return reach_loss + 0.05 * sparsity
+    sparsity = alpha.mean(dim=(1,2,3))
+    return (reach_loss + 0.05 * sparsity).mean()
 
 def load_image(imagePath: str):
     """
