@@ -15,7 +15,7 @@ import argparse
 from learning_rate_adjuster import lradj
 import numpy as np
 
-TRAINING = False  # Is our purpose to train or are we just looking rn?
+TRAINING = True  # Is our purpose to train or are we just looking rn?
 LOAD_WEIGHTS = True # only load weights if we want to start training from previous
 
 ## For learning rate adjustmnet
@@ -339,12 +339,16 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, seedrate, reco
 
 
 def initialiseGPU(model):
-    ## Check if GPU available
+    # Get and configure GPU (CPU fallback)
     if torch.cuda.is_available():
-        print(f"GPU: {torch.cuda.get_device_name(0)} is available.")
+        device = torch.device("cuda")
+        gpu_name = torch.cuda.get_device_name(1)
+        backend = "CUDA" if torch.version.hip is None else "ROCm"
+        print(f"GPU is available. Model: {gpu_name} ({backend}).")
+    else:
+        device = torch.device("cpu")
+        print("GPU not available. Using CPU.")
 
-    ## Configure device as GPU
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     return model
 
@@ -353,10 +357,10 @@ if __name__ == "__main__":
 
     print("Initialising model...")
 
-    MODEL = GCA()
+    MODEL = Directional_GCA()
     MODEL = initialiseGPU(MODEL)
 
-    # targetImg = load_image("./cat.png")
+    targetImg = load_image("./images/diagonal-1.png")
 
     ## Load model weights if available
     if LOAD_WEIGHTS:
