@@ -31,14 +31,14 @@ import argparse
 from learning_rate_adjuster import lradj
 import numpy as np
 
-TRAINING = True  # Is our purpose to train or are we just looking rn?
+TRAINING = False  # Is our purpose to train or are we just looking rn?
 LOAD_WEIGHTS = True # only load weights if we want to start training from previous
 
 ## For learning rate adjustmnet
 ADJUSTMENT_WINDOW = 7
 
 GRID_SIZE = 40
-CHANNELS = 18
+CHANNELS = 16
 
 POOL_SIZE = 1024
 
@@ -110,6 +110,7 @@ def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
 
     return ani
 
+
 def new_seed(batch=1):
     """
     Creates a 4D tensor with dimensions batch_size x GRID_SIZE x GRID_SIZE x CHANNELS
@@ -118,21 +119,13 @@ def new_seed(batch=1):
     if not isinstance(batch, Tensor):
         seed = torch.zeros(batch, CHANNELS, GRID_SIZE, GRID_SIZE)
         seed[:, 3, GRID_SIZE // 2, GRID_SIZE // 2] = 1  # Alpha channel = 1
-        sx, sy = GRID_SIZE // 4, GRID_SIZE // 2  # source x and y
-        tx, ty = 3 * GRID_SIZE // 4, GRID_SIZE // 2  # target x and y
-        seed[:, 3, sx, sy] = 1
-        seed[:, -2, sx, sy] = 1
-
-        seed[:, 3, tx, ty] = 1
-        seed[:, -1, tx, ty] = 1
+    
         return seed
     
     batch[:, :, :, :] = 0
     batch[:, 3, GRID_SIZE // 2, GRID_SIZE // 2] = 1  # Alpha channel = 1
     return batch
 
-def connectivity_loss(state):
-    return torch.mean(state, dim = None)
 
 def load_image(imagePath: str):
     """
@@ -186,9 +179,8 @@ def update_pass(model, batch, target, optimiser, updates_range):
     updates = random.randint(updates_range[0],updates_range[1])
     batch = forward_pass(model, batch, updates)
     ## apply pixel-wise MSE loss between RGBA channels in the grid and the target pattern
-    batch_losses = LOSS_FN(batch[0, 0:4])
+    batch_losses = LOSS_FN(batch[0, 0:4], target)
     ## .item() removes computational graph for memory efficiency
-    print(batch_losses)
     batch_losses.backward()
     optimiser.step()
     optimiser.zero_grad()
@@ -209,7 +201,7 @@ def standard_train(model: nn.Module, target: torch.Tensor, optimiser, record=Fal
 
     batch = new_seed(BATCH_SIZE)
 
-    best_loss = LOSS_FN(snapshots[0, 0:4]).cpu().detach().numpy()
+    best_loss = LOSS_FN(snapshots[0, 0:4], target).cpu().detach().numpy()
     best_model = model.state_dict()
 
     try:
@@ -241,7 +233,7 @@ def standard_train(model: nn.Module, target: torch.Tensor, optimiser, record=Fal
             MODEL.eval()
             test_run = forward_pass(MODEL, test_seed, 96)
             training_losses.append(
-                LOSS_FN(test_run[0, 0:4]).cpu().detach().numpy()
+                LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
             )
             loss_window[loss_window_idx] = training_losses[-1].item()
 
@@ -287,7 +279,7 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, seedrate, reco
 
     snapshots = sample_pool[[1,2], :, :, :]
     
-    best_loss = LOSS_FN(snapshots[0, 0:4]).cpu().detach().numpy()
+    best_loss = LOSS_FN(snapshots[0, 0:4], target).cpu().detach().numpy()
     best_model = model.state_dict()
 
     try:
@@ -323,7 +315,7 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, seedrate, reco
             MODEL.eval()
             test_run = forward_pass(MODEL, test_seed, 96)
             training_losses.append(
-                LOSS_FN(test_run[0, 0:4]).cpu().detach().numpy()
+                LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
             )
 
             loss_window[loss_window_idx] = training_losses[-1].item()
@@ -352,16 +344,12 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, seedrate, reco
 
 
 def initialiseGPU(model):
-    # Get and configure GPU (CPU fallback)
+    ## Check if GPU available
     if torch.cuda.is_available():
-        device = torch.device("cuda")
-        gpu_name = torch.cuda.get_device_name(1)
-        backend = "CUDA" if torch.version.hip is None else "ROCm"
-        print(f"GPU is available. Model: {gpu_name} ({backend}).")
-    else:
-        device = torch.device("cpu")
-        print("GPU not available. Using CPU.")
+        print(f"GPU: {torch.cuda.get_device_name(0)} is available.")
 
+    ## Configure device as GPU
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     return model
 
@@ -404,7 +392,7 @@ if __name__ == "__main__":
             BATCH_SIZE = 2
 
             optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR, weight_decay= 1e-8)
-            LOSS_FN = connectivity_loss
+            LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
             UPDATES_RANGE=(64, 96)
             MODEL, losses1, recording1 = standard_train(MODEL, targetImg, optimizer, record=True)
@@ -413,7 +401,7 @@ if __name__ == "__main__":
             torch.save(MODEL.state_dict(), SAVE_PATH)
 
         optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
-        LOSS_FN = connectivity_loss
+        LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
         UPDATES_RANGE=(10, 50)
         MODEL, losses2, recording2 = pool_train(MODEL, targetImg, optimizer, record=True, seedrate = 1)
@@ -450,7 +438,7 @@ if __name__ == "__main__":
         ## Visialise the training snapshots
         if (LOAD_WEIGHTS):
             anim = visualise(recording2, anim=True, filenameBase="pool", show=False)
-        else:
+        else :
             anim = visualise(torch.cat((recording1, recording2), dim=0), anim=True, filenameBase="pool", show=False)
 
     ## Switch state to evaluation to disable dropout e.g.

@@ -1,103 +1,96 @@
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as f
 
+# Use GPU if available
+if torch.cuda.is_available():
+    torch.set_default_device('cuda')
+
+# Define perceptions
+IDENTITY = torch.tensor([[0,0,0],[0,1,0],[0,0,0]], dtype=torch.float)       # Used to maintain the current state
+SOBEL_X = torch.tensor([[-1,0,1],[-2,0,2],[-1,0,1]], dtype=torch.float)     # Detects horizontal edges
+SOBEL_Y = SOBEL_X.T                                                         # Detects vertical edges
+
+# Create perception layer, consisting of the identity, sobel x, sobel y and laplacian
+PERCEPTIONS = torch.stack([IDENTITY, SOBEL_X, SOBEL_Y])
+PERCEPTION_COUNT = PERCEPTIONS.shape[0]
 
 class Directional_GCA(nn.Module):
-    SOBEL_X = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32)
-    SOBEL_Y = torch.tensor([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype=torch.float32)
-    GRID_SIZE = 32
-
-    def __init__(self, n_channels=18, hidden_channels=128):
+    def __init__(self, channels=18, hidden_channels=128):
         ## Hidden channels are the number of channels in the linear layer in network
         super().__init__()
-        self.n_channels = n_channels
-        ## Represent the update step as a submodule
-        self.update_network = (
-            nn.Sequential(  # pytorch Conv2d layers automatically parallelize
-                nn.Conv2d(3 * n_channels + 1, hidden_channels, kernel_size=1),
-                nn.ReLU(),
-                nn.Conv2d(hidden_channels, n_channels, kernel_size=1, bias=False),
-            )
+
+        self.channels = channels
+
+        # indexing convention (implicit contract)
+        self.IDENTITY_CHANNELS = [channels - 2, channels - 1]
+        self.MUTABLE_CHANNELS = list(range(channels - 2))
+
+        # Define dense layers (2D convolutions with kernel size of 1)
+        self.layers = nn.Sequential(
+            # Input channels = channels * # of perceptions
+            nn.Conv2d(channels*PERCEPTION_COUNT, hidden_channels, 1),
+            nn.ReLU(),
+            nn.Conv2d(hidden_channels, channels, 1, bias=False)
         )
-        for m in self.update_network.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.normal_(m.weight, mean = 0.0, std = 0.001)
 
-    def to(self, device):
-        """
-        Overrides parent nn.Module to method for sending resources to GPU
-        Move the model and constant tensors to the device (GPU)"""
-        """
-        Overrides parent nn.Module to method for sending resources to GPU
-        Move the model and constant tensors to the device (GPU)"""
-        self.SOBEL_X = self.SOBEL_X.to(device)
-        self.SOBEL_Y = self.SOBEL_Y.to(device)
-        return super().to(device)
+        # Initialize weights of the last conv layer to zero
+        nn.init.zeros_(self.layers[-1].weight)
 
-    def forward(self, input_grid):
-        """
-        Input_grid is tensor with dims: (batch, in_channels, height, width)
-        1. Construct `perception_grid` by replacing each cell in input_grid with its feature vector
-        2. Apply update to each `perception_vector` in `perception_grid` to obtain `ds_grid`, the grid of changes
-        3. Apply stochastic update mask to `ds_grid` to filter out some changes
-        Input_grid is tensor with dims: (batch, in_channels, height, width)
-        1. Construct `perception_grid` by replacing each cell in input_grid with its feature vector
-        2. Apply update to each `perception_vector` in `perception_grid` to obtain `ds_grid`, the grid of changes
-        3. Apply stochastic update mask to `ds_grid` to filter out some changes
-        4. Obtain next state of grid from `ds_grid` + `state_grid`
-        5. Apply alive cell masking to `state_grid` to kill of cells with alpha < 0.1
-        This yields output_filtered_grid, a tensor with dims: (batch, in_channels, height, width)
-        """
+    def forward(self, x):
+        # Create perception vector
+        y = self.perception_conv(x)
 
-        ## Add input grid to the device model parameters are on
-        input_grid = input_grid.to(next(self.parameters()).device)
+        # Pass through fully-connected layers
+        y = self.layers(y)
 
-        perception = self.perception(input_grid)
-        dx = self.update_network(perception)
-        
-        if self.training:
-            mask = (torch.rand_like(dx[:, :1]) < 0.5).float()
-            dx = dx * mask
+        # Stochastic update
+        y = self.mask(y)
 
-        state = input_grid + dx
-        state[:, 4:7] = input_grid.detach()[:, 4:7]
-        state = self.apply_alive_mask(input_grid)
-        return state
+        # Alive cell masking
+        y = self.apply_alive_mask(y)
 
-    def perception(self, state_grid):
-        """
-        Calculates 1x48 perception vector for each cell in grid, returns as grid of perception vectors.
-        Perception vectors are 4 dimensional. Unsqueeze used to add dimension of size 1 at index
-        """
+        # Return input + stochastic delta
+        return x + y
+    
+    def perception_conv(self, x):
+        """Apply each perception convolution to the current state."""
+        # Reshape input to apply perception convolution
+        batches, channels, height, width = x.shape
+        y = x.reshape(batches*channels, 1, height, width)
 
-        state_grid_padded = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
+        # Circular pad the input to avoid losing information at the edges
+        y = f.pad(y, [1, 1, 1, 1], 'circular')
 
-        sobel_x = self.SOBEL_X.view(1,1,3,3).repeat(self.n_channels, 1, 1, 1)
-        sobel_y = self.SOBEL_Y.view(1,1,3,3).repeat(self.n_channels, 1, 1, 1)
+        # Apply each perception convolution
+        y = f.conv2d(y, PERCEPTIONS[:,None])
 
-        grad_x = f.conv2d(state_grid_padded, sobel_x, groups = self.n_channels)
-        grad_y = f.conv2d(state_grid_padded, sobel_y, groups = self.n_channels)
+        # Reshape back to original shape
+        return y.reshape(batches, -1, height, width)
+    
+    def mask(self, x, update_rate = 0.5):
+        """Stochastically mask updates to mimic the random updates found in biological cells."""
+        # Uniformly mask across all channels
+        batches, channels, height, width = x.shape
+        mask = (torch.rand(batches, 1, height, width) + update_rate).floor()
 
-        source = state_grid[:, -2:-1]
-        target = state_grid[:, -1:]
-        direction = target - source
-
-        return torch.cat([state_grid, grad_x, grad_y, direction], dim = 1)
-
-    # def apply_stochastic_mask(self, ds_grid, p = 0.5):
-    #    """Applies stochastic update mask to ds_grid
-    #    Zero out (with 0.5 chance) a random fraction of the updates using a random mask
-    #    Uses the GPU for random mask generation
-    #    """
-    #    mask = (torch.rand_like(dx[:, :1]) < p).float()
-    #    return ds_grid * mask  
-
+        # Apply mask
+        return x * mask
+    
+    def rgb(self, x):
+        """Converts the model output to an RGB image."""
+        # Return the first 3 channels, clamped between 0 and 1
+        return x[:, :3].clamp(0, 1)
+    
     def apply_alive_mask(self, state_grid):
         """Applies alive mask to state_grid
         Does not use GPU to generate alive mask as doing max pooling
         A cell is considered empty (set rgba : 0) if there is no mature (alpha > 0.1) cell in its 3x3 neighbourhood
         """
-        alpha = state_grid[:, 3:4]
-        alive = f.max_pool2d(alpha, 3, 1, 1) > 0.1
-        return alive * state_grid
+        alive_mask = (
+            f.max_pool2d(state_grid[:, 3:4, :, :], kernel_size=3, stride=1, padding=1)
+            > 0.1
+        )
+
+        return alive_mask * state_grid
+
