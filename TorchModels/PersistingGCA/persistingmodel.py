@@ -14,10 +14,8 @@ class GCA(nn.Module):
 
     def __init__(self, n_channels=16, hidden_channels=128):
         ## Hidden channels are the number of channels in the linear layer in network
-        ## Hidden channels are the number of channels in the linear layer in network
         super().__init__()
 
-        ## Represent the update step as a submodule
         ## Represent the update step as a submodule
         self.update_network = (
             nn.Sequential(  # pytorch Conv2d layers automatically parallelize
@@ -29,10 +27,6 @@ class GCA(nn.Module):
             )
         )
 
-        ## Initialise model parameters as much smaller numbers
-        torch.nn.init.normal_(self.update_network[0].weight, mean=0.0, std=0.001)
-        torch.nn.init.normal_(self.update_network[0].bias, mean=0.0, std=0.001)
-        torch.nn.init.normal_(self.update_network[2].weight, mean=0.0, std=0.001)
         ## Initialise model parameters as much smaller numbers
         torch.nn.init.normal_(self.update_network[0].weight, mean=0.0, std=0.001)
         torch.nn.init.normal_(self.update_network[0].bias, mean=0.0, std=0.001)
@@ -50,12 +44,8 @@ class GCA(nn.Module):
         self.IDENTITY = self.IDENTITY.to(device)
         return super().to(device)
 
-    def forward(self, input_grid):
+    def forward(self, input_grid, image_grid):
         """
-        Input_grid is tensor with dims: (batch, in_channels, height, width)
-        1. Construct `perception_grid` by replacing each cell in input_grid with its feature vector
-        2. Apply update to each `perception_vector` in `perception_grid` to obtain `ds_grid`, the grid of changes
-        3. Apply stochastic update mask to `ds_grid` to filter out some changes
         Input_grid is tensor with dims: (batch, in_channels, height, width)
         1. Construct `perception_grid` by replacing each cell in input_grid with its feature vector
         2. Apply update to each `perception_vector` in `perception_grid` to obtain `ds_grid`, the grid of changes
@@ -63,59 +53,83 @@ class GCA(nn.Module):
         4. Obtain next state of grid from `ds_grid` + `state_grid`
         5. Apply alive cell masking to `state_grid` to kill of cells with alpha < 0.1
         This yields output_filtered_grid, a tensor with dims: (batch, in_channels, height, width)
-        5. Apply alive cell masking to `state_grid` to kill of cells with alpha < 0.1
-        This yields output_filtered_grid, a tensor with dims: (batch, in_channels, height, width)
         """
 
         ## Add input grid to the device model parameters are on
         input_grid = input_grid.to(next(self.parameters()).device)
-
-        ## Add input grid to the device model parameters are on
-        input_grid = input_grid.to(next(self.parameters()).device)
-
-        perception_grid = self.calculate_perception_grid(input_grid)
+        perception_grid = self.calculate_perception_grid(input_grid, image_grid)
         ds_grid = self.calculate_ds_grid(perception_grid)
         #filtered_ds_grid = self.apply_stochastic_mask(ds_grid)
         #filtered_ds_grid = nn.Dropout(p=0.5)(ds_grid)
-        output_raw_grid = input_grid + ds_grid# filtered_ds_grid
+        output_raw_grid = input_grid + ds_grid
         output_filtered_grid = self.apply_alive_mask(output_raw_grid)
         return output_filtered_grid
 
-    def calculate_perception_grid(self, state_grid):
+    # def calculate_perception_grid(self, state_grid):
+    #     """
+    #     Calculates 1x48 perception vector for each cell in grid, returns as grid of perception vectors.
+    #     Perception vectors are 4 dimensional. Unsqueeze used to add dimension of size 1 at index
+    #     """
+
+    #     state_grid_padded = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
+
+    #     grad_x = f.conv2d(
+    #         state_grid_padded,
+    #         self.SOBEL_X.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
+    #         stride=1,
+    #         padding=0,
+    #         groups=state_grid_padded.size(1),
+    #     ) 
+    #     grad_y = f.conv2d(
+    #         state_grid_padded,
+    #         self.SOBEL_Y.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
+    #         stride=1,
+    #         padding=0,
+    #         groups=state_grid_padded.size(1),
+    #     )
+
+    #     perception_grid = torch.cat([state_grid, grad_x, grad_y], dim=1)
+
+    #     return perception_grid
+    
+    def calculate_perception_grid(self, state_grid, image_grid):
         """
         Calculates 1x48 perception vector for each cell in grid, returns as grid of perception vectors.
         Perception vectors are 4 dimensional. Unsqueeze used to add dimension of size 1 at index
         """
-
-        state_grid_padded = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
-
+        # Cells perceive both their own state and the underlying image
+        # The image should be read-only — we never modify it
+        combined = torch.cat([state_grid, image_grid], dim=1)  # (batch, 20, H, W)
+        
+        combined_padded = f.pad(combined, (1, 1, 1, 1), mode="circular")
+        
+        # Sobel filters  operate over the full combined input
+        n_combined = combined.size(1)
         grad_x = f.conv2d(
-            state_grid_padded,
-            self.SOBEL_X.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
-            stride=1,
-            padding=0,
-            groups=state_grid_padded.size(1),
-        ) 
-        grad_y = f.conv2d(
-            state_grid_padded,
-            self.SOBEL_Y.unsqueeze(0).repeat(state_grid.size(1), 1, 1, 1),
-            stride=1,
-            padding=0,
-            groups=state_grid_padded.size(1),
+            combined_padded,
+            self.SOBEL_X.unsqueeze(0).repeat(n_combined, 1, 1, 1),
+            stride=1, padding=0, groups=n_combined
         )
-
-        perception_grid = torch.cat([state_grid, grad_x, grad_y], dim=1)
-
-        return perception_grid
+        grad_y = f.conv2d(
+            combined_padded,
+            self.SOBEL_Y.unsqueeze(0).repeat(n_combined, 1, 1, 1),
+            stride=1, padding=0, groups=n_combined
+        )
+        
+        # Perception vector: own state + image + both gradients
+        return torch.cat([state_grid, image_grid, grad_x, grad_y], dim=1)
 
     def calculate_ds_grid(self, perception_grid):
-        """Updates each perception vector in perception grid, return
-        We can apply the submodule network like a function"""
+        """
+        Updates each perception vector in perception grid, return
+        We can apply the submodule network like a function
+        """
         return self.update_network(perception_grid)
 
 
     def apply_alive_mask(self, state_grid):
-        """Applies alive mask to state_grid
+        """
+        Applies alive mask to state_grid
         Does not use GPU to generate alive mask as doing max pooling
         A cell is considered empty (set rgba : 0) if there is no mature (alpha > 0.1) cell in its 3x3 neighbourhood
         """
