@@ -8,18 +8,34 @@ class GCA(nn.Module):
     Persisting variation of Growing Neural Cellular Automata. Minimal changes have been made, except
     Dropout replacing manual stochastic mask.
     """
-    SOBEL_X = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32)
-    SOBEL_Y = torch.tensor([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype=torch.float32)
-    IDENTITY = torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=torch.float32)
+    environment_grid = None
+    SOBEL_X = torch.tensor(
+        [
+            [-1, 0, 1],
+            [-2, 0, 2],
+            [-1, 0, 1]
+        ], dtype=torch.float32)
+    SOBEL_Y = torch.tensor(
+        [
+            [ 1,  2,  1],
+            [ 0,  0,  0],
+            [-1, -2, -1]
+        ], dtype=torch.float32)
+    IDENTITY = torch.tensor(
+        [
+            [0, 0, 0],
+            [0, 1, 0],
+            [0, 0, 0]
+        ], dtype=torch.float32)
 
-    def __init__(self, n_channels=16, hidden_channels=128):
+    def __init__(self, n_channels=16, hidden_channels=128, environment_size=0):
         ## Hidden channels are the number of channels in the linear layer in network
         super().__init__()
 
         ## Represent the update step as a submodule
         self.update_network = (
             nn.Sequential(  # pytorch Conv2d layers automatically parallelize
-                nn.Conv2d(3 * n_channels, hidden_channels, kernel_size=1),
+                nn.Conv2d(3 * (n_channels + environment_size), hidden_channels, kernel_size=1),
                 nn.ReLU(),
                 nn.Conv2d(hidden_channels, n_channels, kernel_size=1, bias=False),
                 nn.Dropout(p=0.5) # Apply stochastic mask, 
@@ -36,15 +52,12 @@ class GCA(nn.Module):
         """
         Overrides parent nn.Module to method for sending resources to GPU
         Move the model and constant tensors to the device (GPU)"""
-        """
-        Overrides parent nn.Module to method for sending resources to GPU
-        Move the model and constant tensors to the device (GPU)"""
         self.SOBEL_X = self.SOBEL_X.to(device)
         self.SOBEL_Y = self.SOBEL_Y.to(device)
         self.IDENTITY = self.IDENTITY.to(device)
         return super().to(device)
 
-    def forward(self, input_grid, image_grid):
+    def forward(self, input_grid, environment_size=0):
         """
         Input_grid is tensor with dims: (batch, in_channels, height, width)
         1. Construct `perception_grid` by replacing each cell in input_grid with its feature vector
@@ -56,12 +69,12 @@ class GCA(nn.Module):
         """
 
         ## Add input grid to the device model parameters are on
+        input_grid_without_environment_size = input_grid.size(1) - environment_size
         input_grid = input_grid.to(next(self.parameters()).device)
-        perception_grid = self.calculate_perception_grid(input_grid, image_grid)
-        ds_grid = self.calculate_ds_grid(perception_grid)
-        #filtered_ds_grid = self.apply_stochastic_mask(ds_grid)
-        #filtered_ds_grid = nn.Dropout(p=0.5)(ds_grid)
-        output_raw_grid = input_grid + ds_grid
+        perception_grid = self.calculate_perception_grid(input_grid)
+        update_grid = self.calculate_ds_grid(perception_grid)
+        output_raw_grid = input_grid[:, :input_grid_without_environment_size] + update_grid[:, :input_grid_without_environment_size]
+
         output_filtered_grid = self.apply_alive_mask(output_raw_grid)
         return output_filtered_grid
 
@@ -92,32 +105,31 @@ class GCA(nn.Module):
 
     #     return perception_grid
     
-    def calculate_perception_grid(self, state_grid, image_grid):
+    def calculate_perception_grid(self, state_grid):
         """
         Calculates 1x48 perception vector for each cell in grid, returns as grid of perception vectors.
         Perception vectors are 4 dimensional. Unsqueeze used to add dimension of size 1 at index
         """
         # Cells perceive both their own state and the underlying image
         # The image should be read-only — we never modify it
-        combined = torch.cat([state_grid, image_grid], dim=1)  # (batch, 20, H, W)
         
-        combined_padded = f.pad(combined, (1, 1, 1, 1), mode="circular")
+        state_grid_padded = f.pad(state_grid, (1, 1, 1, 1), mode="circular")
         
         # Sobel filters  operate over the full combined input
-        n_combined = combined.size(1)
+        n_combined = state_grid_padded.size(1)
         grad_x = f.conv2d(
-            combined_padded,
+            state_grid_padded,
             self.SOBEL_X.unsqueeze(0).repeat(n_combined, 1, 1, 1),
             stride=1, padding=0, groups=n_combined
         )
         grad_y = f.conv2d(
-            combined_padded,
+            state_grid_padded,
             self.SOBEL_Y.unsqueeze(0).repeat(n_combined, 1, 1, 1),
             stride=1, padding=0, groups=n_combined
         )
         
         # Perception vector: own state + image + both gradients
-        return torch.cat([state_grid, image_grid, grad_x, grad_y], dim=1)
+        return torch.cat([state_grid, grad_x, grad_y], dim=1)
 
     def calculate_ds_grid(self, perception_grid):
         """

@@ -82,14 +82,14 @@ class lradj:
         return new_learning_rate
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     # test_losses: List[float] = [0.5, 0.2, 0.05, 0.02]
     # adjustment_losses: List[float] = lradj.get_adjusted_learning_rate(t.Tensor(test_losses))
     # print((adjustment_losses))
-#     # list:List[float] = [0.5125302, 0.5117947, 0.44350803, 0.43563068, 0.43197787, 0.3666371, 0.15286264, 0.0984481, 0.12255937, 0.14001535, 0.1265211, 0.1348856, 0.13952297, 0.11741823, 0.11464076, 0.12191339, 0.09644841, 0.12031035, 0.11494549, 0.10283274, 0.1231882, 0.10839787, 0.11618645, 0.11455134, 0.10809456, 0.10307693, 0.12078851, 0.10172762, 0.10440645,0.09962489]
-#     # deltas:List[float] = [None for i in range(len(list) - 1)]
-#     # for i in range(0, len(list) - 1):
-#     #     deltas[i] = abs(list[i + 1] - list[i])
-#     # delta_median: float = statistics.median(deltas)
-#     # print(delta_median)
-#     # print(deltas)
+    list:List[float] = [0.5125302, 0.5117947, 0.44350803, 0.43563068, 0.43197787, 0.3666371, 0.15286264, 0.0984481, 0.12255937, 0.14001535, 0.1265211, 0.1348856, 0.13952297, 0.11741823, 0.11464076, 0.12191339, 0.09644841, 0.12031035, 0.11494549, 0.10283274, 0.1231882, 0.10839787, 0.11618645, 0.11455134, 0.10809456, 0.10307693, 0.12078851, 0.10172762, 0.10440645,0.09962489]
+    deltas:List[float] = [None for i in range(len(list) - 1)]
+    for i in range(0, len(list) - 1):
+        deltas[i] = abs(list[i + 1] - list[i])
+    delta_median: float = statistics.median(deltas)
+    print(delta_median)
+    print(deltas)
