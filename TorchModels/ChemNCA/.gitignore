@@ -1,0 +1,9 @@
+## The repo root .gitignore covers only *.binlog, so guard this directory explicitly.
+## Committed: source, README, and the outputs/*.png evidence (small, and the whole point).
+## Not committed: checkpoints, animations and logs -- all regenerable from the scripts.
+*.pth
+*.bin
+*.gif
+*.log
+outputs/*.gif
+outputs/*.log
