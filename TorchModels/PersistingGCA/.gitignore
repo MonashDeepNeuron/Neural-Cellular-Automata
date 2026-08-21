@@ -1,0 +1,15 @@
+## Generated artifacts. Listed explicitly rather than as *.png / *.pth so the
+## TARGET images (lizard.png, cat.png) and any deliberately-kept checkpoint
+## still have to be added by hand.
+lizard.pth
+weights.bin
+train_log.txt
+val_log.txt
+
+## rendered output
+loss.png
+train.png
+eval_steps.png
+diag_grid_size.png
+diag_train_vs_eval.png
+pool.gif

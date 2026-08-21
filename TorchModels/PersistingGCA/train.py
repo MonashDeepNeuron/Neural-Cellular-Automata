@@ -24,29 +24,47 @@ import torchvision
 from torch import Tensor
 import torch.nn as nn
 from persistingmodel import GCA
+import copy
+import math
 import random
+import matplotlib
+matplotlib.use("Agg")  # non-interactive backend so plt.show() never blocks a headless run
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import argparse
 from learning_rate_adjuster import lradj
 import numpy as np
 
-TRAINING = False  # Is our purpose to train or are we just looking rn?
-LOAD_WEIGHTS = True # only load weights if we want to start training from previous
+TRAINING = True  # Is our purpose to train or are we just looking rn?
+LOAD_WEIGHTS = False # only load weights if we want to start training from previous
 
 ## For learning rate adjustmnet
 ADJUSTMENT_WINDOW = 7
+## The adaptive adjuster was tuned for un-normalised gradients. With per-parameter
+## gradient normalisation (the canonical NCA trick) a constant lr is correct, so the
+## adjuster is disabled by default -- it otherwise drives the lr far too low.
+USE_LR_ADJUSTER = False
+## With grad-norm + constant lr the model takes fixed-size steps forever and can
+## eventually random-walk into the absorbing "all cells dead" state. Decay the lr
+## (cosine) so it settles once converged. Final lr = LR_MIN_FACTOR * starting lr.
+USE_LR_DECAY = True
+LR_MIN_FACTOR = 0.05
 
 GRID_SIZE = 40
 CHANNELS = 16
 
+## Horizons for evaluation during training:
+TEST_STEPS = 96       # logged each epoch for the loss curve (comparable to old runs)
+PERSIST_STEPS = 250   # used at save intervals to pick the best model, so the saved
+                      # model is rewarded for STAYING on-target, not just reaching it
+
 POOL_SIZE = 1024
 
-EPOCHS = 5000  # 5000 recommended epochs 
+EPOCHS = 5000  # 5000 recommended
 ## 30 epochs, once loss dips under 0.8 switch to learning rate 0.0001
 
-MODEL_PATH = "abc_4.pth"
-SAVE_PATH = "abc_4.pth"
+MODEL_PATH = "lizard.pth"
+SAVE_PATH = "lizard.pth"
 
 LR = 1e-4
 BATCH_SIZE = 12
@@ -67,7 +85,7 @@ def visualise(imgTensor, filenameBase="test", anim=False, save=True, show=True):
     def update(imgIdx):
         # We're only interested in the RGBalpha channels, and need numpy representation for plt
         plt.clf()
-        img = imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 0)
+        img = imgTensor[imgIdx].clip(0, 1).squeeze().permute(1, 2, 0).cpu()
 
         if anim:
             plt.suptitle("Update " + str(imgIdx))
@@ -169,19 +187,36 @@ def forward_pass(model: nn.Module, state, updates, record=False):
     return state
 
 
+def apply_lr_decay(optimiser, base_lr, epoch_idx, total_epochs):
+    """Cosine-decay the learning rate from base_lr down to base_lr*LR_MIN_FACTOR
+    over the phase, so training settles instead of stepping into the dead state."""
+    if not USE_LR_DECAY:
+        return
+    frac = epoch_idx / max(total_epochs - 1, 1)
+    scale = LR_MIN_FACTOR + (1 - LR_MIN_FACTOR) * 0.5 * (1 + math.cos(math.pi * frac))
+    for pg in optimiser.param_groups:
+        pg["lr"] = base_lr * scale
+
+
 def update_pass(model, batch, target, optimiser, updates_range):
     """
     Back calculate gradient and update model paramaters
     """
-    device = next(model.parameters()).device
-    batch_losses = torch.zeros(BATCH_SIZE, device=device)
     optimiser.zero_grad()
     updates = random.randint(updates_range[0],updates_range[1])
     batch = forward_pass(model, batch, updates)
-    ## apply pixel-wise MSE loss between RGBA channels in the grid and the target pattern
-    batch_losses = LOSS_FN(batch[0, 0:4], target)
-    ## .item() removes computational graph for memory efficiency
-    batch_losses.backward()
+    ## Pixel-wise MSE loss between the RGBA channels and the target, averaged over the
+    ## WHOLE batch (target broadcasts across the batch dim). Using only batch[0] here
+    ## threw away most of the gradient signal and is why training stalled.
+    target_b = target.unsqueeze(0).expand(batch.size(0), -1, -1, -1)
+    batch_loss = LOSS_FN(batch[:, 0:4], target_b)
+    batch_loss.backward()
+    ## Per-parameter gradient normalisation (canonical NCA trick): rescale each
+    ## gradient to unit norm before the Adam step so no single layer dominates and
+    ## training stays stable. Without this these models plateau at high loss.
+    for p in model.parameters():
+        if p.grad is not None:
+            p.grad /= (p.grad.norm() + 1e-8)
     optimiser.step()
     optimiser.zero_grad()
 
@@ -201,8 +236,9 @@ def standard_train(model: nn.Module, target: torch.Tensor, optimiser, record=Fal
 
     batch = new_seed(BATCH_SIZE)
 
-    best_loss = LOSS_FN(snapshots[0, 0:4], target).cpu().detach().numpy()
-    best_model = model.state_dict()
+    best_loss = float("inf")
+    best_model = copy.deepcopy(model.state_dict())
+    base_lr = optimiser.param_groups[0]["lr"]
 
     try:
         training_losses = []
@@ -210,9 +246,10 @@ def standard_train(model: nn.Module, target: torch.Tensor, optimiser, record=Fal
         loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
 
         for epoch_idx in range(EPOCHS):
+            apply_lr_decay(optimiser, base_lr, epoch_idx, EPOCHS)
             loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
-            if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
-                
+            if USE_LR_ADJUSTER and loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
+
                 updated_lr = lradj.get_adjusted_learning_rate(loss_window)*LR_FACTOR
                 loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
                 ## SET OPTIMISER
@@ -231,7 +268,7 @@ def standard_train(model: nn.Module, target: torch.Tensor, optimiser, record=Fal
 
             test_seed = new_seed(1) # test on the default seed state (could be worth also testing on a persisting state ? )
             MODEL.eval()
-            test_run = forward_pass(MODEL, test_seed, 96)
+            test_run = forward_pass(MODEL, test_seed, TEST_STEPS)
             training_losses.append(
                 LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
             )
@@ -241,11 +278,13 @@ def standard_train(model: nn.Module, target: torch.Tensor, optimiser, record=Fal
             save_interval = 16
             if (epoch_idx % save_interval == 0):
 
-                print(f"Epoch {epoch_idx} complete, loss = {training_losses[-1]}")
+                # Growing phase: select on reaching the target (the short horizon).
+                # Persistence is the pool phase's job.
+                print(f"Epoch {epoch_idx} complete, loss@{TEST_STEPS} = {training_losses[-1]}")
 
                 if training_losses[-1] < best_loss:
                     best_loss = training_losses[-1]
-                    best_model = model.state_dict()
+                    best_model = copy.deepcopy(model.state_dict())
 
                 if (record):
                     selected = random.sample(range(BATCH_SIZE), 2)
@@ -278,9 +317,10 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, seedrate, reco
     model.eval()
 
     snapshots = sample_pool[[1,2], :, :, :]
-    
-    best_loss = LOSS_FN(snapshots[0, 0:4], target).cpu().detach().numpy()
-    best_model = model.state_dict()
+
+    best_loss = float("inf")
+    best_model = copy.deepcopy(model.state_dict())
+    base_lr = optimiser.param_groups[0]["lr"]
 
     try:
         training_losses = []
@@ -288,8 +328,9 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, seedrate, reco
         loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
 
         for epoch_idx in range(EPOCHS):
+            apply_lr_decay(optimiser, base_lr, epoch_idx, EPOCHS)
             loss_window_idx = epoch_idx % ADJUSTMENT_WINDOW
-            if loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
+            if USE_LR_ADJUSTER and loss_window_idx == 0 and epoch_idx != 0: # don't start lr adjuster at the start of training
                 updated_lr = lradj.get_adjusted_learning_rate(loss_window)*LR_FACTOR
                 loss_window = [None for i in range(ADJUSTMENT_WINDOW)]
                 ## SET OPTIMISER
@@ -301,9 +342,15 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, seedrate, reco
             model.train()
             # get a random sample of indices from the poolsize to create a batch
             batch_indices = random.sample(range(POOL_SIZE), BATCH_SIZE)
-            seeds = random.sample(range(BATCH_SIZE), seedrate)
             batch = sample_pool[batch_indices, :, :, :]
-            batch[seeds] = new_seed(seedrate).to(device)
+
+            ## Re-seed the WORST (highest-loss) samples instead of random ones. This
+            ## keeps the most-diverged states from polluting the pool while still
+            ## forcing the model to grow from a fresh seed each step.
+            with torch.no_grad():
+                per_sample_loss = (batch[:, 0:4] - target).pow(2).mean(dim=(1, 2, 3))
+            worst = torch.argsort(per_sample_loss, descending=True)[:seedrate]
+            batch[worst] = new_seed(seedrate).to(device)
 
             ## Optimisation step
             output = update_pass(model, batch, target, optimiser, UPDATES_RANGE)
@@ -313,20 +360,23 @@ def pool_train(model: nn.Module, target: torch.Tensor, optimiser, seedrate, reco
 
             test_seed = new_seed(1) # test on the default seed state (could be worth also testing on a persisting state ? )
             MODEL.eval()
-            test_run = forward_pass(MODEL, test_seed, 96)
+            test_run = forward_pass(MODEL, test_seed, TEST_STEPS)
             training_losses.append(
                 LOSS_FN(test_run[0, 0:4], target).cpu().detach().numpy()
             )
 
             loss_window[loss_window_idx] = training_losses[-1].item()
-            
+
             # Save best model weights every 4 epochs
             save_interval = 20
             if (epoch_idx % save_interval == 0):
-                print(f"Epoch {epoch_idx} complete, loss = {training_losses[-1]}")
-                if training_losses[-1] < best_loss:
-                    best_loss = training_losses[-1]
-                    best_model = model.state_dict()
+                # Select on a LONGER rollout so we keep the most persistent weights.
+                persist_run = forward_pass(MODEL, new_seed(1), PERSIST_STEPS)
+                persist_loss = LOSS_FN(persist_run[0, 0:4], target).cpu().detach().numpy()
+                print(f"Epoch {epoch_idx} complete, loss@{TEST_STEPS} = {training_losses[-1]}, loss@{PERSIST_STEPS} = {persist_loss}")
+                if persist_loss < best_loss:
+                    best_loss = persist_loss
+                    best_model = copy.deepcopy(model.state_dict())
                 if (record):
                     selected = random.sample(range(BATCH_SIZE), 2)
                     snapshots = torch.cat((snapshots, batch[selected]), dim=0)
@@ -356,12 +406,19 @@ def initialiseGPU(model):
 
 if __name__ == "__main__":
 
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("--epochs", type=int, default=EPOCHS,
+                            help="epochs PER PHASE (standard, then pool)")
+    cli_args = arg_parser.parse_args()
+    EPOCHS = cli_args.epochs
+    print(f"Running {EPOCHS} epochs per phase")
+
     print("Initialising model...")
 
     MODEL = GCA()
     MODEL = initialiseGPU(MODEL)
 
-    targetImg = load_image("./cat.png")
+    targetImg = load_image("./lizard.png")
 
     ## Load model weights if available
     if LOAD_WEIGHTS:
@@ -388,7 +445,9 @@ if __name__ == "__main__":
         losses1, recording1 = None, None
 
         if (not LOAD_WEIGHTS):
-            LR = 1e-3
+            ## With gradient normalisation the step size IS the lr, so use the canonical
+            ## NCA constant lr (~2e-3) rather than the tiny values the old adjuster set.
+            LR = 2e-3
             BATCH_SIZE = 2
 
             optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR, weight_decay= 1e-8)
@@ -400,10 +459,14 @@ if __name__ == "__main__":
             ## Save the model's weights after training
             torch.save(MODEL.state_dict(), SAVE_PATH)
 
+        BATCH_SIZE = 8  # pool phase benefits from a larger batch of pool states
+
         optimizer = torch.optim.Adam(MODEL.parameters(), lr=LR)
         LOSS_FN = torch.nn.MSELoss(reduction="mean")
 
-        UPDATES_RANGE=(10, 50)
+        ## Roll the pool states for 64-96 steps (was 10-50): the model must stay on
+        ## target over a long horizon for the pattern to actually persist.
+        UPDATES_RANGE=(64, 96)
         MODEL, losses2, recording2 = pool_train(MODEL, targetImg, optimizer, record=True, seedrate = 1)
 
         ## Save the model's weights after training
@@ -441,13 +504,14 @@ if __name__ == "__main__":
         else :
             anim = visualise(torch.cat((recording1, recording2), dim=0), anim=True, filenameBase="pool", show=False)
 
-    ## Switch state to evaluation to disable dropout e.g.
     MODEL.eval()
 
-    GRID_SIZE = 60
+    ## Evaluate on the SAME grid size the model trained on (40). Rolling out on a
+    ## larger grid the model never saw destabilises it.
+    GRID_SIZE = 40
 
     ## Plot final state of evaluation OR evaluation animation
     img = new_seed(1)
     video = forward_pass(MODEL, img, 600, record=True)
-    anim = visualise(video, filenameBase = "train", anim=True)
-    anim = visualise(video[-1].unsqueeze(0), filenameBase = "train", anim=False)
+    anim = visualise(video, filenameBase = "train", anim=True, show=False)
+    anim = visualise(video[-1].unsqueeze(0), filenameBase = "train", anim=False, show=False)
