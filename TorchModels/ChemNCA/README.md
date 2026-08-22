@@ -19,6 +19,11 @@ python manifold_proto.py --epochs 4000     # ~10 min on an RTX 4060, writes mani
 python render_manifold.py                  # writes the three manifold_*.png + the walk gif
 ```
 
+> The reusable version of this lives in `TorchModels/Manifold/nca_manifold.ipynb` — same
+> mechanism, but `K`-agnostic, with pluggable target loaders so it can be trained on any
+> set of images rather than the four shapes hard-coded here. Use that one for new work;
+> these two scripts stay as the reference the notebook was verified against.
+
 Config: 4 latents (dim 8) -> `Linear(8,64)+ReLU` -> `Linear(64,8320)`, zero-init, emitting all
 8,320 update-net weights as a residual on a learned base rule. 549,729 params total.
 
