@@ -43,8 +43,12 @@ Ideal colony at nutrient `n` = a plume along near-shortest paths:
 - corridor: free cells with `D_s + D_t ≤ D_st + slack` (slack = 6, `D_st` = geodesic
   seed→target distance) — naturally widens in open space, hugs the detour around
   obstacles;
-- progress: corridor ∩ `{D_s ≤ n·D_st + r0}` (r0 = 2, so `n≈0` is still a visible
-  blob at the seed).
+- progress: corridor ∩ `{D_t ≥ (1−n)·K}` with the fixed constant `K = d_max`, plus a
+  home blob `{D_s ≤ r0}` (r0 = 2) that is always present. The front contour is the
+  iso-attractant line `A*(n) = exp(−(1−n)K/τ)` — a pure function of the nutrient, so a
+  cell can decide **locally** whether to keep advancing. (A fraction-of-`D_st`
+  parameterization would make the stopping contour depend on the journey length, which
+  a cell cannot sense — inconsistent supervision.)
 
 RGBA target: colony cells get a yellow-green bacteria color, alpha 1. MSE loss on
 RGBA channels, as in `env_growth.py`.
