@@ -135,3 +135,7 @@ Truncated BPTT against the teacher, B = 8 fresh worlds per epoch:
   matched by any local rule). Before each window most slots re-anchor the teacher on the NCA's
   own colony (age read back from colour, head = youngest cell), so the loss asks "from where
   you are, what would the teacher do next".
+- **Teacher body = an age grid**, not a list of head positions: every step living cells age by
+  one, the head stamps a radius-2 disc of age 0, cells die at `age > life(n) = round(n·48)`
+  steps, and cells under blue/black die. Equivalent to "the last L(n) head positions", but
+  purely local, and crushed cells cannot reappear when a wall walks away.
