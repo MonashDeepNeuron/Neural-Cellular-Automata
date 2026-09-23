@@ -338,6 +338,24 @@ def test_run_world_records_frames():
     assert t_rgba.shape == n_rgba.shape == (2, 4, G, G) and masks.shape == (2, 5, G, G)
 
 
+def test_env_cuda_graph_matches_eager():
+    if not torch.cuda.is_available():
+        return
+    envs = [bl.Env(CFG, bl.World.random(CFG, 4, np.random.default_rng(5), DEV), use_graph=g)
+            for g in (False, True)]
+    n = torch.tensor([0.3, 0.6, 0.9, 1.0], device=DEV)
+    for t in range(40):
+        for e in envs:
+            e.step(n)
+        if t == 20:                             ## a slot reset mid-run must work with the graph
+            for e in envs:
+                e.reset_slots(np.array([1, 2]), np.random.default_rng(9))
+    a, b = envs
+    assert torch.equal(a.masks, b.masks), "masks diverged"
+    assert torch.allclose(a.fields.c, b.fields.c, atol=1e-6), "fields diverged"
+    assert torch.equal(a.teacher.age, b.teacher.age) and torch.equal(a.teacher.head, b.teacher.head)
+
+
 def main():
     pat = sys.argv[1] if len(sys.argv) > 1 else ""
     tests = [(k, v) for k, v in globals().items() if k.startswith("test_") and pat in k]

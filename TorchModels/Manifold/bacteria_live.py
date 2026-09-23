@@ -175,7 +175,8 @@ class Fields:
         return val, where
 
     @torch.no_grad()
-    def relax(self, masks, iters):
+    def relax(self, masks, iters, sel=None):
+        """`iters` relaxation steps; with `sel` (B,1,1,1) bool only those slots commit."""
         ## Conductance between neighbours i,j: 1 if both free, p = wall_perm if either is a
         ## wall. Then  lap_i = p*conv8(c) + (1-p)*f_i*conv8(f*c) - c_i*G_i  with the total
         ## conductance G_i precomputed. Decay and Dirichlet pins fold into coefficients.
@@ -197,8 +198,8 @@ class Fields:
             s = F.conv2d(torch.cat([c, c * f], 1), nbr4, padding=1, groups=4)
             c = torch.addcmul(torch.addcmul(torch.addcmul(pin, coef, c), g_all, s[:, :2]),
                               g_free, s[:, 2:])
-        self.c = c
-        return c
+        self.c.copy_(c if sel is None else torch.where(sel, c, self.c))   ## in place: CUDA graphs
+        return self.c
 
     def sense(self, masks):
         """(B,3,H,W): attractant, repellent, raw food mask -- what a cell perceives."""
@@ -318,27 +319,33 @@ class World:
             seeds.append(cells[rng.integers(len(cells))])
         return torch.as_tensor(np.array(seeds), dtype=torch.long, device=self.device)
 
+    def splice(self, idx, other):
+        """Replace slots `idx` with the (len(idx)-slot) world `other`."""
+        for k in ("walls", "pos", "vel", "r", "col", "active", "seed"):
+            getattr(self, k)[idx] = getattr(other, k)
+
     def masks(self):
         d2 = (self._yy - self.pos[..., 0, None, None]) ** 2 + (self._xx - self.pos[..., 1, None, None]) ** 2
-        inside = (d2 <= self.r[..., None, None] ** 2) & self.active[..., None, None]     ## (B,P,H,W)
-        m = torch.stack([(inside & (self.col == c)[..., None, None]).any(1) for c in range(5)], 1)
-        m[:, BLUE] |= self.walls
-        return m.float()
+        inside = ((d2 <= self.r[..., None, None] ** 2) & self.active[..., None, None]).float()
+        onehot = (self.col[..., None] == torch.arange(5, device=self.device)).float()
+        m = torch.einsum("bphw,bpc->bchw", inside, onehot).clamp_(max=1.0)
+        m[:, BLUE] = torch.maximum(m[:, BLUE], self.walls.float())
+        return m
 
     def step(self):
         if self.wander:                             ## slowly turning heading
             dth = torch.randn(self.vel.shape[:2], device=self.device, generator=self.gen) * 0.15
             c, s = torch.cos(dth), torch.sin(dth)
             vy, vx = self.vel[..., 0], self.vel[..., 1]
-            self.vel = torch.stack([c * vy - s * vx, s * vy + c * vx], -1)
+            self.vel.copy_(torch.stack([c * vy - s * vx, s * vy + c * vx], -1))
             flip = torch.rand(self.active.shape, device=self.device, generator=self.gen) < self.cfg.toggle_prob
             self.active ^= flip
         self.pos += self.vel
         lo = self.r[..., None].expand_as(self.pos)
         hi = self.cfg.grid - 1 - lo
         below, above = self.pos < lo, self.pos > hi
-        self.pos = torch.where(below, 2 * lo - self.pos, torch.where(above, 2 * hi - self.pos, self.pos))
-        self.vel = torch.where(below | above, -self.vel, self.vel)
+        self.pos.copy_(torch.where(below, 2 * lo - self.pos, torch.where(above, 2 * hi - self.pos, self.pos)))
+        self.vel.copy_(torch.where(below | above, -self.vel, self.vel))
 
 # %% [markdown]
 # ## The teacher -- a greedy chemotaxis CA (the supervision)
@@ -379,7 +386,8 @@ class Teacher:
     def __init__(self, cfg, seed, masks):
         B, _, H, W = masks.shape
         dev = masks.device
-        self.cfg, self.t = cfg, 0
+        self.cfg = cfg
+        self.t = torch.zeros(B, dtype=torch.long, device=dev)      ## per-slot clock
         self.head = torch.as_tensor(seed, device=dev).long().clone()
         self.age = torch.full((B, H, W), float("inf"), device=dev)
         self.alive = torch.ones(B, dtype=torch.bool, device=dev)
@@ -393,11 +401,11 @@ class Teacher:
     def _stamp(self):
         d2 = (self._yy - self.head[:, 0, None, None]) ** 2 + (self._xx - self.head[:, 1, None, None]) ** 2
         disc = (d2 <= self.cfg.body_r ** 2) & self.alive[:, None, None]
-        self.age = torch.where(disc, torch.zeros_like(self.age), self.age)
+        self.age.copy_(torch.where(disc, torch.zeros_like(self.age), self.age))
 
     def _kill_env(self, masks):
         dead = (masks[:, BLUE] > 0) | (masks[:, BLACK] > 0)
-        self.age = torch.where(dead, torch.full_like(self.age, float("inf")), self.age)
+        self.age.copy_(torch.where(dead, torch.full_like(self.age, float("inf")), self.age))
         self.alive &= torch.isfinite(self.age).flatten(1).any(1)
 
     def _move(self, fields, masks):
@@ -421,17 +429,22 @@ class Teacher:
         ok[:, 0] = self_ok
         k = torch.where(ok, Uc, torch.full_like(Uc, -float("inf"))).argmax(1)
         go = due & self.alive & ok.any(1)
-        self.head = torch.where(go[:, None], cand[b, k], self.head)
+        self.head.copy_(torch.where(go[:, None], cand[b, k], self.head))
 
     @torch.no_grad()
     def step(self, fields, masks, n):
         self._move(fields, masks)
-        self.age = self.age + 1
+        self.age.add_(1)
         self._stamp()
         lf = life(torch.as_tensor(n, dtype=torch.float32, device=self.age.device), self.cfg)
-        self.age = torch.where(self.age > lf.view(-1, 1, 1), torch.full_like(self.age, float("inf")), self.age)
+        self.age.copy_(torch.where(self.age > lf.view(-1, 1, 1), torch.full_like(self.age, float("inf")), self.age))
         self._kill_env(masks)
         self.t += 1
+
+    def splice(self, idx, other):
+        """Replace slots `idx` with the (len(idx)-slot) teacher `other`."""
+        for k in ("t", "head", "age", "alive"):
+            getattr(self, k)[idx] = getattr(other, k)
 
     def rgba(self, masks):
         """(B,4,H,W) target image: colour by age, bloom on food, alpha = body."""
@@ -529,21 +542,83 @@ def seed_state(rgba, cfg):
 
 
 class Env:
-    """World + fields + teacher, advanced together. The NCA reads `inputs()`."""
+    """World + fields + teacher, advanced together. The NCA reads `inputs()`.
 
-    def __init__(self, cfg, world, n0=None):
+    On CUDA, `step()` is captured once as a CUDA graph and replayed: the env is ~250 tiny
+    kernels per step on a 48x48 grid, so without the graph it is pure launch overhead
+    (~12 ms/step on a Windows laptop vs ~0.3 ms of actual GPU work). Every state update
+    in World/Fields/Teacher is therefore in place (static addresses)."""
+
+    def __init__(self, cfg, world, use_graph=True):
         self.cfg, self.world = cfg, world
         self.masks = world.masks()
         B, _, H, W = self.masks.shape
         self.fields = Fields(cfg, B, H, W, self.masks.device)
         self.fields.relax(self.masks, cfg.init_iters)
         self.teacher = Teacher(cfg, world.seed, self.masks)
+        self.use_graph = use_graph and self.masks.is_cuda
+        self._graph, self._init_graph = None, None
+        self._n = torch.zeros(B, device=self.masks.device)
+        self._sel = torch.zeros(B, 1, 1, 1, dtype=torch.bool, device=self.masks.device)
+
+    def _state_tensors(self):
+        w, t = self.world, self.teacher
+        return [w.pos, w.vel, w.active, self.masks, self.fields.c, t.age, t.head, t.alive, t.t]
+
+    def _step_impl(self):
+        self.world.step()
+        self.masks.copy_(self.world.masks())
+        self.fields.relax(self.masks, self.cfg.field_iters)
+        self.teacher.step(self.fields, self.masks, self._n)
+
+    _INIT_CHUNK = 100
+
+    def _init_impl(self):
+        self.fields.relax(self.masks, self._INIT_CHUNK, sel=self._sel)
+
+    def _capture(self, fn):
+        saved = [x.clone() for x in self._state_tensors()]
+        gen_state = self.world.gen.get_state()
+        side = torch.cuda.Stream()
+        side.wait_stream(torch.cuda.current_stream())
+        with torch.cuda.stream(side):                    ## warm-up, as CUDA graphs require
+            for _ in range(3):
+                fn()
+        torch.cuda.current_stream().wait_stream(side)
+        for x, v in zip(self._state_tensors(), saved):   ## undo the warm-up steps
+            x.copy_(v)
+        self.world.gen.set_state(gen_state)
+        g = torch.cuda.CUDAGraph()
+        g.register_generator_state(self.world.gen)
+        with torch.cuda.graph(g):
+            fn()
+        return g
+
+    def reset_slots(self, idx, rng):
+        """Fresh random worlds (and teachers, fields) in slots idx. The fields of just those
+        slots are relaxed from zero, `init_iters` steps, by a replayed CUDA graph."""
+        idx = torch.as_tensor(idx, dtype=torch.long, device=self.masks.device)
+        self.world.splice(idx, World.random(self.cfg, len(idx), rng, self.masks.device))
+        self.masks.copy_(self.world.masks())
+        self.fields.c[idx] = 0.0
+        self._sel.zero_()
+        self._sel[idx] = True
+        if self.use_graph:
+            if self._init_graph is None:
+                self._init_graph = self._capture(self._init_impl)
+            for _ in range(max(1, self.cfg.init_iters // self._INIT_CHUNK)):
+                self._init_graph.replay()
+        else:
+            self.fields.relax(self.masks, self.cfg.init_iters, sel=self._sel)
+        self.teacher.splice(idx, Teacher(self.cfg, self.world.seed[idx], self.masks[idx]))
 
     def step(self, n):
-        self.world.step()
-        self.masks = self.world.masks()
-        self.fields.relax(self.masks, self.cfg.field_iters)
-        self.teacher.step(self.fields, self.masks, n)
+        self._n.copy_(torch.as_tensor(n, dtype=torch.float32, device=self._n.device).expand_as(self._n))
+        if not self.use_graph:
+            return self._step_impl()
+        if self._graph is None:
+            self._graph = self._capture(self._step_impl)
+        self._graph.replay()
 
     def inputs(self):
         m = self.masks
@@ -576,3 +651,154 @@ def run_world(model, env, n_fn, steps, state=None, record_every=1, seed=0):
         if (t + 1) % record_every == 0:
             frames.append(snap())
     return state, frames
+
+# %% [markdown]
+# ## Checkpoint save / load
+
+# %%
+def save_checkpoint(model, cfg, path=None):
+    path = path or os.path.join(cfg.out_dir, cfg.ckpt_name)
+    torch.save({"state_dict": model.state_dict(), "config": asdict(cfg)}, path)
+    print(f"saved {path}")
+
+
+def load_checkpoint(path=None, device=DEVICE):
+    path = path or os.path.join(CFG.out_dir, CFG.ckpt_name)
+    ck = torch.load(path, map_location=device, weights_only=False)
+    cfg = Config(**ck["config"])
+    m = BacteriaNCA(cfg).to(device)
+    m.load_state_dict(ck["state_dict"])
+    m.eval()
+    return m, cfg
+
+# %% [markdown]
+# ## Training -- imitate the teacher from the NCA's own states
+#
+# A **persistent pool** of `batch` running worlds. The teacher and the NCA start from the
+# same body and run in lockstep on identical fields; each epoch continues every world by
+# a short **gradient window** (MSE on RGBA vs the teacher every `loss_every` steps), then
+# detaches and carries the state on. Slots are reset to fresh worlds at random -- often
+# early in training (short episodes), rarely later (episodes hundreds of steps deep) --
+# so the rule is trained to *correct back* toward the teacher from wherever it has
+# drifted, which is what keeps an unbounded live run stable. Each slot has its own
+# nutrient schedule: constant, a ramp, or a sudden jump, up or down.
+
+# %%
+class Schedule:
+    """Per-slot nutrient schedules on per-slot clocks: constant / ramp / jump."""
+
+    def __init__(self, B, rng, cfg, device=DEVICE):
+        self.cfg, self.device = cfg, device
+        self.a, self.b = np.zeros(B), np.zeros(B)
+        self.kind, self.t_s, self.dur, self.t = (np.zeros(B, int) for _ in range(4))
+        self.reset(np.arange(B), rng)
+
+    def reset(self, idx, rng):
+        k = len(idx)
+        self.a[idx] = rng.uniform(self.cfg.n_lo, 1.0, k)
+        self.b[idx] = rng.uniform(self.cfg.n_lo, 1.0, k)
+        self.kind[idx] = rng.integers(0, 3, k)
+        self.t_s[idx] = rng.integers(0, 400, k)
+        self.dur[idx] = rng.integers(40, 200, k)
+        self.t[idx] = 0
+
+    def n(self):
+        f = np.clip((self.t - self.t_s) / self.dur, 0.0, 1.0)
+        v = np.where(self.kind == 0, self.a,
+                     np.where(self.kind == 1, self.a + (self.b - self.a) * f,
+                              np.where(self.t >= self.t_s, self.b, self.a)))
+        return torch.as_tensor(v, dtype=torch.float32, device=self.device)
+
+    def tick(self):
+        self.t += 1
+
+
+def _fixed_eval_worlds(cfg, device=DEVICE):
+    return World.random(cfg, 4, np.random.default_rng(1234), device)
+
+
+@torch.no_grad()
+def _fixed_eval(model, cfg):
+    """Deterministic held-out eval for best-checkpoint tracking: MSE vs the teacher at
+    t = 100, 200, 300 on four fixed worlds. Saves and restores the global RNG."""
+    cpu_state = torch.get_rng_state()
+    cuda_states = torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None
+    try:
+        dev = next(model.parameters()).device
+        env = Env(cfg, _fixed_eval_worlds(cfg, dev))
+        levels = torch.tensor([0.4, 0.7, 1.0, 0.6], device=dev)
+        _, frames = run_world(model, env, lambda t: levels, 300, record_every=100, seed=11)
+        return float(np.mean([F.mse_loss(n, t).item() for t, n, _ in frames[1:]]))
+    finally:
+        torch.set_rng_state(cpu_state)
+        if cuda_states is not None:
+            torch.cuda.set_rng_state_all(cuda_states)
+
+
+def reset_prob(epoch, epochs):
+    """Per-slot reset probability per epoch: 0.3 early (episodes ~80 steps) decaying to
+    0.05 by mid-training (episodes ~500 steps)."""
+    f = min(1.0, epoch / (0.5 * epochs))
+    return 0.3 + (0.05 - 0.3) * f
+
+
+def train(model, cfg, rng, epochs=None):
+    dev = next(model.parameters()).device
+    epochs = epochs or cfg.epochs
+    vec = [p for p in model.parameters() if p.numel() > 1]
+    sca = [p for p in model.parameters() if p.numel() == 1]
+    opt = torch.optim.Adam([{"params": vec, "lr": cfg.lr},
+                            {"params": sca, "lr": cfg.scalar_lr}])
+    best, best_state = float("inf"), copy.deepcopy(model.state_dict())
+    history, t0 = [], time.time()
+
+    B = cfg.batch
+    env = Env(cfg, World.random(cfg, B, rng, dev))
+    sched = Schedule(B, rng, cfg, dev)
+    state = seed_state(env.teacher.rgba(env.masks), cfg)
+
+    for epoch in range(epochs):
+        frac = epoch / max(epochs - 1, 1)
+        opt.param_groups[0]["lr"] = cfg.lr * (0.05 + 0.95 * 0.5 * (1 + math.cos(math.pi * frac)))
+
+        ## reset some slots: at random, or because the teacher colony went extinct
+        idx = np.nonzero((rng.random(B) < reset_prob(epoch, epochs))
+                         | ~env.teacher.alive.cpu().numpy())[0]
+        if len(idx):
+            env.reset_slots(idx, rng)
+            sched.reset(idx, rng)
+            state[idx] = seed_state(env.teacher.rgba(env.masks)[idx], cfg)
+
+        opt.zero_grad()
+        W = int(rng.integers(cfg.window[0], cfg.window[1] + 1))
+        loss, k = 0.0, 0
+        for i in range(W):
+            n = sched.n()
+            env.step(n)
+            sched.tick()
+            state = model(state, model.weights_for(n), *env.inputs())
+            if (i + 1) % cfg.loss_every == 0 or i == W - 1:
+                loss = loss + F.mse_loss(state[:, 0:4], env.teacher.rgba(env.masks))
+                k += 1
+        loss = loss / k
+        loss.backward()
+        for p in vec:                                   ## per-parameter gradient normalisation
+            if p.grad is not None:
+                p.grad /= p.grad.norm() + 1e-8
+        opt.step()
+        state = state.detach()
+        history.append((epoch, loss.item(), float(sched.t.mean())))
+
+        if epoch % cfg.eval_every == 0 or epoch == epochs - 1:
+            ev = _fixed_eval(model, cfg)
+            if ev < best:
+                best, best_state = ev, copy.deepcopy(model.state_dict())
+
+        if epoch % cfg.log_every == 0 or epoch == epochs - 1:
+            recent = np.mean([h[1] for h in history[-cfg.log_every:]])
+            print(f"epoch {epoch:5d} | loss {recent:.5f} | mean episode depth {sched.t.mean():5.0f} "
+                  f"| best-eval {best:.5f} | {time.time() - t0:.0f}s", flush=True)
+
+    model.load_state_dict(best_state)
+    print(f"done in {time.time() - t0:.1f}s | best eval {best:.6f} | weights restored to best")
+    return history
