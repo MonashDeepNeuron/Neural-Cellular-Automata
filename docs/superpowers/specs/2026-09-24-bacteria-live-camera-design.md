@@ -109,3 +109,29 @@ Truncated BPTT against the teacher, B = 8 fresh worlds per epoch:
   Auto-reseed if the colony dies out.
 - **Notebook**: `LIVE = False` flag cell; a headless fake-camera smoke test running the
   full path for ~300 frames and reporting fps.
+
+## Changes made during implementation (2026-09-24)
+
+- **Code location:** everything lives in `bacteria_chemotaxis.ipynb` (user preference — no
+  companion `.py` module); unit tests are a sanity-check cell section (`run_tests()`).
+- **Walls seep chemical** (`wall_perm = 0.25`) instead of being no-flux. With no-flux walls the
+  diffusion field has no local maxima away from its sources (maximum principle + Hopf lemma on
+  the Neumann boundary), so greedy ascent could never be trapped — it would be BFS in disguise.
+  With seepage the far side of a U-wall facing the food is a genuine local maximum (tested).
+- **Log-sensing:** the colony climbs `log A` (Weber's law — E. coli responds to relative
+  change), normalised `la = 1 + log(A + 1e-4)/log(1e4)`; the NCA senses `la` too. With linear
+  `A` the far field is ~0.02, so even a weak repellent tail dominated and the colony fled to the
+  border. Repellent retuned to `rep_weight = 0.4`, `ell_rep = 3` — the colony keeps ~6 cells
+  from a toxin and still reaches food behind it.
+- **Training speed:** the env is ~250 tiny kernels per step; on this Windows laptop each launch
+  costs ~45 µs, so `Env.step` is captured once as a **CUDA graph** (all state updates in place;
+  the world RNG registered with the graph): 12.7 ms → 0.37 ms per step. Slot resets relax only
+  the reset slots through a second graph (0.7 s → 0.03 s).
+- **Persistent pool** instead of warm-up + window: `batch` running worlds carried across epochs,
+  reset at random (often early, rarely late), so episodes reach hundreds of steps for the cost
+  of one gradient window per epoch.
+- **DAgger:** the first run plateaued at ~0.6× the empty-grid MSE — compounding divergence
+  (once the NCA's colony is a few cells off, the independently running teacher can't be
+  matched by any local rule). Before each window most slots re-anchor the teacher on the NCA's
+  own colony (age read back from colour, head = youngest cell), so the loss asks "from where
+  you are, what would the teacher do next".
