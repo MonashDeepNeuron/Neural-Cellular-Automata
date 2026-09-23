@@ -151,3 +151,13 @@ Truncated BPTT against the teacher, B = 8 fresh worlds per epoch:
 - **Run log:** v1 (stochastic, no DAgger) passed wall/chase/decoy/toxin/booster, failed
   imitation (0.9× empty), trap, biomass. v2 (+DAgger, +feeding) additionally passed trap,
   imitation 0.53×, but failed decoy-only and biomass (the smear). v3: deterministic.
+- **Local teacher (v4).** v3 (deterministic) passed decoy too, but still failed trap and biomass:
+  the NCA advanced as a wide faint *fan*. The single-head teacher is not local — "I am the one
+  head cell" is not something a cell can sense, so the NCA hedged. The teacher is now a pure
+  local CA with no special cell: every cell's greedy choice is its best neighbour by `U`
+  (strict gain); mature cells (age ≥ 2 → 0.5 cells/step) divide into their choice; cells whose
+  choice is themselves are **tips** (local maxima) and keep dividing in place; aging, `life(n)`,
+  feeding, kills unchanged. It reproduces every scene (food, trap, decoy, decoy-only, toxin
+  detour, chase) with a 1-cell-wide trail; widening the trail by dilating newborn cells ran away
+  (toxin scene grew to ~800 cells), so the thin trail stays. DAgger anchoring is now exact (the
+  state is just the age grid).
