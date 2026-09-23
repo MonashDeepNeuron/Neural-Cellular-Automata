@@ -169,6 +169,99 @@ def test_world_random_seed_valid_and_deterministic():
     assert (m[:, bl.RED].flatten(1).sum(1) > 0).float().mean() >= 0.5, "red too rare"
 
 
+## ---------------------------------------------------------------- teacher
+
+def run_teacher(masks, seed, n, steps, masks_fn=None):
+    """Static (or scripted via masks_fn(t)) world; returns the teacher and its head track."""
+    f = relaxed(masks)
+    T = bl.Teacher(CFG, torch.tensor([seed], device=DEV), masks)
+    track = [tuple(T.head[0].tolist())]
+    for t in range(steps):
+        m = masks if masks_fn is None else masks_fn(t)
+        f.relax(m, CFG.field_iters)
+        T.step(f, m, torch.full((1,), float(n), device=DEV))
+        track.append(tuple(T.head[0].tolist()))
+    return T, track
+
+
+def test_teacher_climbs_to_food():
+    T, track = run_teacher(masks_from(red=disc(24, 40, 3)), (24, 8), 0.5, 120)
+    hy, hx = track[-1]
+    assert (hy - 24) ** 2 + (hx - 40) ** 2 <= 9, f"head ended at {track[-1]}, not on the food"
+    assert track[-1] == track[-10], "head should rest once on the food plateau"
+
+
+def test_teacher_trapped_in_u_cup():
+    T, track = run_teacher(masks_from(red=disc(24, 40, 3), blue=u_cup()), (24, 8), 1.0, 250)
+    hy, hx = track[-1]
+    assert hx == 29 and 15 <= hy <= 33, f"greedy head should be stuck at the cup's back, got {track[-1]}"
+    assert track[-1] == track[-30], "a trapped head must not move"
+
+
+def test_teacher_biomass_and_retreat():
+    m = masks_from(red=disc(24, 44, 2))
+    counts = {}
+    for n in (0.25, 1.0):
+        T, _ = run_teacher(m, (24, 4), n, 100)
+        alive = torch.isfinite(T.age)
+        counts[n] = alive.sum().item()
+        assert T.age[alive].max().item() <= bl.life(n, CFG), "a cell outlived life(n)"
+    assert counts[1.0] > 1.5 * counts[0.25], counts
+    ## drop the nutrient: the tail dies on the very next step
+    f = relaxed(m)
+    T.step(f, m, torch.full((1,), 0.25, device=DEV))
+    assert T.age[torch.isfinite(T.age)].max().item() <= bl.life(0.25, CFG)
+
+
+def test_teacher_kills_under_black_and_blue():
+    m = masks_from(red=disc(24, 44, 2))
+    T, _ = run_teacher(m, (24, 4), 1.0, 60)
+    body = torch.isfinite(T.age[0]).cpu().numpy()
+    ys, xs = np.nonzero(body)
+    y0, x0 = int(ys.mean()), int(xs.min()) + 2     ## the old tail
+    tox = disc(y0, x0, 2)
+    wall = np.zeros((G, G), bool)
+    wall[:, 30:32] = True
+    m2 = masks_from(red=disc(24, 44, 2), black=tox, blue=wall)
+    f = relaxed(m2, 50)
+    T.step(f, m2, torch.full((1,), 1.0, device=DEV))
+    alive = torch.isfinite(T.age[0]).cpu().numpy()
+    assert not alive[tox].any(), "cells survived under black"
+    assert not alive[wall].any(), "cells survived under blue"
+    assert alive.any()
+
+
+def test_teacher_green_doubles_speed():
+    red = disc(24, 46, 1)
+    green = np.zeros((G, G), bool)
+    green[18:31, :] = True                       ## a green carpet along the path
+    _, slow = run_teacher(masks_from(red=red), (24, 4), 0.5, 20)
+    _, fast = run_teacher(masks_from(red=red, green=green), (24, 4), 0.5, 20)
+    d_slow, d_fast = slow[-1][1] - 4, fast[-1][1] - 4
+    assert d_slow == 10 and d_fast == 20, f"head displacement slow {d_slow}, fast {d_fast}"
+
+
+def test_teacher_extinct_when_crushed():
+    m = masks_from(red=disc(24, 44, 2))
+    T, _ = run_teacher(m, (24, 4), 0.5, 10)
+    everything = np.ones((G, G), bool)
+    m2 = masks_from(blue=everything)
+    f = relaxed(m2, 10)
+    T.step(f, m2, torch.full((1,), 0.5, device=DEV))
+    assert not T.alive[0].item(), "teacher should be extinct"
+    assert (T.rgba(m2)[0, 3] == 0).all()
+
+
+def test_teacher_rgba_colours():
+    m = masks_from(red=disc(24, 20, 3))
+    T, _ = run_teacher(m, (24, 8), 1.0, 60)
+    rgba = T.rgba(m)[0].cpu().numpy()
+    alive = torch.isfinite(T.age[0]).cpu().numpy()
+    assert np.array_equal(rgba[3] > 0, alive), "alpha must equal the body"
+    on_food = alive & disc(24, 20, 3)
+    assert on_food.any() and np.allclose(rgba[0:3, on_food].T, bl.BLOOM), "no bloom on the food"
+
+
 def main():
     pat = sys.argv[1] if len(sys.argv) > 1 else ""
     tests = [(k, v) for k, v in globals().items() if k.startswith("test_") and pat in k]

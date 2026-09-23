@@ -28,7 +28,7 @@ Design doc: docs/superpowers/specs/2026-09-24-bacteria-live-camera-design.md
 # | GREEN | booster | local speed-up (higher fire rate) |
 #
 # **No path planning.** The attractant and repellent *diffuse* from their sources (walls
-# block diffusion) and the colony climbs the local gradient **greedily**. Like real
+# only slow diffusion) and the colony climbs the local gradient **greedily**. Like real
 # chemotaxis it can be caught at a local maximum -- a U-shaped wall with food behind it
 # traps it until somebody moves. The global nutrient `n` sets the colony's **biomass**:
 # the manifold maps `n` to the update rule's weights, and `n` decides how long a cell
@@ -339,3 +339,108 @@ class World:
         below, above = self.pos < lo, self.pos > hi
         self.pos = torch.where(below, 2 * lo - self.pos, torch.where(above, 2 * hi - self.pos, self.pos))
         self.vel = torch.where(below | above, -self.vel, self.vel)
+
+# %% [markdown]
+# ## The teacher -- a greedy chemotaxis CA (the supervision)
+#
+# Deterministic and small enough to read in one go:
+#
+# - a **head** cell moves every `move_every` steps (every step on green) to the best of
+#   its 8 neighbours by utility `U = A - rep_weight * R` -- but only for a strict gain.
+#   No neighbour better -> it stays: **greedy ascent, trapped at local maxima**. Never
+#   into a wall;
+# - every step the head stamps a radius-2 disc of **age 0**; every living cell ages by
+#   one; a cell dies when `age > life(n) = n * life_max` -- so `n` is the **biomass**, and
+#   dropping `n` kills the tail at once;
+# - cells under blue (crushed) or black (poisoned) die; if the whole body dies the colony
+#   is **extinct** (the live loop reseeds);
+# - colour encodes age (bright young front -> dark old tail), cells on red food **bloom**.
+#
+# Everything the teacher does depends only on local quantities (age, the fields, the
+# masks, `n`), which is what makes it learnable by an NCA.
+
+# %%
+CORE = np.array([0.30, 0.42, 0.12])      ## old tail
+FRONT = np.array([0.90, 0.95, 0.45])     ## young front
+BLOOM = np.array([0.98, 0.45, 0.80])     ## feeding on red food
+
+_OFFS = torch.tensor([[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1],
+                      [-1, -1], [-1, 1], [1, -1], [1, 1]])      ## self first: ties -> stay
+
+
+def life(n, cfg):
+    """Cell lifespan in steps at nutrient n (float or tensor)."""
+    if torch.is_tensor(n):
+        return torch.clamp(torch.round(n * cfg.life_max), min=1)
+    return max(1, int(round(float(n) * cfg.life_max)))
+
+
+class Teacher:
+    def __init__(self, cfg, seed, masks):
+        B, _, H, W = masks.shape
+        dev = masks.device
+        self.cfg, self.t = cfg, 0
+        self.head = torch.as_tensor(seed, device=dev).long().clone()
+        self.age = torch.full((B, H, W), float("inf"), device=dev)
+        self.alive = torch.ones(B, dtype=torch.bool, device=dev)
+        yy, xx = torch.meshgrid(torch.arange(H, device=dev), torch.arange(W, device=dev), indexing="ij")
+        self._yy, self._xx = yy, xx
+        self._offs = _OFFS.to(dev)
+        self._bidx = torch.arange(B, device=dev)
+        self._stamp()
+        self._kill_env(masks)
+
+    def _stamp(self):
+        d2 = (self._yy - self.head[:, 0, None, None]) ** 2 + (self._xx - self.head[:, 1, None, None]) ** 2
+        disc = (d2 <= self.cfg.body_r ** 2) & self.alive[:, None, None]
+        self.age = torch.where(disc, torch.zeros_like(self.age), self.age)
+
+    def _kill_env(self, masks):
+        dead = (masks[:, BLUE] > 0) | (masks[:, BLACK] > 0)
+        self.age = torch.where(dead, torch.full_like(self.age, float("inf")), self.age)
+        self.alive &= torch.isfinite(self.age).flatten(1).any(1)
+
+    def _move(self, fields, masks):
+        cfg = self.cfg
+        H, W = self.age.shape[-2:]
+        U = fields.c[:, 0] - cfg.rep_weight * fields.c[:, 1]
+        wall = masks[:, BLUE] > 0
+        b = self._bidx
+        on_green = masks[b, GREEN, self.head[:, 0], self.head[:, 1]] > 0
+        due = on_green | (self.t % cfg.move_every == 0)
+
+        cand = self.head[:, None, :] + self._offs[None]                 ## (B,9,2)
+        inb = (cand[..., 0] >= 0) & (cand[..., 0] < H) & (cand[..., 1] >= 0) & (cand[..., 1] < W)
+        cy, cx = cand[..., 0].clamp(0, H - 1), cand[..., 1].clamp(0, W - 1)
+        Uc = U[b[:, None], cy, cx]
+        free = inb & ~wall[b[:, None], cy, cx]
+        self_ok = free[:, 0]
+        ## a move needs a strict gain -- unless the head is standing in a (moving) wall
+        better = (Uc > Uc[:, :1] + cfg.gain_eps) | ~self_ok[:, None]
+        ok = free & better
+        ok[:, 0] = self_ok
+        k = torch.where(ok, Uc, torch.full_like(Uc, -float("inf"))).argmax(1)
+        go = due & self.alive & ok.any(1)
+        self.head = torch.where(go[:, None], cand[b, k], self.head)
+
+    @torch.no_grad()
+    def step(self, fields, masks, n):
+        self._move(fields, masks)
+        self.age = self.age + 1
+        self._stamp()
+        lf = life(torch.as_tensor(n, dtype=torch.float32, device=self.age.device), self.cfg)
+        self.age = torch.where(self.age > lf.view(-1, 1, 1), torch.full_like(self.age, float("inf")), self.age)
+        self._kill_env(masks)
+        self.t += 1
+
+    def rgba(self, masks):
+        """(B,4,H,W) target image: colour by age, bloom on food, alpha = body."""
+        alive = torch.isfinite(self.age)
+        shade = (self.age / self.cfg.life_max).clamp(0, 1).nan_to_num(0.0)
+        front = torch.tensor(FRONT, dtype=torch.float32, device=self.age.device).view(1, 3, 1, 1)
+        core = torch.tensor(CORE, dtype=torch.float32, device=self.age.device).view(1, 3, 1, 1)
+        bloom = torch.tensor(BLOOM, dtype=torch.float32, device=self.age.device).view(1, 3, 1, 1)
+        rgb = front + (core - front) * shade[:, None]
+        rgb = torch.where((masks[:, RED:RED + 1] > 0), bloom, rgb)
+        a = alive[:, None].float()
+        return torch.cat([rgb * a, a], 1)
