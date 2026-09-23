@@ -139,3 +139,15 @@ Truncated BPTT against the teacher, B = 8 fresh worlds per epoch:
   one, the head stamps a radius-2 disc of age 0, cells die at `age > life(n) = round(n·48)`
   steps, and cells under blue/black die. Equivalent to "the last L(n) head positions", but
   purely local, and crushed cells cannot reappear when a wall walks away.
+- **Feeding:** cells on red food don't age and the colony spreads over the food one cell per
+  step, so it engulfs the food person (and trails after them); without it a colony that reached
+  its food collapsed to a single disc — a weak visual for the demo's key moment.
+- **Deterministic NCA** (`fire_rate = 1`). The stochastic rule (0.5) learned a faint grey smear:
+  it cannot count a cell's age exactly or keep its front in step with the deterministic teacher,
+  so MSE rewards hedging. **Green** therefore became "local time runs 2×": green cells take a
+  second update per step; the teacher's head moves every step there and its cells age 2 per step.
+- **Biomass test** measures mid-journey (t = 60): once the head rests on food the trail ages away
+  for any `n`, so the original t = 150 measurement could not distinguish nutrient levels.
+- **Run log:** v1 (stochastic, no DAgger) passed wall/chase/decoy/toxin/booster, failed
+  imitation (0.9× empty), trap, biomass. v2 (+DAgger, +feeding) additionally passed trap,
+  imitation 0.53×, but failed decoy-only and biomass (the smear). v3: deterministic.
