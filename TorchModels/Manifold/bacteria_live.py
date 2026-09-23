@@ -444,3 +444,135 @@ class Teacher:
         rgb = torch.where((masks[:, RED:RED + 1] > 0), bloom, rgb)
         a = alive[:, None].float()
         return torch.cat([rgb * a, a], 1)
+
+# %% [markdown]
+# ## The model
+#
+# `BacteriaNCA` keeps the manifold of `env_growth.py`: nutrient -> env encoder -> latent
+# -> DNA decoder -> the update net's weights, as a residual on a learned base rule
+# (predictor zero-init). Three inputs are new:
+#
+# - **sense** `(A, R, food)` is concatenated to the state before perception, so every cell
+#   sees the fields and their Sobel gradients -- it *learns* greedy chemotaxis;
+# - **kill** = blue or black: `state *= 1 - kill` after every step, so walls and toxins are
+#   exactly empty by construction;
+# - **boost** = green: the stochastic fire rate rises from 0.5 to 0.9 -- faster growth.
+
+# %%
+class BacteriaNCA(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        self.cfg = cfg
+        self.env_encoder = nn.Sequential(
+            nn.Linear(1, cfg.env_hidden), nn.ReLU(),
+            nn.Linear(cfg.env_hidden, cfg.latent_dim))
+
+        self.n_generated = cfg.hidden * cfg.perception + cfg.hidden + cfg.channels * cfg.hidden
+        self.dna_decoder = nn.Sequential(nn.Linear(cfg.latent_dim, cfg.dna_hidden), nn.ReLU())
+        self.predictor = nn.Linear(cfg.dna_hidden, self.n_generated)
+        nn.init.zeros_(self.predictor.weight)          ## start as a zero residual: every
+        nn.init.zeros_(self.predictor.bias)            ## nutrient decodes to the base rule
+
+        self.base_w1 = nn.Parameter(torch.randn(cfg.hidden, cfg.perception) * 0.001)
+        self.base_b1 = nn.Parameter(torch.zeros(cfg.hidden))
+        self.base_w2 = nn.Parameter(torch.zeros(cfg.channels, cfg.hidden))
+        self.log_leak = nn.Parameter(torch.tensor(math.log(cfg.leak_init)))
+
+        sx = torch.tensor([[-1.0, 0.0, 1.0], [-2.0, 0.0, 2.0], [-1.0, 0.0, 1.0]])
+        sy = torch.tensor([[1.0, 2.0, 1.0], [0.0, 0.0, 0.0], [-1.0, -2.0, -1.0]])
+        c3 = cfg.channels + 3
+        self.register_buffer("kx", sx.view(1, 1, 3, 3).repeat(c3, 1, 1, 1))
+        self.register_buffer("ky", sy.view(1, 1, 3, 3).repeat(c3, 1, 1, 1))
+
+    def weights_for(self, n):
+        """(B,) nutrient levels -> the update net's (w1, b1, w2), batched over B."""
+        cfg = self.cfg
+        z = self.env_encoder(n.view(-1, 1))
+        theta = self.predictor(self.dna_decoder(z))
+        b, i, k = z.shape[0], 0, cfg.hidden * cfg.perception
+        w1 = self.base_w1 + theta[:, i:i + k].view(b, cfg.hidden, cfg.perception)
+        i += k
+        b1 = self.base_b1 + theta[:, i:i + cfg.hidden]
+        i += cfg.hidden
+        w2 = self.base_w2 + theta[:, i:].view(b, cfg.channels, cfg.hidden)
+        return w1, b1, w2
+
+    def perceive(self, state, sense):
+        x = torch.cat([state, sense], dim=1)               ## the fields ARE sensed
+        p = F.pad(x, (1, 1, 1, 1), mode="replicate")       ## no-flux, not a torus
+        gx = F.conv2d(p, self.kx, groups=self.cfg.channels + 3)
+        gy = F.conv2d(p, self.ky, groups=self.cfg.channels + 3)
+        return torch.cat([x, gx, gy], dim=1)
+
+    def alive_mask(self, state):
+        return F.max_pool2d(state[:, 3:4], 3, stride=1, padding=1) > self.cfg.alive_threshold
+
+    def forward(self, state, weights, sense, kill, boost):
+        """One step. sense (B,3,H,W); kill, boost (B,1,H,W) in {0,1}."""
+        w1, b1, w2 = weights
+        pre = self.alive_mask(state)
+        p = self.perceive(state, sense)
+        a = torch.einsum("bop,bpij->boij", w1, p) + b1[:, :, None, None]
+        ds = torch.einsum("bcv,bvij->bcij", w2, F.relu(a))
+        fire = self.cfg.fire_rate + self.cfg.boost_fire * boost
+        m = (torch.rand_like(ds[:, :1]) < fire).to(ds.dtype)
+        out = state + self.log_leak.exp() * ds * m
+        out = out * (pre & self.alive_mask(out)).to(out.dtype)
+        return out * (1.0 - kill)
+
+
+def seed_state(rgba, cfg):
+    """NCA start state: the teacher's first body in RGBA, hidden channels zero."""
+    s = torch.zeros(rgba.shape[0], cfg.channels, *rgba.shape[-2:], device=rgba.device)
+    s[:, 0:4] = rgba
+    return s
+
+
+class Env:
+    """World + fields + teacher, advanced together. The NCA reads `inputs()`."""
+
+    def __init__(self, cfg, world, n0=None):
+        self.cfg, self.world = cfg, world
+        self.masks = world.masks()
+        B, _, H, W = self.masks.shape
+        self.fields = Fields(cfg, B, H, W, self.masks.device)
+        self.fields.relax(self.masks, cfg.init_iters)
+        self.teacher = Teacher(cfg, world.seed, self.masks)
+
+    def step(self, n):
+        self.world.step()
+        self.masks = self.world.masks()
+        self.fields.relax(self.masks, self.cfg.field_iters)
+        self.teacher.step(self.fields, self.masks, n)
+
+    def inputs(self):
+        m = self.masks
+        kill = torch.maximum(m[:, BLUE:BLUE + 1], m[:, BLACK:BLACK + 1])
+        return self.fields.sense(m), kill, m[:, GREEN:GREEN + 1]
+
+
+def _as_n(v, B, device):
+    return torch.as_tensor(v, dtype=torch.float32, device=device).expand(B).contiguous()
+
+
+@torch.no_grad()
+def run_world(model, env, n_fn, steps, state=None, record_every=1, seed=0):
+    """Advance env + NCA together under nutrient n_fn(t) (float or (B,) tensor).
+    Returns the final NCA state and frames [(teacher_rgba, nca_rgba, masks)] on the CPU,
+    starting with the initial frame."""
+    torch.manual_seed(seed)
+    dev = env.masks.device
+    B = env.masks.shape[0]
+    if state is None:
+        state = seed_state(env.teacher.rgba(env.masks), model.cfg)
+    snap = lambda: (env.teacher.rgba(env.masks).cpu(), state[:, :4].clamp(0, 1).cpu(), env.masks.cpu())
+    frames, cur, w = [snap()], None, None
+    for t in range(steps):
+        n = _as_n(n_fn(t), B, dev)
+        if cur is None or not torch.equal(n, cur):
+            w, cur = model.weights_for(n), n
+        env.step(n)
+        state = model(state, w, *env.inputs())
+        if (t + 1) % record_every == 0:
+            frames.append(snap())
+    return state, frames

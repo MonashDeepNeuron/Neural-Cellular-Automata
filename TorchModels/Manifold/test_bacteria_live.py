@@ -1,5 +1,6 @@
 """Unit tests for bacteria_live.py. No pytest in this env: `python test_bacteria_live.py`
 runs every `test_*` function (optionally filtered: `python test_bacteria_live.py teacher`)."""
+import math
 import sys
 import time
 
@@ -260,6 +261,81 @@ def test_teacher_rgba_colours():
     assert np.array_equal(rgba[3] > 0, alive), "alpha must equal the body"
     on_food = alive & disc(24, 20, 3)
     assert on_food.any() and np.allclose(rgba[0:3, on_food].T, bl.BLOOM), "no bloom on the food"
+
+
+## ---------------------------------------------------------------- model
+
+def probe_model():
+    """A model with a small non-zero predictor (at init every n decodes to the base rule,
+    and the base rule outputs zero -- so sensitivities are legitimately 0 there)."""
+    m = bl.BacteriaNCA(CFG).to(DEV)
+    torch.nn.init.normal_(m.predictor.weight, std=1e-3)
+    return m
+
+
+def random_env(B=4, seed=0):
+    return bl.Env(CFG, bl.World.random(CFG, B, np.random.default_rng(seed), DEV))
+
+
+def test_model_shapes_and_kill_exact():
+    m, env = probe_model(), random_env()
+    n = torch.full((4,), 0.7, device=DEV)
+    w1, b1, w2 = m.weights_for(n)
+    assert w1.shape == (4, CFG.hidden, CFG.perception)
+    assert b1.shape == (4, CFG.hidden) and w2.shape == (4, CFG.channels, CFG.hidden)
+    state = bl.seed_state(env.teacher.rgba(env.masks), CFG)
+    for _ in range(20):
+        env.step(n)
+        state = m(state, (w1, b1, w2), *env.inputs())
+    kill = env.inputs()[1][:, 0] > 0
+    assert state.abs().amax(1)[kill].max().item() == 0.0, "state non-zero under blue/black"
+
+
+def test_model_senses_fields():
+    m, env = probe_model(), random_env()
+    n = torch.full((4,), 0.7, device=DEV)
+    w = m.weights_for(n)
+    state = bl.seed_state(env.teacher.rgba(env.masks), CFG)
+    sense, kill, boost = env.inputs()
+    with torch.no_grad():
+        torch.manual_seed(1); a = m(state, w, sense, kill, boost)
+        torch.manual_seed(1); b = m(state, w, sense.roll(5, -1), kill, boost)
+    assert (a - b).abs().max().item() > 0, "rolling the sensed fields changed nothing"
+
+
+def test_model_grad_reaches_predictor_at_init():
+    m, env = bl.BacteriaNCA(CFG).to(DEV), random_env()
+    n = torch.full((4,), 0.5, device=DEV)
+    state = bl.seed_state(env.teacher.rgba(env.masks), CFG)
+    for _ in range(8):
+        env.step(n)
+        state = m(state, m.weights_for(n), *env.inputs())
+    loss = torch.nn.functional.mse_loss(state[:, :4], env.teacher.rgba(env.masks))
+    g = torch.autograd.grad(loss, m.predictor.weight)[0].norm().item()
+    assert math.isfinite(g) and g > 0, g
+
+
+def test_model_boost_raises_fire_rate():
+    m = probe_model()
+    with torch.no_grad():
+        m.base_w2.normal_(std=0.1)              ## make every cell's update non-zero
+    s = torch.zeros(1, CFG.channels, G, G, device=DEV)
+    s[:, 3] = 1.0
+    sense = torch.zeros(1, 3, G, G, device=DEV)
+    zero = torch.zeros(1, 1, G, G, device=DEV)
+    w = m.weights_for(torch.tensor([0.5], device=DEV))
+    with torch.no_grad():
+        f0 = ((m(s, w, sense, zero, zero) - s).abs().amax(1) > 0).float().mean().item()
+        f1 = ((m(s, w, sense, zero, torch.ones_like(zero)) - s).abs().amax(1) > 0).float().mean().item()
+    assert abs(f0 - 0.5) < 0.05 and abs(f1 - 0.9) < 0.05, (f0, f1)
+
+
+def test_run_world_records_frames():
+    m, env = probe_model(), random_env(B=2)
+    final, frames = bl.run_world(m, env, lambda t: 0.6, 12, record_every=4)
+    assert final.shape == (2, CFG.channels, G, G) and len(frames) == 4
+    t_rgba, n_rgba, masks = frames[-1]
+    assert t_rgba.shape == n_rgba.shape == (2, 4, G, G) and masks.shape == (2, 5, G, G)
 
 
 def main():
