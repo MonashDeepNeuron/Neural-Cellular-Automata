@@ -85,6 +85,9 @@ class Config:
     ell_attr: float = 10.0      ## attractant length scale (cells)
     ell_rep: float = 4.0        ## repellent length scale -- a local push, not a wall
     decoy_level: float = 0.5    ## orange pins the attractant at this level (red at 1)
+    wall_perm: float = 0.25     ## walls stop cells, but the chemical seeps through them.
+                                ## (fully no-flux walls leave NO local maxima off the
+                                ## sources -- greedy ascent would never get trapped)
     field_iters: int = 8        ## relaxation iterations per step (the field LAGS motion)
     init_iters: int = 1500      ## relaxation at episode start
 
@@ -140,8 +143,12 @@ os.makedirs(CFG.out_dir, exist_ok=True)
 # ## Fields -- diffusion instead of BFS
 #
 # Two concentrations, attractant `A` (red pinned at 1, orange at 0.5) and repellent `R`
-# (black pinned at 1), relaxed by an explicit diffusion-with-decay scheme. Walls are
-# no-flux (a cell only exchanges with free neighbours) and hold zero. The scheme is
+# (black pinned at 1), relaxed by an explicit diffusion-with-decay scheme. Walls stop
+# the *bacteria* but only slow the *chemical*: it seeps through them at `wall_perm` of the
+# free rate, like a chemical diffusing through the agar under a ridge. That matters --
+# with fully no-flux walls the field has no local maxima away from its sources (maximum
+# principle), so greedy ascent would always find the food and could never be trapped;
+# with seepage, the far side of a U-wall facing the food becomes a real trap. The scheme is
 # warm-started every step with only a few iterations, so the chemical **lags** behind
 # moving people -- the far field of somebody who just walked in is still building up.
 # Steady-state length scale `ell = sqrt(D/k)` with `D = 3*alpha/8` for the 8-neighbour
@@ -169,24 +176,166 @@ class Fields:
 
     @torch.no_grad()
     def relax(self, masks, iters):
-        ## c stays 0 in walls, so the no-flux Laplacian is conv8(c) - c * n_free. Folding
-        ## the wall, decay and Dirichlet pins into per-cell coefficients leaves 3 kernels
-        ## per iteration:  c <- pin + coef * c + g * conv8(c)
-        free = (1.0 - masks[:, BLUE:BLUE + 1]).expand(-1, 2, -1, -1)
-        n_free = F.conv2d(free, self.nbr, padding=1, groups=2)
+        ## Conductance between neighbours i,j: 1 if both free, p = wall_perm if either is a
+        ## wall. Then  lap_i = p*conv8(c) + (1-p)*f_i*conv8(f*c) - c_i*G_i  with the total
+        ## conductance G_i precomputed. Decay and Dirichlet pins fold into coefficients.
+        B, _, H, W = self.c.shape
+        p, a = self.cfg.wall_perm, self.cfg.diff_alpha
+        f = (1.0 - masks[:, BLUE:BLUE + 1]).expand(-1, 2, -1, -1)
+        ones = torch.ones_like(f)
+        G = p * F.conv2d(ones, self.nbr, padding=1, groups=2) \
+            + (1 - p) * f * F.conv2d(f, self.nbr, padding=1, groups=2)
         val, where = self._pins(masks)
-        where &= free > 0                      ## a source under a wall is walled in
-        a, keep = self.cfg.diff_alpha, (~where).float() * free
-        coef = (1.0 - a * n_free / 8 - self.k) * keep
-        g = (a / 8) * keep
+        where &= f > 0                         ## a source standing in a wall is walled in
+        keep = (~where).float()
+        coef = (1.0 - a * G / 8 - self.k) * keep
         pin = val * where.float()
+        g_all, g_free = (a / 8) * p * keep, (a / 8) * (1 - p) * keep * f
+        nbr4 = self.nbr.repeat(2, 1, 1, 1)
         c = torch.addcmul(pin, self.c, keep)
         for _ in range(iters):
-            c = torch.addcmul(torch.addcmul(pin, coef, c), g,
-                              F.conv2d(c, self.nbr, padding=1, groups=2))
+            s = F.conv2d(torch.cat([c, c * f], 1), nbr4, padding=1, groups=4)
+            c = torch.addcmul(torch.addcmul(torch.addcmul(pin, coef, c), g_all, s[:, :2]),
+                              g_free, s[:, 2:])
         self.c = c
         return c
 
     def sense(self, masks):
         """(B,3,H,W): attractant, repellent, raw food mask -- what a cell perceives."""
         return torch.cat([self.c, masks[:, RED:RED + 1]], 1)
+
+# %% [markdown]
+# ## Worlds -- walls and walking people
+#
+# Training worlds are synthetic: 0-3 static wall shapes (blue) and up to six "people",
+# discs of radius 2-4 cells with a clothing colour, walking with a slowly turning
+# heading, bouncing off the borders, and occasionally stepping in or out of view. The
+# camera produces exactly the same `(B,5,H,W)` masks, so the model cannot tell them apart.
+
+# %%
+def sample_walls(g, rng):
+    """0-3 shapes from {wall with a gap, blob, bar}; the outer 2-cell ring stays free."""
+    obs = np.zeros((g, g), bool)
+    n_shapes = 0 if rng.random() < 0.25 else int(rng.integers(1, 4))
+    for _ in range(n_shapes):
+        kind = int(rng.integers(0, 3))
+        if kind == 0:                                        ## wall with a gap
+            pos, th = int(rng.integers(12, g - 12)), int(rng.integers(2, 4))
+            gc, gw = int(rng.integers(8, g - 8)), int(rng.integers(3, 6))
+            if rng.random() < 0.5:
+                obs[pos:pos + th, :] = True
+                obs[pos:pos + th, max(0, gc - gw):gc + gw] = False
+            else:
+                obs[:, pos:pos + th] = True
+                obs[max(0, gc - gw):gc + gw, pos:pos + th] = False
+        elif kind == 1:                                      ## blob
+            cy, cx = rng.integers(8, g - 8, size=2)
+            r = int(rng.integers(3, 7))
+            yy, xx = np.mgrid[0:g, 0:g]
+            obs |= (yy - cy) ** 2 + (xx - cx) ** 2 <= r * r
+        else:                                                ## bar
+            cy, cx = rng.integers(8, g - 8, size=2)
+            L, th = int(rng.integers(8, 16)), int(rng.integers(2, 4))
+            if rng.random() < 0.5:
+                obs[max(0, cy - L // 2):cy + L // 2, max(0, cx - th // 2):cx + th // 2 + 1] = True
+            else:
+                obs[max(0, cy - th // 2):cy + th // 2 + 1, max(0, cx - L // 2):cx + L // 2] = True
+    obs[:2, :] = False; obs[-2:, :] = False; obs[:, :2] = False; obs[:, -2:] = False
+    return obs
+
+
+class World:
+    """Batched walls + people. `pos`, `vel` (B,P,2) float; `r` (B,P); `col` (B,P) colour
+    index; `active` (B,P) bool; `walls` (B,H,W) bool; `seed` (B,2) long."""
+
+    def __init__(self, cfg, walls, pos, vel, r, col, active, seed, device,
+                 wander=True, gen_seed=0):
+        self.cfg, self.device, self.wander = cfg, device, wander
+        self.walls = torch.as_tensor(walls, device=device).bool()
+        self.pos = torch.as_tensor(pos, dtype=torch.float32, device=device).clone()
+        self.vel = torch.as_tensor(vel, dtype=torch.float32, device=device).clone()
+        self.r = torch.as_tensor(r, dtype=torch.float32, device=device)
+        self.col = torch.as_tensor(col, dtype=torch.long, device=device)
+        self.active = torch.as_tensor(active, device=device).bool().clone()
+        self.seed = torch.as_tensor(seed, dtype=torch.long, device=device)
+        self.gen = torch.Generator(device=device)
+        self.gen.manual_seed(int(gen_seed))
+        H, W = self.walls.shape[-2:]
+        yy, xx = torch.meshgrid(torch.arange(H, device=device), torch.arange(W, device=device),
+                                indexing="ij")
+        self._yy, self._xx = yy.float(), xx.float()
+
+    @property
+    def B(self):
+        return self.walls.shape[0]
+
+    @classmethod
+    def random(cls, cfg, B, rng, device=DEVICE):
+        g, P = cfg.grid, cfg.max_people
+        walls = np.stack([sample_walls(g, rng) for _ in range(B)])
+        r = rng.integers(cfg.person_r[0], cfg.person_r[1] + 1, size=(B, P)).astype(np.float32)
+        col = rng.choice(5, size=(B, P), p=np.array(cfg.colour_probs))
+        col[:, 0] = np.where(rng.random(B) < 0.8, RED, col[:, 0])     ## food is usually there
+        pos = rng.uniform(r[..., None], g - 1 - r[..., None], size=(B, P, 2)).astype(np.float32)
+        speed = rng.uniform(0, cfg.person_speed, size=(B, P))
+        head = rng.uniform(0, 2 * np.pi, size=(B, P))
+        vel = np.stack([speed * np.sin(head), speed * np.cos(head)], -1).astype(np.float32)
+        n_on = rng.integers(1, P + 1, size=B)
+        active = np.arange(P)[None, :] < n_on[:, None]
+        w = cls(cfg, walls, pos, vel, r, col, active, np.zeros((B, 2)), device,
+                wander=True, gen_seed=int(rng.integers(1 << 31)))
+        w.seed = w._pick_seeds(rng)
+        return w
+
+    @classmethod
+    def scripted(cls, cfg, people, seeds, walls=None, device=DEVICE):
+        """people: per batch element, a list of dicts {pos, vel, r, colour}. Straight-line
+        motion (bouncing at the borders), nobody appears or vanishes."""
+        g, B = cfg.grid, len(people)
+        P = max(1, max(len(p) for p in people))
+        pos, vel = np.zeros((B, P, 2), np.float32), np.zeros((B, P, 2), np.float32)
+        r, col, active = np.full((B, P), 2.0, np.float32), np.zeros((B, P), int), np.zeros((B, P), bool)
+        for b, plist in enumerate(people):
+            for i, p in enumerate(plist):
+                pos[b, i], vel[b, i], r[b, i] = p["pos"], p.get("vel", (0, 0)), p["r"]
+                col[b, i], active[b, i] = COLOURS.index(p["colour"]), True
+        if walls is None:
+            walls = np.zeros((B, g, g), bool)
+        return cls(cfg, walls, pos, vel, r, col, active, np.array(seeds), device, wander=False)
+
+    def _pick_seeds(self, rng):
+        """A free cell per world: not in a wall, clear of every person by 2 cells."""
+        g, m = self.cfg.grid, self.cfg.margin
+        d2 = (self._yy - self.pos[..., 0, None, None]) ** 2 + (self._xx - self.pos[..., 1, None, None]) ** 2
+        near = ((d2 <= (self.r[..., None, None] + 2) ** 2) & self.active[..., None, None]).any(1)
+        bad = (near | self.walls).cpu().numpy()
+        bad[:, :m, :] = True; bad[:, -m:, :] = True; bad[:, :, :m] = True; bad[:, :, -m:] = True
+        seeds = []
+        for b in range(self.B):
+            cells = np.argwhere(~bad[b])
+            if len(cells) == 0:                     ## crowded: fall back to any free cell
+                cells = np.argwhere(~self.walls[b].cpu().numpy())
+            seeds.append(cells[rng.integers(len(cells))])
+        return torch.as_tensor(np.array(seeds), dtype=torch.long, device=self.device)
+
+    def masks(self):
+        d2 = (self._yy - self.pos[..., 0, None, None]) ** 2 + (self._xx - self.pos[..., 1, None, None]) ** 2
+        inside = (d2 <= self.r[..., None, None] ** 2) & self.active[..., None, None]     ## (B,P,H,W)
+        m = torch.stack([(inside & (self.col == c)[..., None, None]).any(1) for c in range(5)], 1)
+        m[:, BLUE] |= self.walls
+        return m.float()
+
+    def step(self):
+        if self.wander:                             ## slowly turning heading
+            dth = torch.randn(self.vel.shape[:2], device=self.device, generator=self.gen) * 0.15
+            c, s = torch.cos(dth), torch.sin(dth)
+            vy, vx = self.vel[..., 0], self.vel[..., 1]
+            self.vel = torch.stack([c * vy - s * vx, s * vy + c * vx], -1)
+            flip = torch.rand(self.active.shape, device=self.device, generator=self.gen) < self.cfg.toggle_prob
+            self.active ^= flip
+        self.pos += self.vel
+        lo = self.r[..., None].expand_as(self.pos)
+        hi = self.cfg.grid - 1 - lo
+        below, above = self.pos < lo, self.pos > hi
+        self.pos = torch.where(below, 2 * lo - self.pos, torch.where(above, 2 * hi - self.pos, self.pos))
+        self.vel = torch.where(below | above, -self.vel, self.vel)

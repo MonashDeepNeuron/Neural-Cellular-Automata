@@ -45,15 +45,40 @@ def test_fields_open_space():
     assert 0.15 <= A[24, 37] <= 0.6, f"A ten cells from the source edge = {A[24, 37]:.3f}"
 
 
-def test_fields_orange_weaker_and_walls():
+def test_fields_orange_weaker_and_walls_shade():
     orange = disc(24, 10, 3)
     wall = np.zeros((G, G), bool)
-    wall[:, 30:33] = True
-    f = relaxed(masks_from(orange=orange, blue=wall))
-    A = f.c[0, 0].cpu().numpy()
+    wall[:, 20:23] = True
+    A = relaxed(masks_from(orange=orange, blue=wall)).c[0, 0].cpu().numpy()
+    A_open = relaxed(masks_from(orange=orange)).c[0, 0].cpu().numpy()
     assert np.allclose(A[orange], 0.5), "decoy must pin at 0.5"
-    assert A[wall].max() == 0.0, "attractant inside a wall"
-    assert A[24, 36] < 1e-3, "attractant leaked through a solid wall"
+    assert 0 < A[24, 26] < 0.6 * A_open[24, 26], \
+        f"a solid wall must shade (but not block) the chemical: {A[24, 26]:.4f} vs {A_open[24, 26]:.4f}"
+
+
+def u_cup():
+    """Cup opening LEFT toward x=0, back wall at x=30..32, food behind it at x=40."""
+    wall = np.zeros((G, G), bool)
+    wall[12:37, 30:33] = True                   ## back
+    wall[12:15, 18:33] = True                   ## top arm
+    wall[34:37, 18:33] = True                   ## bottom arm
+    return wall
+
+
+def test_fields_u_cup_is_a_trap():
+    """The point of wall seepage: inside the cup, right at the back wall, the utility is
+    a LOCAL MAXIMUM -- greedy ascent from the open side gets stuck there."""
+    wall = u_cup()
+    f = relaxed(masks_from(red=disc(24, 40, 3), blue=wall))
+    A = f.c[0, 0].cpu().numpy()
+    inner = A[16:33, 19:30]                     ## the cup's free interior
+    y, x = np.unravel_index(inner.argmax(), inner.shape)
+    y, x = y + 16, x + 19
+    nb = A[y - 1:y + 2, x - 1:x + 2].copy()
+    nb[wall[y - 1:y + 2, x - 1:x + 2]] = -1
+    assert A[y, x] >= nb.max() - 1e-9, "no local maximum in the cup"
+    assert x == 29, f"the trap should sit against the back wall, got x={x}"
+    assert A[24, 5] < A[y, x], "the cup must be uphill from the open side"
 
 
 def test_fields_slit_is_weaker_than_open():
@@ -63,8 +88,10 @@ def test_fields_slit_is_weaker_than_open():
     wall[22:27, 20:23] = False                  ## a 5-cell slit
     A_slit = relaxed(masks_from(red=red, blue=wall)).c[0, 0].cpu().numpy()
     A_open = relaxed(masks_from(red=red)).c[0, 0].cpu().numpy()
-    assert A_slit[10, 30] < 0.5 * A_open[10, 30], "the wall does not shadow the field"
-    assert A_slit[24, 30] > 0, "no field through the slit"
+    behind = A_slit[10, 30] / A_open[10, 30]
+    through = A_slit[24, 30] / A_open[24, 30]
+    assert behind < 0.8, f"the wall does not shade the field ({behind:.2f})"
+    assert through > behind, f"the slit should pass more than the wall ({through:.2f} vs {behind:.2f})"
 
 
 def test_fields_repellent_shorter_range():
@@ -94,6 +121,52 @@ def test_fields_sense():
     s = f.sense(m)
     assert s.shape == (1, 3, G, G)
     assert torch.equal(s[:, 2], m[:, 0]), "third sense channel must be the raw food mask"
+
+
+## ---------------------------------------------------------------- world
+
+def test_world_masks_binary_and_discs():
+    w = bl.World.scripted(CFG, [[dict(pos=(20, 20), vel=(0, 0), r=3, colour="orange"),
+                                 dict(pos=(30, 35), vel=(0, 0), r=2, colour="green")]],
+                          seeds=[(5, 5)], device=DEV)
+    m = w.masks()
+    assert m.shape == (1, 5, G, G)
+    assert set(torch.unique(m).tolist()) <= {0.0, 1.0}
+    assert np.array_equal(m[0, bl.ORANGE].cpu().numpy() > 0, disc(20, 20, 3))
+    assert np.array_equal(m[0, bl.GREEN].cpu().numpy() > 0, disc(30, 35, 2))
+    assert m[0, bl.RED].sum() == 0 and m[0, bl.BLUE].sum() == 0
+
+
+def test_world_scripted_motion_and_bounce():
+    w = bl.World.scripted(CFG, [[dict(pos=(24, 24), vel=(0.0, 0.25), r=2, colour="red")]],
+                          seeds=[(5, 5)], device=DEV)
+    for _ in range(8):
+        w.step()
+    assert torch.allclose(w.pos[0, 0], torch.tensor([24.0, 26.0], device=DEV)), w.pos[0, 0]
+    for _ in range(400):                        ## long enough to hit a border many times
+        w.step()
+        x = w.pos[0, 0, 1].item()
+        assert 2 - 1e-5 <= x <= G - 3 + 1e-5, f"person left the grid: x={x}"
+
+
+def test_world_static_walls_are_blue():
+    walls = np.zeros((1, G, G), bool)
+    walls[0, 10:12, :] = True
+    w = bl.World.scripted(CFG, [[]], seeds=[(30, 30)], walls=walls, device=DEV)
+    assert np.array_equal(w.masks()[0, bl.BLUE].cpu().numpy() > 0, walls[0])
+
+
+def test_world_random_seed_valid_and_deterministic():
+    w1 = bl.World.random(CFG, 16, np.random.default_rng(3), DEV)
+    w2 = bl.World.random(CFG, 16, np.random.default_rng(3), DEV)
+    m = w1.masks()
+    for b in range(16):
+        y, x = w1.seed[b].tolist()
+        assert m[b, bl.BLUE, y, x] == 0 and m[b, bl.BLACK, y, x] == 0, "seed on blue/black"
+    for _ in range(50):
+        w1.step(); w2.step()
+    assert torch.equal(w1.masks(), w2.masks()), "same rng must give the same world"
+    assert (m[:, bl.RED].flatten(1).sum(1) > 0).float().mean() >= 0.5, "red too rare"
 
 
 def main():
