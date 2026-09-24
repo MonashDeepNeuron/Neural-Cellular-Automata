@@ -161,3 +161,12 @@ Truncated BPTT against the teacher, B = 8 fresh worlds per epoch:
   detour, chase) with a 1-cell-wide trail; widening the trail by dilating newborn cells ran away
   (toxin scene grew to ~800 cells), so the thin trail stays. DAgger anchoring is now exact (the
   state is just the age grid).
+- **Thick rendering (v5, shipped).** v4's 1-cell trail was too thin a target (the NCA smeared near
+  the seed and died at low `n`). The teacher's *state* stays the thin local CA, but its target
+  image is the colony dilated by one cell (age = youngest neighbour; walls/toxins empty), and
+  DAgger erodes the NCA's thick colony back (a morphological closing — a few filled corners).
+  **Result: 6/8** — wall, chase, decoy, toxin, trap, booster pass. Biomass is half-met (mass rises
+  with `n`: 24/75/127 vs teacher 27/45/81, but 21 ghost cells linger after an `n` drop vs a limit
+  of 5); long-horizon imitation is 0.37–0.78× empty vs the 0.35× target. Checkpoints of every run
+  are kept in `outputs/` (`bacteria_live_v1_nodagger` … `bacteria_live_v5_thick`);
+  `bacteria_live.pth` = v5. Live: ~40 fps per frame on the laptop (segmentation at 240 px).
