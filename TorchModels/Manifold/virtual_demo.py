@@ -80,7 +80,7 @@ def draw_sidebar(h, w, selected):
     return bar
 
 def main():
-    model, cfg = load_checkpoint(os.path.join("outputs", "bacteria.pth"))   # path to your saved checkpoint
+    model, cfg = load_checkpoint(os.path.join("outputs", "bacteria_live.pth"))   # path to your saved checkpoint
     sess = VirtualSession(model, cfg, grid=cfg.grid)
     tool, brush = ["red"], 2
     window, sidebar_w = "virtual demo", 70
@@ -91,7 +91,11 @@ def main():
         P_ = sess.panel_px
         if x < sidebar_w:
             if ev == cv2.EVENT_LBUTTONDOWN:
-                tool[0] = TOOLS[min(y // (sidebar_w * len(TOOLS) // sidebar_w), len(TOOLS)-1)]
+                # The palette rows span the full height of the rendered panel,
+                # not the sidebar width.  Dividing by the latter made nearly every
+                # click select the final (erase) tool.
+                row_h = P_ // len(TOOLS)
+                tool[0] = TOOLS[min(y // row_h, len(TOOLS) - 1)]
             return
         gx, gy = x - sidebar_w, y
         if not (0 <= gx < P_ and 0 <= gy < P_):
